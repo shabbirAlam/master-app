@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @EnvironmentObject var router: Router
+    @EnvironmentObject private var router: Router
+    @EnvironmentObject private var themeManager: ThemeManager
+    @Environment(\.colorScheme) private var scheme
+    
     @State private var selectedTab = 0
     
     var body: some View {
@@ -39,6 +42,12 @@ struct DashboardView: View {
             .navigationDestination(for: AppRoute.self) { route in
                 route.destination()
             }
+            .onAppear {
+                themeManager.update(for: scheme)
+            }
+            .onChange(of: scheme) { newValue in
+                themeManager.update(for: newValue)
+            }
         }
     }
 }
@@ -46,4 +55,5 @@ struct DashboardView: View {
 #Preview {
     DashboardView()
         .environmentObject(Router())
+        .environmentObject(ThemeManager())
 }

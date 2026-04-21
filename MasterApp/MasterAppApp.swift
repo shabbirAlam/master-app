@@ -10,11 +10,13 @@ import SwiftUI
 @main
 struct MasterAppApp: App {
     @StateObject private var router = Router()
+    @StateObject private var themeManager = ThemeManager()
     
     var body: some Scene {
         WindowGroup {
             DashboardView()
                 .environmentObject(router)
+                .environmentObject(themeManager)
         }
     }
 }
