@@ -19,37 +19,37 @@ final class ShortsViewModel: ObservableObject {
 }
 
 struct MockVideoUrls {
-//    static var all: [String] {
-//        [
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//            "https://www.w3schools.com/html/mov_bbb.mp4",
-//        ]
-//    }
-    
-    static var all: [Color] {
+    static var all: [String] {
         [
-            Color.red,
-            Color.blue,
-            .green,
-            .yellow,
-            .orange,
-            .pink,
-            .purple,
-            .red,
-            .blue,
-            .green,
-            .yellow,
-            .orange,
-            .pink,
-            .purple,
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.w3schools.com/html/mov_bbb.mp4",
         ]
     }
+    
+//    static var all: [Color] {
+//        [
+//            Color.red,
+//            Color.blue,
+//            .green,
+//            .yellow,
+//            .orange,
+//            .pink,
+//            .purple,
+//            .red,
+//            .blue,
+//            .green,
+//            .yellow,
+//            .orange,
+//            .pink,
+//            .purple,
+//        ]
+//    }
 }

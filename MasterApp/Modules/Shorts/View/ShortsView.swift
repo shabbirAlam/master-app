@@ -15,8 +15,18 @@ struct ShortsView: View {
             Color.black.opacity(0.5)
                 .ignoresSafeArea(edges: .top)
             
-            VideoView(url: URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")!)
-                .ignoresSafeArea(edges: .top)
+            GeometryReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: 0) {
+                        ForEach(0..<viewModel.urls.count, id: \.self) { ind in
+                            if let url = URL(string: viewModel.urls[ind]) {
+                                VideoView(url: url)
+                                    .frame(width: proxy.size.width, height: proxy.size.height)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

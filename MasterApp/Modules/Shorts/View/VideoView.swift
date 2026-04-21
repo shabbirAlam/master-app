@@ -19,7 +19,6 @@ struct VideoView: View {
     
     var body: some View {
         VideoPlayer(player: player)
-//            .rotationEffect(.degrees(-90)) // 👈 undo parent rotation
             .onAppear { player.play() }
             .onDisappear { player.pause() }
     }
