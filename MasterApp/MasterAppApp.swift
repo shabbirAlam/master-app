@@ -13,13 +13,8 @@ struct MasterAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $router.path) {
-                DashboardView()
-                    .environmentObject(router)
-                    .navigationDestination(for: AppRoute.self) { route in
-                        route.destination()
-                    }
-            }
+            DashboardView()
+                .environmentObject(router)
         }
     }
 }

@@ -8,35 +8,42 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @EnvironmentObject var router: Router
     @State private var selectedTab = 0
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house")
-                    Text("Home")
-                }
-                .tag(0)
-            
-            ShortsView()
-                .tabItem {
-                    Image(systemName: "video.bubble")
-                    Text("Shorts")
-                }
-                .tag(1)
-                .background(Color.black.opacity(0.5))
-            
-            ProfileView()
-                .tabItem {
-                    Image(systemName: "person")
-                    Text("Profile")
-                }
-                .tag(2)
+        NavigationStack(path: $router.path) {
+            TabView(selection: $selectedTab) {
+                HomeView()
+                    .tabItem {
+                        Image(systemName: "house")
+                        Text("Home")
+                    }
+                    .tag(0)
+                
+                ShortsView()
+                    .tabItem {
+                        Image(systemName: "video.bubble")
+                        Text("Shorts")
+                    }
+                    .tag(1)
+                    .background(Color.black.opacity(0.5))
+                
+                ProfileView()
+                    .tabItem {
+                        Image(systemName: "person")
+                        Text("Profile")
+                    }
+                    .tag(2)
+            }
+            .navigationDestination(for: AppRoute.self) { route in
+                route.destination()
+            }
         }
     }
 }
 
 #Preview {
     DashboardView()
+        .environmentObject(Router())
 }
