@@ -6,7 +6,6 @@
 //
 
 import Combine
-import SwiftUI
 
 final class Router: ObservableObject {
     @Published var path: [AppRoute] = []
@@ -16,30 +15,24 @@ final class Router: ObservableObject {
     }
     
     func pop() {
+        guard !path.isEmpty else { return }
         path.removeLast()
     }
     
     func popToRoot() {
-        path.removeLast(path.count)
-    }
-}
-
-extension AppRoute {
-    @ViewBuilder
-    func destination() -> some View {
-        switch self {
-            case .home:
-                HomeView()
-            case .profile(let details):
-                profileDestinations(for: details)
-        }
+        guard !path.isEmpty else { return }
+        path.removeAll()
     }
     
-    @ViewBuilder
-    private func profileDestinations(for route: ProfileRoute) -> some View {
-        switch route {
-            case .editProfile:
-                ProfileDetailsView()
+    func popTo(_ route: AppRoute) {
+        guard let index = path.lastIndex(of: route) else {
+            return // route not found → do nothing
         }
+        
+        let elementsToRemove = path.count - (index + 1)
+        
+        guard elementsToRemove > 0 else { return }
+        
+        path.removeLast(elementsToRemove)
     }
 }

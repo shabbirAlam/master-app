@@ -8,11 +8,14 @@
 import Foundation
 
 enum AppRoute: Hashable {
-    case home
+    case home(type: HomeRoute)
     case profile(type: ProfileRoute)
 }
 
-
 enum ProfileRoute: Hashable {
     case editProfile
+}
+
+enum HomeRoute: Hashable {
+    case todo
 }
