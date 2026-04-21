@@ -18,31 +18,31 @@ final class ThemeManager: ObservableObject {
 
 extension Theme {
     static let light = Theme(
-        background: Color.white,
+        background: .white,
         surface: Color(.systemGray6),
-        elevatedSurface: Color.white,
+        elevatedSurface: .white,
         
-        textPrimary: Color.black,
-        textSecondary: Color.gray,
-        textInverse: Color.white,
+        textPrimary: .black,
+        textSecondary: .gray,
+        textInverse: .white,
         
-        primary: Color.blue,
-        primaryVariant: Color.blue.opacity(0.8),
-        secondary: Color.purple,
+        primary: .blue,
+        primaryVariant: .blue.opacity(0.8),
+        secondary: .purple,
         
-        buttonPrimaryBackground: Color.blue,
-        buttonPrimaryText: Color.white,
+        buttonPrimaryBackground: .blue,
+        buttonPrimaryText: .white,
         
         buttonSecondaryBackground: Color.gray.opacity(0.15),
-        buttonSecondaryText: Color.black,
+        buttonSecondaryText: .black,
         
         buttonDisabledBackground: Color.gray.opacity(0.2),
-        buttonDisabledText: Color.gray,
+        buttonDisabledText: .gray,
         
-        success: Color.green,
-        warning: Color.orange,
-        error: Color.red,
-        info: Color.cyan,
+        success: .green,
+        warning: .orange,
+        error: .red,
+        info: .cyan,
         
         border: Color.gray.opacity(0.3),
         divider: Color.gray.opacity(0.2),
@@ -53,31 +53,31 @@ extension Theme {
 
 extension Theme {
     static let dark = Theme(
-        background: Color.black,
+        background: .black,
         surface: Color(.systemGray5),
         elevatedSurface: Color(.systemGray6),
         
-        textPrimary: Color.white,
-        textSecondary: Color.gray,
-        textInverse: Color.black,
+        textPrimary: .white,
+        textSecondary: .gray,
+        textInverse: .black,
         
-        primary: Color.blue,
-        primaryVariant: Color.blue.opacity(0.7),
-        secondary: Color.purple,
+        primary: .blue,
+        primaryVariant: .blue.opacity(0.7),
+        secondary: .purple,
         
-        buttonPrimaryBackground: Color.blue,
-        buttonPrimaryText: Color.white,
+        buttonPrimaryBackground: .blue,
+        buttonPrimaryText: .white,
         
         buttonSecondaryBackground: Color.white.opacity(0.1),
-        buttonSecondaryText: Color.white,
+        buttonSecondaryText: .white,
         
         buttonDisabledBackground: Color.gray.opacity(0.3),
-        buttonDisabledText: Color.gray,
+        buttonDisabledText: .gray,
         
-        success: Color.green,
-        warning: Color.orange,
-        error: Color.red,
-        info: Color.cyan,
+        success: .green,
+        warning: .orange,
+        error: .red,
+        info: .cyan,
         
         border: Color.gray.opacity(0.4),
         divider: Color.gray.opacity(0.3),
