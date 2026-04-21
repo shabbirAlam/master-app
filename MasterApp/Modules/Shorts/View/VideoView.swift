@@ -10,16 +10,26 @@ import AVKit
 
 struct VideoView: View {
     let url: URL
-    @State private var player: AVPlayer
     
-    init(url: URL) {
-        self.url = url
-        _player = State(initialValue: AVPlayer(url: url))
-    }
+    @State private var playerLooper: AVPlayerLooper?
+    @State private var queuePlayer: AVQueuePlayer?
     
     var body: some View {
-        VideoPlayer(player: player)
-            .onAppear { player.play() }
-            .onDisappear { player.pause() }
+        VideoPlayer(player: queuePlayer)
+            .onAppear {
+                setupPlayer()
+                queuePlayer?.play()
+            }
+            .onDisappear {
+                queuePlayer?.pause()
+            }
+    }
+    
+    private func setupPlayer() {
+        let item = AVPlayerItem(url: url)
+        let player = AVQueuePlayer()
+        
+        playerLooper = AVPlayerLooper(player: player, templateItem: item)
+        queuePlayer = player
     }
 }

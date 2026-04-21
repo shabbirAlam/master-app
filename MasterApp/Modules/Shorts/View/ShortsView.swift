@@ -22,10 +22,13 @@ struct ShortsView: View {
                             if let url = URL(string: viewModel.urls[ind]) {
                                 VideoView(url: url)
                                     .frame(width: proxy.size.width, height: proxy.size.height)
+                                    .applyContainerRelativeFrame(.vertical)
                             }
                         }
                     }
                 }
+                .applyScrollTargetBehavior()
+                .ignoresSafeArea()
             }
         }
     }
@@ -33,4 +36,26 @@ struct ShortsView: View {
 
 #Preview {
     ShortsView()
+}
+
+extension View {
+    @ViewBuilder
+    func applyContainerRelativeFrame(_ axes: Axis.Set, alignment: Alignment = .center) -> some View {
+        if #available(iOS 17.0, *) {
+            self.containerRelativeFrame(axes, alignment: alignment)
+        } else {
+            self
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func applyScrollTargetBehavior() -> some View {
+        if #available(iOS 17.0, *) {
+            self.scrollTargetBehavior(.paging)
+        } else {
+            self
+        }
+    }
 }
