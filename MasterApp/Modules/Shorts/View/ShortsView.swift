@@ -37,25 +37,3 @@ struct ShortsView: View {
 #Preview {
     ShortsView()
 }
-
-extension View {
-    @ViewBuilder
-    func applyContainerRelativeFrame(_ axes: Axis.Set, alignment: Alignment = .center) -> some View {
-        if #available(iOS 17.0, *) {
-            self.containerRelativeFrame(axes, alignment: alignment)
-        } else {
-            self
-        }
-    }
-}
-
-extension View {
-    @ViewBuilder
-    func applyScrollTargetBehavior() -> some View {
-        if #available(iOS 17.0, *) {
-            self.scrollTargetBehavior(.paging)
-        } else {
-            self
-        }
-    }
-}

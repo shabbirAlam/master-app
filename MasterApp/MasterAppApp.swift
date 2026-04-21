@@ -9,9 +9,17 @@ import SwiftUI
 
 @main
 struct MasterAppApp: App {
+    @StateObject private var router = Router()
+    
     var body: some Scene {
         WindowGroup {
-            DashboardView()
+            NavigationStack(path: $router.path) {
+                DashboardView()
+                    .environmentObject(router)
+                    .navigationDestination(for: AppRoute.self) { route in
+                        route.destination()
+                    }
+            }
         }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @State private var selectedTab = 1
+    @State private var selectedTab = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -26,6 +26,13 @@ struct DashboardView: View {
                 }
                 .tag(1)
                 .background(Color.black.opacity(0.5))
+            
+            ProfileView()
+                .tabItem {
+                    Image(systemName: "person")
+                    Text("Profile")
+                }
+                .tag(2)
         }
     }
 }

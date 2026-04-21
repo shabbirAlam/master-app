@@ -33,23 +33,4 @@ struct MockVideoUrls {
             "https://www.w3schools.com/html/mov_bbb.mp4",
         ]
     }
-    
-//    static var all: [Color] {
-//        [
-//            Color.red,
-//            Color.blue,
-//            .green,
-//            .yellow,
-//            .orange,
-//            .pink,
-//            .purple,
-//            .red,
-//            .blue,
-//            .green,
-//            .yellow,
-//            .orange,
-//            .pink,
-//            .purple,
-//        ]
-//    }
 }
