@@ -8,8 +8,12 @@
 import SwiftUI
 
 struct ShortsView: View {
-    @StateObject var viewModel = ShortsViewModel()
+    @StateObject var viewModel: ShortsViewModel
 
+    init(vm: ShortsViewModel = ShortsViewModel()) {
+        _viewModel = StateObject(wrappedValue: vm)
+    }
+    
     var body: some View {
         ZStack {
             Color.black.opacity(0.5)

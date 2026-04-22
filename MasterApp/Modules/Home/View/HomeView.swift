@@ -8,9 +8,13 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var vm = HomeViewModel()
+    @StateObject var vm: HomeViewModel
     @EnvironmentObject var router: Router
     @EnvironmentObject var themeManager: ThemeManager
+    
+    init(vm: HomeViewModel = HomeViewModel()) {
+        _vm = StateObject(wrappedValue: vm)
+    }
     
     var body: some View {
         ZStack {
