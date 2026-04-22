@@ -23,6 +23,7 @@ struct ShortsView: View {
                                 VideoView(url: url)
                                     .frame(width: proxy.size.width, height: proxy.size.height)
                                     .applyContainerRelativeFrame(.vertical)
+                                    .accessibilityIdentifier("video_\(ind)")
                             }
                         }
                     }

@@ -29,7 +29,9 @@ struct HomeView: View {
                     }
                     .foregroundStyle(themeManager.current.textPrimary)
                 }
+                .accessibilityIdentifier(item.name)
             }
+            .accessibilityIdentifier("home_view")
         }
     }
 }

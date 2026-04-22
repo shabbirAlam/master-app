@@ -10,7 +10,7 @@ import Testing
 
 struct ShortsViewModelTests {
     @Test
-    func validateVM() {
+    func validate() {
         let vm = ShortsViewModel()
         #expect(vm.title == "Shorts")
         #expect(vm.urls.isEmpty == false)

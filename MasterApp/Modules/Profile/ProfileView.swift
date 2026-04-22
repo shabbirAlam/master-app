@@ -17,6 +17,7 @@ struct ProfileView: View {
             } label: {
                 Text("Edit profile")
             }
+            .accessibilityIdentifier("edit_profile")
         }
     }
 }
