@@ -6,17 +6,14 @@
 //
 
 import Combine
-import SwiftUI
 
 final class HomeViewModel: ObservableObject {
-    var items = ["Todo", "new"]
+    var items = [HomeFeatures.todo]
     
-    func route(for index: Int) -> AppRoute? {
-        switch index {
-            case 0:
+    func route(for item: HomeFeatures) -> AppRoute? {
+        switch item {
+            case .todo:
                 return .home(type: .todo)
-            default:
-                return nil
         }
     }
 }

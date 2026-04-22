@@ -22,6 +22,8 @@ struct VideoView: View {
             }
             .onDisappear {
                 queuePlayer?.pause()
+                queuePlayer = nil
+                playerLooper = nil
             }
     }
     
