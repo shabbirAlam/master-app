@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// api: https://jsonplaceholder.typicode.com/
 struct TodoView: View {
     var body: some View {
         Text("Todo")

@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 
 final class ShortsViewModel: ObservableObject {
-    @Published var title: String = "Home"
+    @Published var title: String = "Shorts"
     @Published var urls = MockVideoUrls.all
     
     func getNextVideos() {

@@ -29,30 +29,9 @@
 		58C179282F97A3CA005B726B /* MasterAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MasterAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		58C1795A2F97A4D4005B726B /* Exceptions for "MasterAppTests" folder in "MasterApp" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				MockNetworkService.swift,
-			);
-			target = 58C179102F97A3C8005B726B /* MasterApp */;
-		};
-		58C1795B2F97A4D4005B726B /* Exceptions for "MasterAppTests" folder in "MasterAppTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				MockNetworkService.swift,
-			);
-			target = 58C1791D2F97A3CA005B726B /* MasterAppTests */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		58C179212F97A3CA005B726B /* MasterAppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				58C1795A2F97A4D4005B726B /* Exceptions for "MasterAppTests" folder in "MasterApp" target */,
-				58C1795B2F97A4D4005B726B /* Exceptions for "MasterAppTests" folder in "MasterAppTests" target */,
-			);
 			path = MasterAppTests;
 			sourceTree = "<group>";
 		};

@@ -1,13 +1,14 @@
 //
-//  ContentView.swift
+//  MockNetworkService.swift
 //  MasterApp
 //
 //  Created by Md Shabbir Alam on 21/04/26.
 //
 
 import Foundation
+@testable import MasterApp
 
-final class MockNetworkServiceImpl: NetworkService, Sendable {
+final class MockNetworkServiceImpl: NetworkService {
     private var mockData: Data?
     private var mockError: Error?
     
@@ -20,7 +21,7 @@ final class MockNetworkServiceImpl: NetworkService, Sendable {
             let data = try JSONDecoder().decode(T.self, from: mockData)
             return data
         }
-        throw URLError(.unknown)
+        throw NetworkError.invalidResponse
     }
     
     func setData<T: Encodable>(_ data: T) {
