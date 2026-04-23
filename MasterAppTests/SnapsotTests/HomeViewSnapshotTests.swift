@@ -27,12 +27,14 @@ final class HomeViewSnapshotTests: XCTestCase {
         assertSnapshot(
             of: vc,
             as: .image(on: .iPhone13),
+            named: "light",
             record: record)
         
         theme.current = .dark
         assertSnapshot(
             of: vc,
             as: .image(on: .iPhone13),
+            named: "dark",
             record: record)
         
     }
