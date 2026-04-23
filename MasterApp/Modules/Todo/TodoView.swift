@@ -44,7 +44,7 @@ struct TodoView: View {
         }
         .task {
             if vm.items.isEmpty {
-                await vm.fetchTodo()
+                await vm.fetchTodos()
             }
         }
     }

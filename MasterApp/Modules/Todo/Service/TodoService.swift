@@ -23,7 +23,7 @@ final class TodoServiceImpl: TodoService {
         do {
             return try await networking.request(url)
         } catch let error as NetworkError  {
-            throw ErrorMapper.map(error)
+            throw AppError.map(error)
         }
     }
 }

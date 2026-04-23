@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 
+@MainActor
 final class TodoViewModel: ObservableObject {
     @Published var items: [Todo] = []
     @Published var errorMsg: String? = nil
@@ -19,7 +20,7 @@ final class TodoViewModel: ObservableObject {
         self.service = service
     }
     
-    func fetchTodo() async {
+    func fetchTodos() async {
         isLoading = true
         defer { isLoading = false }
         do {
