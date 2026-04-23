@@ -38,7 +38,7 @@ final class HomePageUITests: XCTestCase {
         let todoButton = app.buttons["Todo"].firstMatch
         todoButton.tap()
         
-        let lbl = app.staticTexts["todo_label"].firstMatch
+        let lbl = app.staticTexts["todo_label_\(0)"].firstMatch
         XCTAssertTrue(lbl.waitForExistence(timeout: 1))
         let backBtn = app.buttons["BackButton"].firstMatch
         XCTAssertTrue(backBtn.exists)

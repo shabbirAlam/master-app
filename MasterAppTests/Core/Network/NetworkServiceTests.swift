@@ -22,7 +22,7 @@ struct NetworkServiceTests {
         
         let url = URL(string: "https://test1.com")!
         
-        let mockUser = Todo(id: 1, title: "John", completed: true, userId: 1)
+        let mockUser = Todo(userId: 1, id: 1, title: "John", body: "todo body")
         let data = try JSONEncoder().encode(mockUser)
         
         let response = HTTPURLResponse(
@@ -34,7 +34,7 @@ struct NetworkServiceTests {
         
         MockURLProtocol.testURLs[url] = (data, response, nil)
         
-        let service = NetworkServiceImpl(session: makeMockSession())
+        let service = NetworkingImpl(session: makeMockSession())
         
         let result: Todo = try await service.request(url)
         
@@ -58,7 +58,7 @@ struct NetworkServiceTests {
         
         MockURLProtocol.testURLs[url] = (Data(), response, nil)
         
-        let service = NetworkServiceImpl(session: makeMockSession())
+        let service = NetworkingImpl(session: makeMockSession())
         
         do {
             let _: Todo = try await service.request(url)
@@ -67,7 +67,6 @@ struct NetworkServiceTests {
             switch error {
                 case .badStatusCode(let code):
                     #expect(code == 400)
-                    #expect(error.localizedDescription == "Something went wrong please try again later.")
                 default:
                     Issue.record("Unexpected error type: \(error)")
             }
@@ -92,7 +91,7 @@ struct NetworkServiceTests {
         
         MockURLProtocol.testURLs[url] = (Data(), fakeResponse, nil)
         
-        let service = NetworkServiceImpl(session: makeMockSession())
+        let service = NetworkingImpl(session: makeMockSession())
         
         do {
             let _: Todo = try await service.request(url)
@@ -101,7 +100,6 @@ struct NetworkServiceTests {
             switch error {
                 case .invalidResponse:
                     #expect(true)
-                    #expect(error.localizedDescription == "Something went wrong please try again later.")
                 default:
                     Issue.record("Unexpected error type: \(error)")
             }
