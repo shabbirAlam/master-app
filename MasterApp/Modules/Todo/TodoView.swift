@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum TodoBuilder {
-    static func makeTodoViewModel() -> TodoViewModel {
+    private static func makeTodoViewModel() -> TodoViewModel {
         let networking = NetworkingImpl()
         let service = TodoServiceImpl(networking: networking)
         return TodoViewModel(service: service)
