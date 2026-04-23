@@ -19,11 +19,7 @@ final class TodoServiceImpl: TodoService {
     }
     
     func fetchTodos() async throws -> [Todo] {
-        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { throw AppError.unknown }
-        do {
-            return try await networking.request(url)
-        } catch let error as NetworkError  {
-            throw AppError.map(error)
-        }
+        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { throw NetworkError.unknown }
+        return try await networking.request(url)
     }
 }

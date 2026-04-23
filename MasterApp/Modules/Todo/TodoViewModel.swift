@@ -26,10 +26,8 @@ final class TodoViewModel: ObservableObject {
         do {
             items = try await service.fetchTodos()
             errorMsg = nil
-        } catch let error as AppError {
-            errorMsg = error.localizedDescription
         } catch {
-            errorMsg = "Something went wrong"
+            errorMsg = error.localizedDescription
         }
     }
 }

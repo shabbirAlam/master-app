@@ -21,7 +21,7 @@ enum TodoBuilder {
 
 struct TodoView: View {
     @StateObject private var vm: TodoViewModel
-    @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject private var themeManager: ThemeManager
     
     init(vm: TodoViewModel) {
         _vm = StateObject(wrappedValue: vm)
