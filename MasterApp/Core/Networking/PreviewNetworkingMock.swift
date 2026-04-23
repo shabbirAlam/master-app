@@ -1,14 +1,14 @@
 //
-//  MockNetworkService.swift
+//  PreviewNetworkingMock.swift
 //  MasterApp
 //
-//  Created by Md Shabbir Alam on 21/04/26.
+//  Created by Md Shabbir Alam on 23/04/26.
 //
 
 import Foundation
-@testable import MasterApp
 
-final class MockNetworkServiceImpl: Networking {
+#if DEBUG
+final class PreviewNetworkingMock: Networking {
     private var mockData: Data?
     private var mockError: Error?
     
@@ -18,18 +18,14 @@ final class MockNetworkServiceImpl: Networking {
         }
         
         if let mockData {
-            let data = try JSONDecoder().decode(T.self, from: mockData)
-            return data
+            return try JSONDecoder().decode(T.self, from: mockData)
         }
-        throw NetworkError.invalidResponse
+        
+        throw URLError(.badServerResponse)
     }
     
     func setData<T: Encodable>(_ data: T) {
         mockData = try? JSONEncoder().encode(data)
     }
-    
-    func setError(_ error: Error) {
-        mockError = error
-    }
 }
-
+#endif

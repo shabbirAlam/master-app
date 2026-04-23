@@ -7,24 +7,11 @@
 
 import Foundation
 
-protocol NetworkService: Sendable {
+protocol Networking: Sendable {
     func request<T: Decodable>(_ url: URL) async throws -> T
 }
 
-enum NetworkError: Error {
-    case invalidResponse
-    case badStatusCode(Int)
-    
-    var localizedDescription: String {
-        switch self {
-            case .invalidResponse,
-                    .badStatusCode:
-                return "Something went wrong please try again later."
-        }
-    }
-}
-
-final class NetworkServiceImpl: NetworkService, Sendable {
+final class NetworkingImpl: Networking, Sendable {
     
     private let session: URLSession
     private static let decoder = JSONDecoder()
