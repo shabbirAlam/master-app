@@ -28,4 +28,30 @@ final class PreviewNetworkingMock: Networking {
         mockData = try? JSONEncoder().encode(data)
     }
 }
+
+//final class PreviewNetworkingMock: Networking {
+//    private var mockResponses: [String: Data] = [:]
+//    private var mockError: Error?
+//    
+//    func fetch<T: Decodable>(_ endpoint: EndpointProtocol) async throws -> T {
+//        
+//        if let mockError {
+//            throw mockError
+//        }
+//        
+//        let key = endpoint.path
+//        
+//        guard let data = mockResponses[key] else {
+//            throw URLError(.badServerResponse)
+//        }
+//        
+//        let response = try JSONDecoder().decode(T.self, from: data)
+//        print(response)
+//        return response
+//    }
+//    
+//    func setMock<T: Encodable>(path: String, data: T) {
+//        mockResponses[path] = try? JSONEncoder().encode(data)
+//    }
+//}
 #endif

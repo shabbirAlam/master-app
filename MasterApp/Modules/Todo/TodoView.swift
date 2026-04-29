@@ -31,7 +31,8 @@ struct TodoView: View {
         ZStack {
             themeManager.current.background.edgesIgnoringSafeArea(.all)
             
-            List(vm.items.indices, id: \.self) { ind in Text(vm.items[ind].title) .accessibilityIdentifier("todo_label_\(ind)")
+            List(vm.items.indices, id: \.self) { ind in
+                Text(vm.items[ind].title) .accessibilityIdentifier("todo_label_\(ind)")
             }
             
             if vm.isLoading {

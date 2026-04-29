@@ -9,6 +9,7 @@ import Foundation
 
 enum HomeFeatures {
     case todo
+//    case todo
     
     var name: String {
         switch self {

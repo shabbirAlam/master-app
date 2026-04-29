@@ -9,6 +9,7 @@ import Foundation
 
 protocol Networking: Sendable {
     func request<T: Decodable>(_ url: URL) async throws -> T
+//    func fetch<T: Decodable>(_ endpoint: EndpointProtocol) async throws -> T
 }
 
 final class NetworkingImpl: Networking, Sendable {
