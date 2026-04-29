@@ -24,7 +24,7 @@ extension HomeRoute {
     fileprivate func destinations() -> some View {
         switch self {
             case .todo:
-                TodoBuilder.makeTodoView()
+                TodoBuilder.build()
         }
     }
 }

@@ -40,6 +40,8 @@ struct HomeView: View {
     }
 }
 
-//#Preview {
-//    HomeView()
-//}
+#Preview {
+    HomeView()
+        .environmentObject(ThemeManager())
+        .environmentObject(Router())
+}
