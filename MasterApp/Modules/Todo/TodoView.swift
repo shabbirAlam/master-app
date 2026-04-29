@@ -43,6 +43,7 @@ struct TodoView: View {
                 Text("No data found")
             }
         }
+        .navigationTitle("Todos")
         .task {
             if vm.items.isEmpty {
                 await vm.fetchTodos()

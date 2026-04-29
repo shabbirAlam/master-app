@@ -9,12 +9,12 @@ import Foundation
 
 enum HomeFeatures {
     case todo
-//    case todo
+    case ai
     
     var name: String {
-        switch self {
-            case .todo:
-                return "Todo"
+        return switch self {
+        case .todo: "Todo"
+        case .ai: "AI"
         }
     }
 }
