@@ -7,7 +7,7 @@
 
 import Combine
 
-final class HomeViewModel: ObservableObject {
+final class HomeViewModel {
     private(set) var items: [HomeFeatures] = []
     
     init() {

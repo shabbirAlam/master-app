@@ -9,22 +9,22 @@ import SwiftUI
 
 extension AppRoute {
     @ViewBuilder
-    func destination() -> some View {
+    func destination(with container: AppDIContainer) -> some View {
         switch self {
         case .home(let details):
-            details.destinations()
+            details.destinations(container: container)
         case .profile(let details):
-            details.destinations()
+            details.destinations(container: container)
         }
     }
 }
 
 extension HomeRoute {
     @ViewBuilder
-    fileprivate func destinations() -> some View {
+    fileprivate func destinations(container: AppDIContainer) -> some View {
         switch self {
         case .todo:
-            TodoBuilder.build()
+            TodoBuilder.build(with: container)
         case .ai:
             AIBuilder.build()
         }
@@ -33,7 +33,7 @@ extension HomeRoute {
 
 extension ProfileRoute {
     @ViewBuilder
-    fileprivate func destinations() -> some View {
+    fileprivate func destinations(container: AppDIContainer) -> some View {
         switch self {
         case .editProfile:
             ProfileDetailsView()

@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject var vm: HomeViewModel
+    let vm: HomeViewModel
     @EnvironmentObject var router: Router
     @EnvironmentObject var themeManager: ThemeManager
     
     init(vm: HomeViewModel = HomeViewModel()) {
-        _vm = StateObject(wrappedValue: vm)
+        self.vm = vm
     }
     
     var body: some View {
