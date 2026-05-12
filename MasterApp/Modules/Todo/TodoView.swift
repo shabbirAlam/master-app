@@ -8,8 +8,8 @@
 import SwiftUI
 
 enum TodoBuilder {
-    static func build(with appDIContainer: AppDIContainer) -> TodoView {
-        let service = TodoServiceImpl(networking: appDIContainer.networking)
+    static func build() -> TodoView {
+        let service = TodoServiceImpl(networking: AppDIContainer.shared.networking)
         let vm = TodoViewModel(service: service)
         return TodoView(vm: vm)
     }

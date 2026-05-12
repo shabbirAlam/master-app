@@ -7,10 +7,11 @@
 
 import Combine
 
-final class AppDIContainer: ObservableObject {
+struct AppDIContainer {
+    static let shared: AppDIContainer = AppDIContainer()
     let networking: Networking
     
-    init(networking: Networking = NetworkingImpl()) {
-        self.networking = networking
+    private init() {
+        self.networking = NetworkingImpl()
     }
 }

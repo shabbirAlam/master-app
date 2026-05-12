@@ -10,7 +10,6 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var router: Router
     @EnvironmentObject private var themeManager: ThemeManager
-    @EnvironmentObject private var appDIContainer: AppDIContainer
     @Environment(\.colorScheme) private var scheme
     
     @State private var selectedTab = 0
@@ -41,7 +40,7 @@ struct DashboardView: View {
                     .tag(2)
             }
             .navigationDestination(for: AppRoute.self) { route in
-                route.destination(with: appDIContainer)
+                route.destination()
             }
             .onAppear {
                 themeManager.update(for: scheme)
@@ -57,5 +56,4 @@ struct DashboardView: View {
     DashboardView()
         .environmentObject(Router())
         .environmentObject(ThemeManager())
-        .environmentObject(AppDIContainer())
 }

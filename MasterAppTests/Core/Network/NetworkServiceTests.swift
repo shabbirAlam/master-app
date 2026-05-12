@@ -15,7 +15,6 @@ private func makeMockSession() -> URLSession {
     return URLSession(configuration: config)
 }
 
-@Suite(.serialized)
 struct NetworkServiceTests {
     @Test
     func requestSuccess() async throws {

@@ -35,6 +35,10 @@ final class NetworkingImpl: Networking, Sendable {
         #if DEBUG
         print(String(data: data, encoding: .utf8)!)
         #endif
-        return try Self.decoder.decode(T.self, from: data)
+        do {
+            return try Self.decoder.decode(T.self, from: data)
+        } catch {
+            throw NetworkError.decodingError
+        }
     }
 }
