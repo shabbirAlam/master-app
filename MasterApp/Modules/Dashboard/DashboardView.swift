@@ -24,20 +24,12 @@ struct DashboardView: View {
                     }
                     .tag(0)
                 
-                ShortsView()
-                    .tabItem {
-                        Image(systemName: "video.bubble")
-                        Text("Shorts")
-                    }
-                    .tag(1)
-                    .background(Color.black.opacity(0.5))
-                
                 ProfileView()
                     .tabItem {
                         Image(systemName: "person")
                         Text("Profile")
                     }
-                    .tag(2)
+                    .tag(1)
             }
             .navigationDestination(for: AppRoute.self) { route in
                 route.destination()
