@@ -15,7 +15,7 @@ final class HomeViewModel {
     }
     
     func setRows() {
-        self.items = [.restAPISearch, .graphQLSearch]
+        self.items = [.restAPISearch, .graphQLSearch, .secureView]
         if AIAvailability.isEnabled() {
             self.items.insert(.ai, at: 0)
         }
@@ -24,6 +24,7 @@ final class HomeViewModel {
     func route(for item: HomeFeatures) -> AppRoute? {
         return switch item {
         case .ai: .home(type: .ai)
+        case .secureView: .home(type: .secureView)
         case .graphQLSearch: .home(type: .graphQLSearch)
         case .restAPISearch: .home(type: .restAPISearch)
         }

@@ -1,5 +1,5 @@
 //
-//  GraphQLNetworkService.swift
+//  GraphQLNetworking.swift
 //  MasterApp
 //
 //  Created by Md Shabbir Alam on 19/04/26.
@@ -7,11 +7,11 @@
 
 import Foundation
 
-protocol GraphQLNetworkService: Sendable {
+protocol GraphQLNetworking: Sendable {
     func fetch<T: Decodable>(query: String, variables: [String: AnyEncodable]?) async throws -> T
 }
 
-final class GraphQLNetworkServiceImpl: GraphQLNetworkService, Sendable {
+final class GraphQLNetworkingImpl: GraphQLNetworking, Sendable {
     
     private let session: URLSession
     private static let decoder = JSONDecoder()

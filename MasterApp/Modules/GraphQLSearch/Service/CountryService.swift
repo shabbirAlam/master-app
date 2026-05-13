@@ -8,9 +8,9 @@
 import Foundation
 
 final class CountryService {
-    private let networking: GraphQLNetworkService
+    private let networking: GraphQLNetworking
     
-    init(networking: GraphQLNetworkService) {
+    init(networking: GraphQLNetworking) {
         self.networking = networking
     }
     

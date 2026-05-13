@@ -1,5 +1,5 @@
 //
-//  MockGraphQLNetworkServiceImpl.swift
+//  PreviewGraphQLNetworkingMock.swift
 //  MasterApp
 //
 //  Created by Md Shabbir Alam on 19/04/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class MockGraphQLNetworkServiceImpl: GraphQLNetworkService, Sendable {
+final class PreviewGraphQLNetworkingMock: GraphQLNetworking, Sendable {
     private var mockData: Data?
     private var mockError: Error?
     
@@ -33,7 +33,7 @@ final class MockGraphQLNetworkServiceImpl: GraphQLNetworkService, Sendable {
 }
 
 #if DEBUG
-//final class MockGraphQLNetworkServiceImpl: GraphQLNetworkService {
+//final class PreviewGraphQLNetworkingMock: GraphQLNetworkService {
 //    private var mockResponses: [String: Data] = [:]
 //    private var mockError: Error?
 //

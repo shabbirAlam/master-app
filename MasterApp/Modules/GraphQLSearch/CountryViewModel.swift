@@ -14,14 +14,17 @@ final class CountryViewModel: ObservableObject {
     @Published var countries: [Country] = []
     @Published var searchedText = ""
     @Published var errorMessage: String?
-    
+    @Published var isLoading = false
+
     let service: CountryService
     
-    init(networking: GraphQLNetworkService) {
+    init(networking: GraphQLNetworking) {
         service = CountryService(networking: networking)
     }
     
     func fetchCountries() async {
+        isLoading = true
+        defer { isLoading = false }
         do {
             countriesData = try await service.fetchCountries()
             filterCountries()
@@ -33,6 +36,8 @@ final class CountryViewModel: ObservableObject {
     }
     
     func fetchCountry(_ country: Country) async {
+        isLoading = true
+        defer { isLoading = false }
         do {
             let country = try await service.fetchCountry(for: country.code)
             print(country)

@@ -25,6 +25,8 @@ extension HomeRoute {
         switch self {
         case .ai:
             AIBuilder.build()
+        case .secureView:
+            SecureBuilder.build()
         case .graphQLSearch:
             CountryBuilder.build()
         case .restAPISearch:

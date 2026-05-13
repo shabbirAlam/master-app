@@ -9,7 +9,7 @@ import SwiftUI
 
 enum CountryBuilder {
     static func build() -> CountryView {
-        let vm = CountryViewModel(networking: GraphQLNetworkServiceImpl())
+        let vm = CountryViewModel(networking: GraphQLNetworkingImpl())
         return CountryView(vm: vm)
     }
 }
@@ -66,6 +66,10 @@ struct CountryView: View {
                     .scrollContentBackground(.hidden)
                     .background(themeManager.background)
                 }
+                
+                if vm.isLoading {
+                    ProgressView()
+                }
             }
         }
         .task {
@@ -76,7 +80,7 @@ struct CountryView: View {
 }
 
 #Preview {
-    let mock = MockGraphQLNetworkServiceImpl()
+    let mock = PreviewGraphQLNetworkingMock()
     mock.setData([Country(code: "IN", name: "India", capital: "Delhi")])
     return CountryView(vm: CountryViewModel(networking: mock))
 }
