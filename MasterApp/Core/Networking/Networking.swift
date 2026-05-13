@@ -33,11 +33,16 @@ final class NetworkingImpl: Networking, Sendable {
             throw NetworkError.badStatusCode(httpResponse.statusCode)
         }
         #if DEBUG
-        print(String(data: data, encoding: .utf8)!)
+        if let json = String(data: data, encoding: .utf8) {
+            print(json)
+        }
         #endif
         do {
             return try Self.decoder.decode(T.self, from: data)
-        } catch {
+        } catch let decodingError as DecodingError {
+            #if DEBUG
+            print(decodingError)
+            #endif
             throw NetworkError.decodingError
         }
     }

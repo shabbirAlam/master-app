@@ -29,8 +29,8 @@ extension NetworkError {
             default:
                 "Request failed (\(code))"
             }
-        case .decodingError,
-                .unknown: "Something went wrong, please try again later."
+        case .decodingError: "Something went wrong, please try again later."
+        case .unknown: "Something went wrong, please try again later."
         }
     }
 }
