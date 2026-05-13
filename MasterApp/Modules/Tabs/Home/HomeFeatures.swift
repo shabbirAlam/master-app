@@ -8,13 +8,15 @@
 import Foundation
 
 enum HomeFeatures {
-    case todo
     case ai
+    case restAPISearch
+    case graphQLSearch
     
     var name: String {
         return switch self {
-        case .todo: "Todo"
         case .ai: "AI"
+        case .restAPISearch: "Rest API Search"
+        case .graphQLSearch: "GraphQL Search"
         }
     }
 }

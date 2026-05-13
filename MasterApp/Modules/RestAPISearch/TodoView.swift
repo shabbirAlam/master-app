@@ -17,7 +17,7 @@ enum TodoBuilder {
 
 struct TodoView: View {
     @StateObject private var vm: TodoViewModel
-    @EnvironmentObject private var themeManager: ThemeManager
+    private let themeManager = ThemeManager.shared
     
     init(vm: TodoViewModel) {
         _vm = StateObject(wrappedValue: vm)
@@ -25,10 +25,25 @@ struct TodoView: View {
     
     var body: some View {
         ZStack {
-            themeManager.current.background.edgesIgnoringSafeArea(.all)
+            themeManager.background.edgesIgnoringSafeArea(.all)
             
-            List(vm.items.indices, id: \.self) { ind in
-                Text(vm.items[ind].title) .accessibilityIdentifier("todo_label_\(ind)")
+            VStack {
+                TextField("Search...", text: $vm.searchedText)
+                    .padding(.horizontal, 16)
+                    .frame(height: 40)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.gray, lineWidth: 1)
+                    )
+                    .padding(.horizontal)
+                
+                List(Array(vm.items.enumerated()), id: \.element.id) { index, item in
+                    Text(item.title)
+                        .accessibilityIdentifier("todo_label_\(index)")
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(themeManager.background)
             }
             
             if vm.isLoading {
@@ -40,10 +55,8 @@ struct TodoView: View {
             }
         }
         .navigationTitle("Todos")
-        .task {
-            if vm.items.isEmpty {
-                await vm.fetchTodos()
-            }
+        .task(id: vm.searchedText) {
+            await vm.fetchTodos()
         }
     }
 }
@@ -53,5 +66,4 @@ struct TodoView: View {
     mock.setData([Todo(userId: 1, id: 1, title: "todo 1", body: "this is todo 1 body")])
     return TodoView(vm: TodoViewModel(
         service: TodoServiceImpl(networking: mock)))
-    .environmentObject(ThemeManager())
 }

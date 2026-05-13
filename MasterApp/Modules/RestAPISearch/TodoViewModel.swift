@@ -11,6 +11,7 @@ import Foundation
 @MainActor
 final class TodoViewModel: ObservableObject {
     @Published var items: [Todo] = []
+    @Published var searchedText = ""
     @Published var errorMsg: String? = nil
     @Published var isLoading = false
     
@@ -24,9 +25,18 @@ final class TodoViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         do {
-            items = try await service.fetchTodos()
+            let query = searchedText.lowercased()
+            let data = try await service.fetchTodos()
+            if query.isEmpty {
+                self.items = data
+            } else {
+                self.items = data.filter({ $0.title.lowercased().contains(query)})
+            }
             errorMsg = nil
+        } catch is CancellationError {
+            return
         } catch {
+            self.items = []
             errorMsg = error.localizedDescription
         }
     }

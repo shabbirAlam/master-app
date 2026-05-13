@@ -19,7 +19,11 @@ final class TodoServiceImpl: TodoService {
     }
     
     func fetchTodos() async throws -> [Todo] {
-        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { throw NetworkError.unknown }
+        try await Task.sleep(nanoseconds: 500_000_000)
+        try Task.checkCancellation()
+        guard let url = URL(string: "\(ApiConfig.todoBaseURL)posts") else {
+            throw NetworkError.unknown
+        }
         return try await networking.request(url)
     }
 }

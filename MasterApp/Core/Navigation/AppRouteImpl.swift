@@ -23,10 +23,12 @@ extension HomeRoute {
     @ViewBuilder
     fileprivate func destinations() -> some View {
         switch self {
-        case .todo:
-            TodoBuilder.build()
         case .ai:
             AIBuilder.build()
+        case .graphQLSearch:
+            CountryBuilder.build()
+        case .restAPISearch:
+            TodoBuilder.build()
         }
     }
 }

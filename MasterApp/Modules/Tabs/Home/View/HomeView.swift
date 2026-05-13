@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct HomeView: View {
-    let vm: HomeViewModel
     @EnvironmentObject var router: Router
-    @EnvironmentObject var themeManager: ThemeManager
+    
+    private let vm: HomeViewModel
+    private let themeManager = ThemeManager.shared
     
     init(vm: HomeViewModel = HomeViewModel()) {
         self.vm = vm
@@ -18,7 +19,7 @@ struct HomeView: View {
     
     var body: some View {
         ZStack {
-            themeManager.current.background.edgesIgnoringSafeArea(.all)
+            themeManager.background.edgesIgnoringSafeArea(.all)
             
             List(vm.items, id: \.self){ item in
                 Button {
@@ -31,7 +32,7 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Image(systemName: "chevron.right")
                     }
-                    .foregroundStyle(themeManager.current.textPrimary)
+                    .foregroundStyle(themeManager.textPrimary)
                 }
                 .accessibilityIdentifier(item.name)
             }
@@ -42,6 +43,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
-        .environmentObject(ThemeManager())
         .environmentObject(Router())
 }

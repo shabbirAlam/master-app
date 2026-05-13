@@ -21,7 +21,6 @@ enum AIBuilder {
 @available(iOS 26.0, *)
 struct AIView: View {
     @StateObject private var vm: AIViewModel
-    @EnvironmentObject private var themeManager: ThemeManager
     
     init(vm: AIViewModel) {
         _vm = StateObject(wrappedValue: vm)

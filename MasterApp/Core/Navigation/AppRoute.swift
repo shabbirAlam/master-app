@@ -17,6 +17,7 @@ enum ProfileRoute: Hashable {
 }
 
 enum HomeRoute: Hashable {
-    case todo
     case ai
+    case graphQLSearch
+    case restAPISearch
 }

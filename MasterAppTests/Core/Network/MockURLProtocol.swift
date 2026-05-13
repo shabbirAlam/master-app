@@ -1,6 +1,6 @@
 //
 //  MockURLProtocol.swift
-//  NetworkApp
+//  MasterApp
 //
 //  Created by Md Shabbir Alam on 28/02/26.
 //
