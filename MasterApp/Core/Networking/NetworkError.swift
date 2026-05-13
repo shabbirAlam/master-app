@@ -9,6 +9,7 @@ import Foundation
 
 enum NetworkError: LocalizedError {
     case unknown
+    case invalidURL
     case decodingError
     case invalidResponse
     case badStatusCode(Int)
@@ -31,6 +32,7 @@ extension NetworkError {
             }
         case .decodingError: "Something went wrong, please try again later."
         case .unknown: "Something went wrong, please try again later."
+        case .invalidURL: "Invalid URL"
         }
     }
 }

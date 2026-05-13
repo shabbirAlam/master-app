@@ -12,7 +12,7 @@ final class PreviewNetworkingMock: Networking {
     private var mockData: Data?
     private var mockError: Error?
     
-    func request<T>(_ url: URL) async throws -> T where T : Decodable {
+    func request<T : Decodable>(_ endpoint: Endpoint) async throws -> T {
         if let mockError {
             throw mockError
         }
