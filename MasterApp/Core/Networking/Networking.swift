@@ -22,6 +22,11 @@ final class NetworkingImpl: Networking, Sendable {
         return decoder
     }()
     
+    private static let encoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        return encoder
+    }()
+    
     init(configuration: URLSessionConfiguration = .default,
          delegate: URLSessionDelegate? = nil) {
         configuration.waitsForConnectivity = true
@@ -36,7 +41,7 @@ final class NetworkingImpl: Networking, Sendable {
     }
     
     func request<T : Decodable>(_ endpoint: Endpoint) async throws -> T {
-        let request = try endpoint.request()
+        let request = try endpoint.request(with: Self.encoder)
 #if DEBUG
         print("Request:", request)
         print("Method:", request.httpMethod ?? "")

@@ -15,7 +15,7 @@ struct APIEndpoint: Endpoint {
     let method: HTTPMethod
     let headers: [String: String]?
     let queryItems: [URLQueryItem]?
-    let body: Data?
+    let body: Encodable?
     var timeout: TimeInterval
 
     init(baseURL: String = ApiConfig.baseURL,
@@ -43,12 +43,12 @@ protocol Endpoint: Sendable {
     var method: HTTPMethod { get }
     var headers: [String: String]? { get }
     var queryItems: [URLQueryItem]? { get }
-    var body: Data? { get }
+    var body: Encodable? { get }
     var timeout: TimeInterval { get }
 }
 
 extension Endpoint {
-    func request() throws -> URLRequest {
+    func request(with encoder: JSONEncoder) throws -> URLRequest {
         guard let url = URL(string: baseURL),
               var components = URLComponents(url: url.appendingPathComponent(path),
                                              resolvingAgainstBaseURL: false) else {
@@ -64,7 +64,16 @@ extension Endpoint {
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.timeoutInterval = timeout
-        request.httpBody = body
+        if let body {
+            do {
+                request.httpBody = try encoder.encode(body)
+            } catch let error as EncodingError {
+#if DEBUG
+                print(error)
+#endif
+                throw NetworkError.encodingError
+            }
+        }
         
         headers?.forEach {
             request.setValue($1, forHTTPHeaderField: $0)

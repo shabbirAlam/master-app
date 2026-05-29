@@ -11,27 +11,26 @@ enum NetworkError: LocalizedError {
     case unknown
     case invalidURL
     case decodingError
+    case encodingError
     case invalidResponse
     case badStatusCode(Int)
 }
-
+// TODO: - Add one customErrorMessage method which will return either NetworkError or any other msg -
+// this will be generic and used in all the apps
 extension NetworkError {
     // this will set the localizedDescription variable
     var errorDescription: String? {
         return switch self {
-        case .invalidResponse:
-            "Server is not responding properly"
+        case .invalidResponse: "Server is not responding properly"
         case .badStatusCode(let code):
             switch code {
-            case 401:
-                "Unauthorized access"
-            case 500:
-                "Server error, please try again later."
-            default:
-                "Request failed (\(code))"
+            case 401: "Unauthorized access"
+            case 500...599: "Server error, please try again later."
+            default: "Request failed (\(code))"
             }
-        case .decodingError: "Something went wrong, please try again later."
-        case .unknown: "Something went wrong, please try again later."
+        case .unknown,
+                .decodingError,
+                .encodingError: "Something went wrong, please try again later."
         case .invalidURL: "Invalid URL"
         }
     }
