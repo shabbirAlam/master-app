@@ -1,10 +1,3 @@
-//
-//  HomePageUITests.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 23/04/26.
-//
-
 import XCTest
 
 final class HomePageUITests: XCTestCase {
@@ -27,45 +20,74 @@ final class HomePageUITests: XCTestCase {
         try super.tearDownWithError()
     }
     
-    func test_showsUserList() {
+    func test_homeViewShows() {
         let homeView = app.collectionViews["home_view"].firstMatch
-        XCTAssertTrue(homeView.waitForExistence(timeout: 1))
-        let todoButton = app.buttons["Todo"].firstMatch
-        XCTAssertTrue(todoButton.exists)
+        XCTAssertTrue(homeView.waitForExistence(timeout: 2))
     }
     
-    func test_showsTodoList() {
-        let todoButton = app.buttons["Todo"].firstMatch
-        todoButton.tap()
+    func test_homeShowsFeatureButtons() {
+        let restAPISearch = app.buttons["Rest API Search"].firstMatch
+        let graphQLSearch = app.buttons["GraphQL Search"].firstMatch
+        let secureView = app.buttons["Secure View"].firstMatch
         
-        let lbl = app.staticTexts["todo_label_\(0)"].firstMatch
-        XCTAssertTrue(lbl.waitForExistence(timeout: 1))
-        let backBtn = app.buttons["BackButton"].firstMatch
-        XCTAssertTrue(backBtn.exists)
-        backBtn.tap()
-        
-        XCTAssertTrue(todoButton.waitForExistence(timeout: 1))
+        XCTAssertTrue(restAPISearch.waitForExistence(timeout: 1))
+        XCTAssertTrue(graphQLSearch.exists)
+        XCTAssertTrue(secureView.exists)
     }
     
-    func test_tabView() {
-        let home = app.buttons["Home"].firstMatch
-        let shorts = app.buttons["Shorts"].firstMatch
-        let profile = app.buttons["Profile"].firstMatch
+    func test_tabNavigation() {
+        let homeTab = app.buttons["Home"].firstMatch
+        let profileTab = app.buttons["Profile"].firstMatch
         
-        XCTAssertTrue(home.waitForExistence(timeout: 1))
-        XCTAssertTrue(shorts.exists)
-        XCTAssertTrue(profile.exists)
+        XCTAssertTrue(homeTab.waitForExistence(timeout: 1))
+        XCTAssertTrue(profileTab.exists)
         
-        shorts.tap()
-        let videoView = app.otherElements["video_0"].firstMatch
-        XCTAssertTrue(videoView.waitForExistence(timeout: 1))
+        profileTab.tap()
+        let editProfile = app.buttons["edit_profile"].firstMatch
+        XCTAssertTrue(editProfile.waitForExistence(timeout: 1))
         
-        profile.tap()
-        let profileView = app.buttons["edit_profile"].firstMatch
-        XCTAssertTrue(profileView.waitForExistence(timeout: 1))
-        
-        home.tap()
+        homeTab.tap()
         let homeView = app.collectionViews["home_view"].firstMatch
         XCTAssertTrue(homeView.waitForExistence(timeout: 1))
+    }
+    
+    func test_navigateToRestAPISearch() {
+        let restAPISearch = app.buttons["Rest API Search"].firstMatch
+        XCTAssertTrue(restAPISearch.waitForExistence(timeout: 1))
+        restAPISearch.tap()
+        
+        let navBar = app.navigationBars["Todos"].firstMatch
+        XCTAssertTrue(navBar.waitForExistence(timeout: 2))
+    }
+    
+    func test_navigateToGraphQLSearch() {
+        let graphQLSearch = app.buttons["GraphQL Search"].firstMatch
+        XCTAssertTrue(graphQLSearch.waitForExistence(timeout: 1))
+        graphQLSearch.tap()
+        
+        let navBar = app.navigationBars["Countries"].firstMatch
+        XCTAssertTrue(navBar.waitForExistence(timeout: 2))
+    }
+    
+    func test_navigateToSecureView() {
+        let secureView = app.buttons["Secure View"].firstMatch
+        XCTAssertTrue(secureView.waitForExistence(timeout: 1))
+        secureView.tap()
+        
+        let secureText = app.staticTexts["This is secure view"].firstMatch
+        XCTAssertTrue(secureText.waitForExistence(timeout: 2))
+    }
+    
+    func test_navigateToProfileEdit() {
+        let profileTab = app.buttons["Profile"].firstMatch
+        XCTAssertTrue(profileTab.waitForExistence(timeout: 1))
+        profileTab.tap()
+        
+        let editProfile = app.buttons["edit_profile"].firstMatch
+        XCTAssertTrue(editProfile.waitForExistence(timeout: 1))
+        editProfile.tap()
+        
+        let backButton = app.buttons["Back"].firstMatch
+        XCTAssertTrue(backButton.waitForExistence(timeout: 2))
     }
 }

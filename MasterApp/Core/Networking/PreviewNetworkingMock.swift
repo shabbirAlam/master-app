@@ -27,6 +27,10 @@ final class PreviewNetworkingMock: Networking {
     func setData<T: Encodable>(_ data: T) {
         mockData = try? JSONEncoder().encode(data)
     }
+
+    func setError(_ error: Error) {
+        mockError = error
+    }
 }
 
 //final class PreviewNetworkingMock: Networking {

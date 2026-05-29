@@ -15,10 +15,11 @@ final class GraphQLNetworkingImpl: GraphQLNetworking, Sendable {
     
     private let session: URLSession
     private static let decoder = JSONDecoder()
-    private let url = URL(string: ApiConfig.graphQLBaseURL)
+    private let url: URL?
     
-    init(session: URLSession = .shared) {
+    init(session: URLSession = .shared, url: URL? = nil) {
         self.session = session
+        self.url = url ?? URL(string: ApiConfig.graphQLBaseURL)
     }
     
     func fetch<T: Decodable>(query: String, variables: [String: AnyEncodable]? = nil) async throws -> T {

@@ -1,22 +1,32 @@
-//
-//  HomeViewModelTests.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 22/04/26.
-//
-
 import Testing
 @testable import MasterApp
 
 struct HomeViewModelTests {
     @Test
-    func itemsValidation() async throws {
+    func itemsContainExpectedFeatures() {
         let vm = HomeViewModel()
         #expect(vm.items.isEmpty == false)
-        #expect(vm.items.count == 1)
-        #expect(vm.items[0] == .todo)
-        await #expect(vm.items[0].name == "Todo")
+        #expect(vm.items.contains(.restAPISearch))
+        #expect(vm.items.contains(.graphQLSearch))
+        #expect(vm.items.contains(.secureView))
         
-        #expect(vm.route(for: .todo) == .home(type: .todo))
+        #expect(vm.route(for: .restAPISearch) == .home(type: .restAPISearch))
+        #expect(vm.route(for: .graphQLSearch) == .home(type: .graphQLSearch))
+        #expect(vm.route(for: .secureView) == .home(type: .secureView))
+        #expect(vm.route(for: .ai) == .home(type: .ai))
+    }
+    
+    @Test
+    func aiFeatureConditionallyIncluded() {
+        let vm = HomeViewModel()
+        if AIAvailability.isEnabled() {
+            #expect(vm.items.count == 4)
+            #expect(vm.items[0] == .ai)
+            #expect(vm.items[0].name == "AI")
+        } else {
+            #expect(vm.items.count == 3)
+            #expect(vm.items[0] == .restAPISearch)
+            #expect(vm.items[0].name == "Rest API Search")
+        }
     }
 }

@@ -1,0 +1,146 @@
+import Testing
+import SwiftUI
+@testable import MasterApp
+
+struct AppDIContainerTests {
+    @Test func sharedInstance() {
+        let container = AppDIContainer.shared
+        #expect(container.networking is NetworkingImpl)
+    }
+}
+
+struct ThemeManagerTests {
+    @Test func sharedInstance() {
+        let theme = ThemeManager.shared
+        #expect(theme.background == .white)
+        #expect(theme.textPrimary == .black)
+    }
+}
+
+struct SecureBuilderTests {
+    @Test func build() {
+        let view = SecureBuilder.build()
+        #expect(view is SecureView)
+    }
+}
+
+struct CountryBuilderTests {
+    @Test func build() {
+        let view = CountryBuilder.build()
+        #expect(view is CountryView)
+    }
+}
+
+struct AppRouteEqualityTests {
+    @Test func appRouteEquality() {
+        #expect(AppRoute.home(type: .ai) == AppRoute.home(type: .ai))
+        #expect(AppRoute.home(type: .ai) != AppRoute.home(type: .secureView))
+        #expect(AppRoute.profile(type: .editProfile) == AppRoute.profile(type: .editProfile))
+        #expect(AppRoute.home(type: .ai) != AppRoute.profile(type: .editProfile))
+    }
+
+    @Test func appRouteHashable() {
+        let routes: Set<AppRoute> = [
+            .home(type: .ai),
+            .home(type: .secureView),
+            .home(type: .graphQLSearch),
+            .home(type: .restAPISearch),
+            .profile(type: .editProfile)
+        ]
+        #expect(routes.count == 5)
+    }
+}
+
+struct AppRouteImplTests {
+    @Test func homeRouteDestinations() {
+        _ = AppRoute.home(type: .ai).destination()
+        _ = AppRoute.home(type: .secureView).destination()
+        _ = AppRoute.home(type: .graphQLSearch).destination()
+        _ = AppRoute.home(type: .restAPISearch).destination()
+    }
+
+    @Test func profileRouteDestination() {
+        _ = AppRoute.profile(type: .editProfile).destination()
+    }
+}
+
+struct APIEndpointTodosTests {
+    @Test func todosEndpointConfiguration() {
+        let endpoint = APIEndpoint.todos
+        #expect(endpoint.baseURL == ApiConfig.todoBaseURL)
+        #expect(endpoint.path == "posts")
+        #expect(endpoint.method == .GET)
+    }
+}
+
+struct TodoBuilderTests {
+    @Test func build() {
+        let view = TodoBuilder.build()
+        #expect(view is TodoView)
+    }
+}
+
+struct PreviewNetworkingMockErrorPathTests {
+    @Test func requestError() async {
+        let mock = PreviewNetworkingMock()
+        mock.setError(NetworkError.unknown)
+        let endpoint = APIEndpoint(baseURL: "https://example.com", path: "todos")
+        await #expect(throws: NetworkError.unknown) {
+            let _: Todo = try await mock.request(endpoint)
+        }
+    }
+}
+
+struct ViewExtensionsTests {
+    @Test func applyContainerRelativeFrame() {
+        let view = Text("test").applyContainerRelativeFrame(.horizontal)
+        let view2 = Text("test").applyContainerRelativeFrame([.horizontal, .vertical], alignment: .top)
+        _ = view
+        _ = view2
+    }
+
+    @Test func applyScrollTargetBehavior() {
+        let view = Text("test").applyScrollTargetBehavior()
+        _ = view
+    }
+}
+
+struct SecureViewModifierTests {
+    @Test func secureModifier() {
+        let view = Text("test").secure()
+        _ = view
+    }
+
+    @Test func secureModifierWithoutSafeArea() {
+        let view = Text("test").secure(ignoreSafeArea: false)
+        _ = view
+    }
+}
+
+struct RouterDuplicateRouteTests {
+    @Test func popToWithDuplicateAtEnd() {
+        let router = Router()
+        router.push(.home(type: .restAPISearch))
+        router.push(.profile(type: .editProfile))
+        router.push(.home(type: .restAPISearch))
+
+        router.popTo(.home(type: .restAPISearch))
+        // lastIndex is 2, elementsToRemove = 3 - 3 = 0 → no change
+        #expect(router.path.count == 3)
+    }
+
+    @Test func popToWithDuplicateInMiddle() {
+        let router = Router()
+        router.push(.home(type: .restAPISearch))
+        router.push(.home(type: .ai))
+        router.push(.home(type: .restAPISearch))
+        router.push(.home(type: .secureView))
+
+        router.popTo(.home(type: .restAPISearch))
+        // lastIndex is 2, elementsToRemove = 4 - 3 = 1 → removes secureView
+        #expect(router.path.count == 3)
+        #expect(router.path[0] == .home(type: .restAPISearch))
+        #expect(router.path[1] == .home(type: .ai))
+        #expect(router.path[2] == .home(type: .restAPISearch))
+    }
+}
