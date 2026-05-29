@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import MasterApp
 
+@MainActor
 final class MockGraphQLNetworking: GraphQLNetworking {
     private var mockData: Data?
     private var mockError: Error?

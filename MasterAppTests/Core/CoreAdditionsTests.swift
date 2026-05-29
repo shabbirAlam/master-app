@@ -2,6 +2,7 @@ import Testing
 import SwiftUI
 @testable import MasterApp
 
+@MainActor
 struct AppDIContainerTests {
     @Test func sharedInstance() {
         let container = AppDIContainer.shared
@@ -9,6 +10,7 @@ struct AppDIContainerTests {
     }
 }
 
+@MainActor
 struct ThemeManagerTests {
     @Test func sharedInstance() {
         let theme = ThemeManager.shared
@@ -17,6 +19,7 @@ struct ThemeManagerTests {
     }
 }
 
+@MainActor
 struct SecureBuilderTests {
     @Test func build() {
         let view = SecureBuilder.build()
@@ -24,6 +27,7 @@ struct SecureBuilderTests {
     }
 }
 
+@MainActor
 struct CountryBuilderTests {
     @Test func build() {
         let view = CountryBuilder.build()
@@ -31,6 +35,7 @@ struct CountryBuilderTests {
     }
 }
 
+@MainActor
 struct AppRouteEqualityTests {
     @Test func appRouteEquality() {
         #expect(AppRoute.home(type: .ai) == AppRoute.home(type: .ai))
@@ -51,6 +56,7 @@ struct AppRouteEqualityTests {
     }
 }
 
+@MainActor
 struct AppRouteImplTests {
     @Test func homeRouteDestinations() {
         _ = AppRoute.home(type: .ai).destination()
@@ -64,6 +70,7 @@ struct AppRouteImplTests {
     }
 }
 
+@MainActor
 struct APIEndpointTodosTests {
     @Test func todosEndpointConfiguration() {
         let endpoint = APIEndpoint.todos
@@ -73,6 +80,7 @@ struct APIEndpointTodosTests {
     }
 }
 
+@MainActor
 struct TodoBuilderTests {
     @Test func build() {
         let view = TodoBuilder.build()
@@ -80,6 +88,7 @@ struct TodoBuilderTests {
     }
 }
 
+@MainActor
 struct PreviewNetworkingMockErrorPathTests {
     @Test func requestError() async {
         let mock = PreviewNetworkingMock()
@@ -91,6 +100,7 @@ struct PreviewNetworkingMockErrorPathTests {
     }
 }
 
+@MainActor
 struct ViewExtensionsTests {
     @Test func applyContainerRelativeFrame() {
         let view = Text("test").applyContainerRelativeFrame(.horizontal)
@@ -105,6 +115,7 @@ struct ViewExtensionsTests {
     }
 }
 
+@MainActor
 struct SecureViewModifierTests {
     @Test func secureModifier() {
         let view = Text("test").secure()
@@ -117,6 +128,7 @@ struct SecureViewModifierTests {
     }
 }
 
+@MainActor
 struct RouterDuplicateRouteTests {
     @Test func popToWithDuplicateAtEnd() {
         let router = Router()

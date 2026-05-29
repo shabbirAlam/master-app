@@ -8,6 +8,7 @@
 import Foundation
 @testable import MasterApp
 
+@MainActor
 final class MockNetworkServiceImpl: Networking {
     private var mockData: Data?
     private var mockError: Error?

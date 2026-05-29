@@ -61,6 +61,7 @@ Focus on:
 * async testing
 * UI testing for user flows and navigation
 * snapshot/UI validation where appropriate
+* For all new codes make sure to write the Unit, UI & snapshot test whichever is applicable.
 
 Avoid testing SwiftUI internals directly, but ensure critical UI behavior and interactions are covered through UI tests.
 
@@ -68,10 +69,9 @@ Avoid testing SwiftUI internals directly, but ensure critical UI behavior and in
 
 # Project Structure
 
-Features/
+Modules/
 Core/
-Networking/
-DesignSystem/
+Components/
 Tests/
 
 ---

@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import MasterApp
 
+@MainActor
 struct NetworkErrorTests {
     @Test func invalidResponseDescription() {
         #expect(NetworkError.invalidResponse.errorDescription == "Server is not responding properly")
@@ -32,6 +33,7 @@ struct NetworkErrorTests {
     }
 }
 
+@MainActor
 struct HomeFeaturesTests {
     @Test func names() {
         #expect(HomeFeatures.ai.name == "AI")
@@ -41,6 +43,7 @@ struct HomeFeaturesTests {
     }
 }
 
+@MainActor
 struct GraphQLRequestTests {
     @Test func encodingWithVariables() throws {
         let request = GraphQLRequest(query: "query { test }", variables: ["key": AnyEncodable("value")])
@@ -62,6 +65,7 @@ struct GraphQLRequestTests {
     }
 }
 
+@MainActor
 struct GraphQLResponseTests {
     @Test func decoding() throws {
         let json = """
@@ -75,6 +79,7 @@ struct GraphQLResponseTests {
     }
 }
 
+@MainActor
 struct AnyEncodableTests {
     @Test func encodingString() throws {
         let value = AnyEncodable("hello")
@@ -112,6 +117,7 @@ struct AnyEncodableTests {
     }
 }
 
+@MainActor
 struct APIEndpointTests {
     @Test func defaultGETRequest() throws {
         let endpoint = APIEndpoint(baseURL: "https://example.com", path: "api/test")
@@ -157,19 +163,20 @@ struct APIEndpointTests {
     }
 
     @Test func requestWithBodyEncodingError() throws {
-        struct FailingEncodable: Encodable {
+        struct FailingEncodable: Encodable, @unchecked Sendable {
             func encode(to encoder: Encoder) throws {
                 throw EncodingError.invalidValue(self, .init(codingPath: [], debugDescription: "test"))
             }
         }
+        @MainActor
         struct TestEndpointWithBody: Endpoint {
             let baseURL: String = "https://example.com"
             let path: String = "test"
             let method: HTTPMethod = .POST
             let headers: [String: String]? = nil
             let queryItems: [URLQueryItem]? = nil
-            let body: (any Encodable)? = FailingEncodable()
             let timeout: TimeInterval = 30
+            var body: Encodable? { FailingEncodable() }
         }
         let endpoint = TestEndpointWithBody()
         #expect(throws: NetworkError.encodingError) {
@@ -178,6 +185,7 @@ struct APIEndpointTests {
     }
 }
 
+@MainActor
 struct ApiConfigTests {
     @Test func baseURL() {
         #expect(ApiConfig.baseURL == "https://dev-api.master.com")
@@ -192,6 +200,7 @@ struct ApiConfigTests {
     }
 }
 
+@MainActor
 struct PreviewNetworkingMockTests {
     @Test func requestSuccess() async throws {
         let mock = PreviewNetworkingMock()
@@ -210,6 +219,7 @@ struct PreviewNetworkingMockTests {
     }
 }
 
+@MainActor
 struct PreviewGraphQLNetworkingMockTests {
     @Test func fetchSuccess() async throws {
         let mock = PreviewGraphQLNetworkingMock()

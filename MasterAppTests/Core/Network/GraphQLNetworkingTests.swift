@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import MasterApp
 
+@MainActor
 struct GraphQLNetworkingTests {
     @Test
     func fetchSuccess() async throws {

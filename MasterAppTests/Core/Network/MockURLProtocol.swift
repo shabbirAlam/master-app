@@ -4,7 +4,7 @@ import os
 final class MockURLProtocol: URLProtocol {
 
     private static let lock = OSAllocatedUnfairLock()
-    private static var _testURLs: [URL: (data: Data?, response: URLResponse?, error: Error?)] = [:]
+    private static nonisolated(unsafe) var _testURLs: [URL: (data: Data?, response: URLResponse?, error: Error?)] = [:]
 
     static func updateTestURL(_ url: URL, value: (data: Data?, response: URLResponse?, error: Error?)) {
         lock.withLock { _testURLs[url] = value }

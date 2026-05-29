@@ -1,6 +1,7 @@
 import Testing
 @testable import MasterApp
 
+@MainActor
 struct HomeViewModelTests {
     @Test
     func itemsContainExpectedFeatures() {

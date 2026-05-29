@@ -3,6 +3,7 @@ import SnapshotTesting
 import SwiftUI
 @testable import MasterApp
 
+@MainActor
 final class HomeViewSnapshotTests: XCTestCase {
     let record: SnapshotTestingConfiguration.Record = .never
     

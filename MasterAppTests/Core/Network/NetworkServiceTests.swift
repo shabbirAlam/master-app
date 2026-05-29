@@ -1,6 +1,6 @@
-import Foundation
+@preconcurrency import Foundation
 import Testing
-@testable import MasterApp
+@preconcurrency @testable import MasterApp
 
 private func makeMockSession() -> URLSession {
     let config = URLSessionConfiguration.ephemeral
@@ -8,26 +8,45 @@ private func makeMockSession() -> URLSession {
     return URLSession(configuration: config)
 }
 
+@MainActor
 private struct TestEndpointWithPOSTBody: Endpoint {
     let baseURL: String
     let path: String
     let method: HTTPMethod = .POST
     let headers: [String: String]? = ["Content-Type": "application/json"]
     let queryItems: [URLQueryItem]? = nil
-    let body: (any Encodable)? = ["key": "value"]
+    let bodyData: Data?
     let timeout: TimeInterval = 30
+
+    var body: Encodable? { bodyData }
+
+    init(baseURL: String, path: String) {
+        self.baseURL = baseURL
+        self.path = path
+        self.bodyData = Data()
+    }
 }
 
+@MainActor
 private struct TestEndpoint: Endpoint {
     let baseURL: String
     let path: String
     let method: HTTPMethod = .GET
     let headers: [String: String]? = nil
     let queryItems: [URLQueryItem]? = nil
-    let body: (any Encodable)? = nil
+    let bodyData: Data?
     let timeout: TimeInterval = 30
+
+    var body: Encodable? { bodyData }
+
+    init(baseURL: String, path: String) {
+        self.baseURL = baseURL
+        self.path = path
+        self.bodyData = nil
+    }
 }
 
+@MainActor
 struct NetworkServiceTests {
     @Test
     func requestSuccess() async throws {

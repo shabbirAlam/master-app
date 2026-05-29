@@ -8,6 +8,7 @@
 import Testing
 @testable import MasterApp
 
+@MainActor
 struct RouterTest {
     @Test
     func routerPush() {

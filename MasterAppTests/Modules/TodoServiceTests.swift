@@ -1,6 +1,7 @@
 import Testing
 @testable import MasterApp
 
+@MainActor
 struct TodoServiceTests {
     @Test func fetchTodosSuccess() async throws {
         let mock = MockNetworkServiceImpl()
