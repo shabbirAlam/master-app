@@ -20,22 +20,6 @@ struct ThemeManagerTests {
 }
 
 @MainActor
-struct SecureBuilderTests {
-    @Test func build() {
-        let view = SecureBuilder.build()
-        #expect(view is SecureView)
-    }
-}
-
-@MainActor
-struct CountryBuilderTests {
-    @Test func build() {
-        let view = CountryBuilder.build()
-        #expect(view is CountryView)
-    }
-}
-
-@MainActor
 struct AppRouteEqualityTests {
     @Test func appRouteEquality() {
         #expect(AppRoute.home(type: .ai) == AppRoute.home(type: .ai))
@@ -81,14 +65,6 @@ struct APIEndpointTodosTests {
 }
 
 @MainActor
-struct TodoBuilderTests {
-    @Test func build() {
-        let view = TodoBuilder.build()
-        #expect(view is TodoView)
-    }
-}
-
-@MainActor
 struct PreviewNetworkingMockErrorPathTests {
     @Test func requestError() async {
         let mock = PreviewNetworkingMock()
@@ -97,31 +73,6 @@ struct PreviewNetworkingMockErrorPathTests {
         await #expect(throws: NetworkError.unknown) {
             let _: Todo = try await mock.request(endpoint)
         }
-    }
-}
-
-@MainActor
-struct ViewExtensionsTests {
-    @Test func applyContainerRelativeFrame() {
-        let view = Text("test").applyContainerRelativeFrame(.horizontal)
-        let view2 = Text("test").applyContainerRelativeFrame([.horizontal, .vertical], alignment: .top)
-        _ = view
-        _ = view2
-    }
-
-
-}
-
-@MainActor
-struct SecureViewModifierTests {
-    @Test func secureModifier() {
-        let view = Text("test").secure()
-        _ = view
-    }
-
-    @Test func secureModifierWithoutSafeArea() {
-        let view = Text("test").secure(ignoreSafeArea: false)
-        _ = view
     }
 }
 

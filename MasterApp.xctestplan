@@ -1,0 +1,57 @@
+{
+  "configurations" : [
+    {
+      "id" : "37E5118F-E447-4BBC-B7C3-A8D78BB0CCB6",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:MasterApp.xcodeproj",
+          "identifier" : "58C179102F97A3C8005B726B",
+          "name" : "MasterApp"
+        },
+        {
+          "containerPath" : "container:MasterApp.xcodeproj",
+          "identifier" : "58C1791D2F97A3CA005B726B",
+          "name" : "MasterAppTests"
+        },
+        {
+          "containerPath" : "container:MasterApp.xcodeproj",
+          "identifier" : "58C179272F97A3CA005B726B",
+          "name" : "MasterAppUITests"
+        }
+      ]
+    },
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:MasterApp.xcodeproj",
+      "identifier" : "58C179102F97A3C8005B726B",
+      "name" : "MasterApp"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:MasterApp.xcodeproj",
+        "identifier" : "58C1791D2F97A3CA005B726B",
+        "name" : "MasterAppTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:MasterApp.xcodeproj",
+        "identifier" : "58C179272F97A3CA005B726B",
+        "name" : "MasterAppUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
