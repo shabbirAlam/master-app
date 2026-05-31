@@ -9,6 +9,7 @@ Modern iOS application built with:
 * MVVM
 * async/await
 * SOLID design principles
+* Modular components
 
 ---
 
@@ -18,7 +19,7 @@ Follow MVVM architecture.
 
 Rules:
 
-* Views should remain lightweight
+* Views should remain lightweight and seperate views should be created in seperate files.
 * Business logic belongs in ViewModels/UseCases
 * Networking should go through repositories
 * Prefer protocol abstractions
@@ -61,7 +62,7 @@ Focus on:
 * async testing
 * UI testing for user flows and navigation
 * snapshot/UI validation where appropriate
-* For all new codes make sure to write the Unit, UI & snapshot test whichever is applicable.
+* For all new written codes make sure to write the Unit, UI & snapshot test whichever is applicable. And compile the test code only, but don't run. 
 
 Avoid testing SwiftUI internals directly, but ensure critical UI behavior and interactions are covered through UI tests.
 

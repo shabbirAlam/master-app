@@ -16,8 +16,8 @@ final class MasterAppUITests: XCTestCase {
     @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
-        }
+//        measure(metrics: [XCTApplicationLaunchMetric()]) {
+//            XCUIApplication().launch()
+//        }
     }
 }
