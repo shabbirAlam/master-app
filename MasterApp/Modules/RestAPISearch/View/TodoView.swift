@@ -1,32 +1,16 @@
-//
-//  TodoView.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 21/04/26.
-//
-
 import SwiftUI
-
-enum TodoBuilder {
-    static func build() -> TodoView {
-        let service = TodoServiceImpl(networking: AppDIContainer.shared.networking)
-        let vm = TodoViewModel(service: service)
-        return TodoView(vm: vm)
-    }
-}
 
 struct TodoView: View {
     @StateObject private var vm: TodoViewModel
-    private let themeManager = ThemeManager.shared
-    
+
     init(vm: TodoViewModel) {
         _vm = StateObject(wrappedValue: vm)
     }
-    
+
     var body: some View {
         ZStack {
-            themeManager.background.edgesIgnoringSafeArea(.all)
-            
+            Color.white.edgesIgnoringSafeArea(.all)
+
             VStack {
                 TextField("Search...", text: $vm.searchedText)
                     .padding(.horizontal, 16)
@@ -36,26 +20,28 @@ struct TodoView: View {
                             .stroke(Color.gray, lineWidth: 1)
                     )
                     .padding(.horizontal)
-                
+                    .onChange(of: vm.searchedText) { _ in
+                        vm.filterSearch()
+                    }
+
                 List(Array(vm.items.enumerated()), id: \.element.id) { index, item in
                     Text(item.title)
                         .accessibilityIdentifier("todo_label_\(index)")
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
-                .background(themeManager.background)
             }
-            
+
             if vm.isLoading {
                 ProgressView()
             } else if let msg = vm.errorMsg {
                 Text(msg)
-            } else if vm.items.isEmpty {
+            } else if vm.items.isEmpty && !vm.isLoading {
                 Text("No data found")
             }
         }
         .navigationTitle("Todos")
-        .task(id: vm.searchedText) {
+        .task {
             await vm.fetchTodos()
         }
     }

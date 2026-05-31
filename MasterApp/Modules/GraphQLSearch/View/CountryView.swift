@@ -7,25 +7,18 @@
 
 import SwiftUI
 
-enum CountryBuilder {
-    static func build() -> CountryView {
-        let vm = CountryViewModel(networking: GraphQLNetworkingImpl())
-        return CountryView(vm: vm)
-    }
-}
-
 struct CountryView: View {
     @StateObject var vm: CountryViewModel
     private let themeManager = ThemeManager.shared
-    
+
     init(vm: CountryViewModel) {
         _vm = StateObject(wrappedValue: vm)
     }
-    
+
     var body: some View {
         ZStack {
             themeManager.background.edgesIgnoringSafeArea(.all)
-            
+
             VStack(spacing: 0) {
                 TextField("Country...", text: $vm.searchedText)
                     .padding(.horizontal, 16)
@@ -38,15 +31,15 @@ struct CountryView: View {
                     .onChange(of: vm.searchedText) { _ in
                         vm.filterCountries()
                     }
-                
+
                 if let error = vm.errorMessage {
                     Text(error)
                         .padding()
-                } else if vm.countries.isEmpty {
+                } else if vm.filteredCountries.isEmpty {
                     Text("No data found")
                         .padding()
                 } else {
-                    List(vm.countries, id: \.id) { country in
+                    List(vm.filteredCountries) { country in
                         VStack {
                             Text(country.name)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -66,7 +59,7 @@ struct CountryView: View {
                     .scrollContentBackground(.hidden)
                     .background(themeManager.background)
                 }
-                
+
                 if vm.isLoading {
                     ProgressView()
                 }
@@ -82,5 +75,6 @@ struct CountryView: View {
 #Preview {
     let mock = PreviewGraphQLNetworkingMock()
     mock.setData([Country(code: "IN", name: "India", capital: "Delhi")])
-    return CountryView(vm: CountryViewModel(networking: mock))
+    let service = CountryServiceImpl(networking: mock)
+    return CountryView(vm: CountryViewModel(service: service))
 }

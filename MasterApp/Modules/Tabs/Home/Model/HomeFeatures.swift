@@ -6,12 +6,7 @@
 //
 
 import Foundation
-/*
- Need to add:
- 1. Combine
- 2. Core Data
- 
- */
+
 enum HomeFeatures {
     case ai
     case secureView

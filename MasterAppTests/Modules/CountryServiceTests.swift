@@ -11,7 +11,7 @@ struct CountryServiceTests {
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let service = CountryService(networking: mock)
+        let service = CountryServiceImpl(networking: mock)
         let countries = try await service.fetchCountries()
 
         #expect(countries.count == 1)
@@ -26,7 +26,7 @@ struct CountryServiceTests {
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let service = CountryService(networking: mock)
+        let service = CountryServiceImpl(networking: mock)
         let country = try await service.fetchCountry(for: "IN")
 
         #expect(country.name == "India")
@@ -38,7 +38,7 @@ struct CountryServiceTests {
         let mock = MockGraphQLNetworking()
         mock.setError(URLError(.notConnectedToInternet))
 
-        let service = CountryService(networking: mock)
+        let service = CountryServiceImpl(networking: mock)
 
         do {
             let _ = try await service.fetchCountries()
@@ -52,7 +52,7 @@ struct CountryServiceTests {
         let mock = MockGraphQLNetworking()
         mock.setError(NetworkError.unknown)
 
-        let service = CountryService(networking: mock)
+        let service = CountryServiceImpl(networking: mock)
 
         do {
             let _ = try await service.fetchCountry(for: "IN")

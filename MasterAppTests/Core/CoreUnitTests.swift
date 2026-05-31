@@ -213,7 +213,7 @@ struct PreviewNetworkingMockTests {
     @Test func requestNoData() async {
         let mock = PreviewNetworkingMock()
         let endpoint = APIEndpoint(baseURL: "https://example.com", path: "todos")
-        await #expect(throws: URLError.self) {
+        await #expect(throws: NetworkError.invalidResponse) {
             let _: Todo = try await mock.request(endpoint)
         }
     }
@@ -239,7 +239,7 @@ struct PreviewGraphQLNetworkingMockTests {
 
     @Test func fetchNoData() async {
         let mock = PreviewGraphQLNetworkingMock()
-        await #expect(throws: URLError.self) {
+        await #expect(throws: NetworkError.unknown) {
             let _: Todo = try await mock.fetch(query: "{ todos }")
         }
     }

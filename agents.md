@@ -24,6 +24,7 @@ Rules:
 * Networking should go through repositories
 * Prefer protocol abstractions
 * Follow SOLID principles across all layers
+* Modular components
 
 ---
 
@@ -63,6 +64,7 @@ Focus on:
 * UI testing for user flows and navigation
 * snapshot/UI validation where appropriate
 * For all new written codes make sure to write the Unit, UI & snapshot test whichever is applicable. And compile the test code only, but don't run. 
+* Always make sure test coverage should be more than 90%
 
 Avoid testing SwiftUI internals directly, but ensure critical UI behavior and interactions are covered through UI tests.
 
@@ -71,6 +73,10 @@ Avoid testing SwiftUI internals directly, but ensure critical UI behavior and in
 # Project Structure
 
 Modules/
+Modules/Model
+Modules/Service
+Modules/View
+Modules/ViewModel
 Core/
 Components/
 Tests/
@@ -87,6 +93,7 @@ When generating code:
 * maintain Swift 6 compatibility
 * generate testable code
 * apply SOLID principles when designing classes, protocols, and modules
+* After code changes/completion, in last always make sure to run this application in simulator and verify all new code changes works perfectly.
 
 When editing:
 
@@ -101,7 +108,7 @@ When editing:
 * Prefer clarity over brevity
 * Avoid force unwraps
 * Use typed errors
-* One primary type per file
+* One primary type/class/struct/actor per file
 
 ---
 
@@ -110,122 +117,7 @@ When editing:
 * Avoid unnecessary SwiftUI re-renders
 * Use lazy containers where appropriate
 * Never block the main thread
-
----
-
-# Security
-
-Never:
-
-* hardcode secrets
-* expose API keys
-* log sensitive data
-
-## Project Overview
-
-Modern iOS application built with:
-
-* Swift 6
-* SwiftUI
-* MVVM
-* async/await
-* modular architecture
-
----
-
-# Architecture
-
-Follow MVVM architecture.
-
-Rules:
-
-* Views should remain lightweight
-* Business logic belongs in ViewModels/UseCases
-* Networking should go through repositories
-* Prefer protocol abstractions
-
----
-
-# SwiftUI Rules
-
-* Avoid heavy logic inside body
-* Extract reusable components
-* Use @StateObject for owned state
-* Use @ObservedObject for injected state
-
----
-
-# Concurrency
-
-Use:
-
-* async/await
-* Task
-* actors where appropriate
-
-Avoid:
-
-* callback-based APIs
-* unnecessary DispatchQueue usage
-
-Always support cancellation for long-running tasks.
-
----
-
-# Testing
-
-Focus on:
-
-* ViewModel unit tests
-* repository tests
-* async testing
-
-Avoid testing SwiftUI internals.
-
----
-
-# Project Structure
-
-Features/
-Core/
-Networking/
-DesignSystem/
-Tests/
-
----
-
-# AI Agent Instructions
-
-When generating code:
-
-* preserve architecture consistency
-* prefer small reusable components
-* avoid unnecessary dependencies
-* maintain Swift 6 compatibility
-* generate testable code
-
-When editing:
-
-* avoid unrelated refactors
-* preserve naming conventions
-* do not modify public APIs unnecessarily
-
----
-
-# Code Style
-
-* Prefer clarity over brevity
-* Avoid force unwraps
-* Use typed errors
-* One primary type per file
-
----
-
-# Performance
-
-* Avoid unnecessary SwiftUI re-renders
-* Use lazy containers where appropriate
-* Never block the main thread
+* Always code according to apple guidelines and best coding practise in mind.
 
 ---
 

@@ -80,7 +80,7 @@ final class HomePageUITests: XCTestCase {
         let navBar = app.navigationBars["Countries"].firstMatch
         XCTAssertTrue(navBar.waitForExistence(timeout: 2))
 
-        let searchField = app.textFields["Search..."]
+        let searchField = app.textFields["Country..."]
         XCTAssertTrue(searchField.waitForExistence(timeout: 2))
     }
 
@@ -156,7 +156,7 @@ final class HomePageUITests: XCTestCase {
         XCTAssertTrue(backToRoot.waitForExistence(timeout: 2))
         backToRoot.tap()
 
-        XCTAssertTrue(app.collectionViews["home_view"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["edit_profile"].waitForExistence(timeout: 2))
     }
 
     func test_profileEdit_backToProfile() {

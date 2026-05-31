@@ -15,8 +15,7 @@ enum NetworkError: LocalizedError, Equatable {
     case invalidResponse
     case badStatusCode(Int)
 }
-// TODO: - Add one customErrorMessage method which will return either NetworkError or any other msg -
-// this will be generic and used in all the apps
+
 extension NetworkError {
     // this will set the localizedDescription variable
     var errorDescription: String? {

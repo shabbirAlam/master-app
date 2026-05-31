@@ -24,7 +24,7 @@ final class GraphQLNetworkingImpl: GraphQLNetworking, Sendable {
     
     func fetch<T: Decodable>(query: String, variables: [String: AnyEncodable]? = nil) async throws -> T {
         guard let url else {
-            throw URLError(.badURL)
+            throw NetworkError.invalidURL
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -42,7 +42,9 @@ final class GraphQLNetworkingImpl: GraphQLNetworking, Sendable {
             throw NetworkError.badStatusCode(httpResponse.statusCode)
         }
         #if DEBUG
-        print(String(data: data, encoding: .utf8)!)
+        if let json = String(data: data, encoding: .utf8) {
+            print(json)
+        }
         #endif
         return try Self.decoder.decode(GraphQLResponse<T>.self, from: data).data
     }

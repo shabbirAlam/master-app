@@ -17,7 +17,7 @@ struct GraphQLNetworkingTests {
             statusCode: 200,
             httpVersion: nil,
             headerFields: nil
-        )!
+        )
 
         MockURLProtocol.updateTestURL(url, value: (responseData, response, nil))
 
@@ -47,7 +47,7 @@ struct GraphQLNetworkingTests {
             statusCode: 500,
             httpVersion: nil,
             headerFields: nil
-        )!
+        )
 
         MockURLProtocol.updateTestURL(url, value: (Data(), response, nil))
 
@@ -89,7 +89,7 @@ struct GraphQLNetworkingTests {
             statusCode: 200,
             httpVersion: nil,
             headerFields: nil
-        )!
+        )
 
         MockURLProtocol.updateTestURL(url, value: (responseData, response, nil))
 
@@ -160,7 +160,7 @@ struct GraphQLNetworkingTests {
             statusCode: 200,
             httpVersion: nil,
             headerFields: nil
-        )!
+        )
 
         MockURLProtocol.updateTestURL(url, value: (invalidData, response, nil))
 

@@ -1,57 +1,53 @@
-//
-//  CountryViewModel.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 19/04/26.
-//
-
 import Combine
 import Foundation
 
 @MainActor
 final class CountryViewModel: ObservableObject {
-    var countriesData: [Country] = []
-    @Published var countries: [Country] = []
+    var allCountries: [Country] = []
+    @Published var filteredCountries: [Country] = []
     @Published var searchedText = ""
     @Published var errorMessage: String?
     @Published var isLoading = false
 
-    let service: CountryService
-    
-    init(networking: GraphQLNetworking) {
-        service = CountryService(networking: networking)
+    private let service: CountryService
+
+    init(service: CountryService) {
+        self.service = service
     }
-    
+
     func fetchCountries() async {
         isLoading = true
         defer { isLoading = false }
         do {
-            countriesData = try await service.fetchCountries()
+            allCountries = try await service.fetchCountries()
             filterCountries()
             errorMessage = nil
+        } catch is CancellationError {
+            return
         } catch {
-            self.countriesData = []
+            allCountries = []
             errorMessage = error.localizedDescription
         }
     }
-    
+
     func fetchCountry(_ country: Country) async {
         isLoading = true
         defer { isLoading = false }
         do {
-            let country = try await service.fetchCountry(for: country.code)
-            print(country)
+            _ = try await service.fetchCountry(for: country.code)
             errorMessage = nil
+        } catch is CancellationError {
+            return
         } catch {
             errorMessage = error.localizedDescription
         }
     }
-    
+
     func filterCountries() {
         if searchedText.isEmpty {
-            countries = countriesData
+            filteredCountries = allCountries
         } else {
-            countries = countriesData.filter { $0.name.localizedCaseInsensitiveContains(searchedText) }
+            filteredCountries = allCountries.filter { $0.name.localizedCaseInsensitiveContains(searchedText) }
         }
     }
 }

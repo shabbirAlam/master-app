@@ -1,22 +1,5 @@
 import SwiftUI
 
-// MARK: - Builder
-
-enum AIBuilder {
-    @ViewBuilder
-    static func build() -> some View {
-        if #available(iOS 26.0, *) {
-            let service = AIChatServiceImpl()
-            let vm = AIViewModel(service: service)
-            AIView(vm: vm)
-        } else {
-            AIUnAvailableView()
-        }
-    }
-}
-
-// MARK: - Main View
-
 @available(iOS 26.0, *)
 struct AIView: View {
     @StateObject private var vm: AIViewModel
@@ -54,8 +37,6 @@ struct AIView: View {
             }
         }
     }
-
-    // MARK: - Chat Content
 
     @ViewBuilder
     private var chatContent: some View {
@@ -108,8 +89,6 @@ struct AIView: View {
             .padding()
         }
     }
-
-    // MARK: - Session List
 
     private var sessionListView: some View {
         VStack(spacing: 16) {
@@ -165,32 +144,6 @@ struct AIView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
-            }
-        }
-    }
-}
-
-// MARK: - Message Bubble
-
-struct MessageBubbleView: View {
-    let message: ChatMessage
-    private let themeManager = ThemeManager.shared
-
-    var body: some View {
-        HStack {
-            if message.role == .user {
-                Spacer(minLength: 60)
-            }
-
-            Text(message.content)
-                .padding(12)
-                .foregroundColor(message.role == .user ? .white : themeManager.textPrimary)
-                .background(message.role == .user ? Color.blue : Color.gray.opacity(0.15))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .textSelection(.enabled)
-
-            if message.role == .assistant {
-                Spacer(minLength: 60)
             }
         }
     }

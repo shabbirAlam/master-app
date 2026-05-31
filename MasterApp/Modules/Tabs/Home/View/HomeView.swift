@@ -9,12 +9,11 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var router: Router
-    
-    private let vm: HomeViewModel
+    @StateObject private var vm: HomeViewModel
     private let themeManager = ThemeManager.shared
-    
+
     init(vm: HomeViewModel = HomeViewModel()) {
-        self.vm = vm
+        _vm = StateObject(wrappedValue: vm)
     }
     
     var body: some View {

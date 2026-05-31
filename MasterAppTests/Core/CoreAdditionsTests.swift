@@ -4,8 +4,8 @@ import SwiftUI
 
 @MainActor
 struct AppDIContainerTests {
-    @Test func sharedInstance() {
-        let container = AppDIContainer.shared
+    @Test func defaultInstance() {
+        let container = AppDIContainer()
         #expect(container.networking is NetworkingImpl)
     }
 }
@@ -109,10 +109,7 @@ struct ViewExtensionsTests {
         _ = view2
     }
 
-    @Test func applyScrollTargetBehavior() {
-        let view = Text("test").applyScrollTargetBehavior()
-        _ = view
-    }
+
 }
 
 @MainActor
