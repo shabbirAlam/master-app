@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36B48DEC2FCC7F8E00CD50DF /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 36B48DEB2FCC7F8E00CD50DF /* MarkdownUI */; };
 		58BDCF3A2F995C0400C9FF75 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 58BDCF392F995C0400C9FF75 /* SnapshotTesting */; };
+		58E2A1B22F9A5E5800A1B2C3 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 58E2A1B12F9A5E5800A1B2C3 /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +59,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				58E2A1B22F9A5E5800A1B2C3 /* MarkdownUI in Frameworks */,
+				36B48DEC2FCC7F8E00CD50DF /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,10 +85,10 @@
 		58C179082F97A3C8005B726B = {
 			isa = PBXGroup;
 			children = (
-				36DDB0CE2FCC5E0F00C283EE /* MasterApp.xctestplan */,
 				58C179512F97A4AB005B726B /* MasterApp */,
 				58C179212F97A3CA005B726B /* MasterAppTests */,
 				58C1792B2F97A3CA005B726B /* MasterAppUITests */,
+				36DDB0CE2FCC5E0F00C283EE /* MasterApp.xctestplan */,
 				58C179122F97A3C8005B726B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -119,6 +123,8 @@
 			);
 			name = MasterApp;
 			packageProductDependencies = (
+				58E2A1B12F9A5E5800A1B2C3 /* MarkdownUI */,
+				36B48DEB2FCC7F8E00CD50DF /* MarkdownUI */,
 			);
 			productName = MasterApp;
 			productReference = 58C179112F97A3C8005B726B /* MasterApp.app */;
@@ -205,6 +211,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				58BDCF382F995C0400C9FF75 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				58E2A1B02F9A5E5800A1B2C3 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 58C179122F97A3C8005B726B /* Products */;
@@ -587,6 +594,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		36B48DEA2FCC7F8E00CD50DF /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui?utm_source=chatgpt.com";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
 		58BDCF382F995C0400C9FF75 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
@@ -595,13 +610,31 @@
 				minimumVersion = 1.19.2;
 			};
 		};
+		58E2A1B02F9A5E5800A1B2C3 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		36B48DEB2FCC7F8E00CD50DF /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 36B48DEA2FCC7F8E00CD50DF /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
 		58BDCF392F995C0400C9FF75 /* SnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 58BDCF382F995C0400C9FF75 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
+		};
+		58E2A1B12F9A5E5800A1B2C3 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 58E2A1B02F9A5E5800A1B2C3 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

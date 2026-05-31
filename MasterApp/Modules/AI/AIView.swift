@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 26.0, *)
 struct AIView: View {
     @StateObject private var vm: AIViewModel
     private let themeManager = ThemeManager.shared
@@ -51,12 +50,11 @@ struct AIView: View {
                     }
                     .padding()
                 }
+                .onAppear {
+                    scrollToLastMessage(proxy)
+                }
                 .onChange(of: vm.selectedSession?.messages.count) { _ in
-                    if let last = vm.selectedSession?.messages.last {
-                        withAnimation {
-                            proxy.scrollTo(last.id, anchor: .bottom)
-                        }
-                    }
+                    scrollToLastMessage(proxy)
                 }
             }
 
@@ -68,9 +66,14 @@ struct AIView: View {
             }
 
             HStack(spacing: 8) {
-                TextField("Type a message...", text: $vm.currentInput)
+                TextField("Type a message...", text: $vm.currentInput, axis: .vertical)
+                    .lineLimit(1...5)
                     .textFieldStyle(.roundedBorder)
                     .disabled(vm.isLoading)
+                    .submitLabel(.send)
+                    .onSubmit {
+                        Task { await vm.sendMessage() }
+                    }
 
                 Button {
                     Task { await vm.sendMessage() }
@@ -84,9 +87,17 @@ struct AIView: View {
                             .font(.title2)
                     }
                 }
-                .disabled(vm.currentInput.trimmingCharacters(in: .whitespaces).isEmpty || vm.isLoading)
+                .disabled(vm.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.isLoading)
             }
             .padding()
+        }
+    }
+
+    private func scrollToLastMessage(_ proxy: ScrollViewProxy) {
+        if let last = vm.selectedSession?.messages.last {
+            withAnimation {
+                proxy.scrollTo(last.id, anchor: .bottom)
+            }
         }
     }
 

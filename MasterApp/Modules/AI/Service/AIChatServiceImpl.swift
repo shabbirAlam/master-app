@@ -15,6 +15,7 @@ final class AIChatServiceImpl: AIChatService {
 
     func generateResponse(for query: String) async throws -> String {
         let response = try await session.respond(to: query)
+        debugPrint(response)
         return response.content
     }
 
