@@ -1,11 +1,5 @@
-//
-//  Networking.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 21/04/26.
-//
-
 import Foundation
+import os
 
 // MARK: - Networking
 
@@ -13,66 +7,68 @@ protocol Networking: Sendable {
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
 }
 
-final class NetworkingImpl: Networking, Sendable {
-    
+final class NetworkingImpl: Networking, @unchecked Sendable {
+
     private let session: URLSession
     private static let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }()
-    
+
     private static let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
         return encoder
     }()
-    
+
     init(configuration: URLSessionConfiguration = .default,
          delegate: URLSessionDelegate? = nil) {
         configuration.waitsForConnectivity = true
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 60
-        
+
         self.session = URLSession(
             configuration: configuration,
             delegate: delegate,
             delegateQueue: nil
         )
     }
-    
-    func request<T : Decodable>(_ endpoint: Endpoint) async throws -> T {
+
+    func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
+        try Task.checkCancellation()
+
         let request = try endpoint.request(with: Self.encoder)
-#if DEBUG
-        print("Request:", request)
-        print("Method:", request.httpMethod ?? "")
+
+        AppLogger.network.debug("Request URL: \(request.url?.absoluteString ?? "nil", privacy: .public)")
+        AppLogger.network.debug("Method: \(request.httpMethod ?? "", privacy: .public)")
+
         if let httpBody = request.httpBody,
            let json = String(data: httpBody, encoding: .utf8) {
-            print("HttpBody:", json)
+            AppLogger.network.debug("Body: \(json, privacy: .private)")
         }
-#endif
-        
+
         let (data, response) = try await session.data(for: request)
-        
+
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NetworkError.invalidResponse
         }
-        
+
         guard 200..<300 ~= httpResponse.statusCode else {
+            AppLogger.network.error("Bad status code: \(httpResponse.statusCode, privacy: .public)")
             throw NetworkError.badStatusCode(httpResponse.statusCode)
         }
-        
-#if DEBUG
+
         if let json = String(data: data, encoding: .utf8) {
-            print("Response:", json)
+            AppLogger.network.debug("Response: \(json, privacy: .private)")
         }
-#endif
-        
+
         do {
             return try Self.decoder.decode(T.self, from: data)
         } catch let error as DecodingError {
-#if DEBUG
-            print(error)
-#endif
+            AppLogger.network.error("Decoding error: \(error.localizedDescription, privacy: .public)")
+            throw NetworkError.decodingError
+        } catch {
+            AppLogger.network.error("Unknown decoding error: \(error.localizedDescription, privacy: .public)")
             throw NetworkError.decodingError
         }
     }

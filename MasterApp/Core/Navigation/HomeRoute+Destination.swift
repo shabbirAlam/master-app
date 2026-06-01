@@ -2,14 +2,14 @@ import SwiftUI
 
 extension HomeRoute {
     @ViewBuilder
-    func destinations() -> some View {
+    func destination(container: AppDIContainer) -> some View {
         switch self {
         case .secureView:
-            SecureBuilder.build()
+            SecureView()
         case .graphQLSearch:
-            CountryBuilder.build()
+            CountryBuilder.build(container: container)
         case .restAPISearch:
-            TodoBuilder.build()
+            TodoBuilder.build(container: container)
         }
     }
 }

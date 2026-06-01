@@ -8,16 +8,14 @@ final class TodoViewSnapshotTests: XCTestCase {
     let record: SnapshotTestingConfiguration.Record = .never
 
     func test_todoView_withData() {
-        let vm = TodoViewModel(service: SnapshotMockTodoService(data: [
-            Todo(userId: 1, id: 1, title: "Buy groceries", body: "Milk, eggs, bread"),
-            Todo(userId: 1, id: 2, title: "Finish project", body: "Complete the report"),
-        ]))
-        vm.items = [
+        let items = [
             Todo(userId: 1, id: 1, title: "Buy groceries", body: "Milk, eggs, bread"),
             Todo(userId: 1, id: 2, title: "Finish project", body: "Complete the report"),
         ]
+        let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: items))
+        viewModel.setItemsForSnapshot(items)
 
-        let view = TodoView(vm: vm)
+        let view = TodoView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -25,10 +23,10 @@ final class TodoViewSnapshotTests: XCTestCase {
     }
 
     func test_todoView_empty() {
-        let vm = TodoViewModel(service: SnapshotMockTodoService(data: []))
-        vm.items = []
+        let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: []))
+        viewModel.setItemsForSnapshot([])
 
-        let view = TodoView(vm: vm)
+        let view = TodoView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -36,16 +34,14 @@ final class TodoViewSnapshotTests: XCTestCase {
     }
 
     func test_todoView_withSearchActive() {
-        let vm = TodoViewModel(service: SnapshotMockTodoService(data: [
-            Todo(userId: 1, id: 1, title: "Buy groceries", body: "Milk, eggs, bread"),
-            Todo(userId: 1, id: 2, title: "Finish project", body: "Complete the report"),
-        ]))
-        vm.items = [
+        let items = [
             Todo(userId: 1, id: 1, title: "Buy groceries", body: "Milk, eggs, bread"),
         ]
-        vm.searchedText = "groceries"
+        let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: items))
+        viewModel.setItemsForSnapshot(items)
+        viewModel.searchedText = "groceries"
 
-        let view = TodoView(vm: vm)
+        let view = TodoView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -53,10 +49,10 @@ final class TodoViewSnapshotTests: XCTestCase {
     }
 
     func test_todoView_loading() {
-        let vm = TodoViewModel(service: SnapshotMockTodoService(data: []))
-        vm.isLoading = true
+        let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: []))
+        viewModel.setLoadingForSnapshot(true)
 
-        let view = TodoView(vm: vm)
+        let view = TodoView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -64,11 +60,11 @@ final class TodoViewSnapshotTests: XCTestCase {
     }
 
     func test_todoView_error() {
-        let vm = TodoViewModel(service: SnapshotMockTodoService(data: []))
-        vm.errorMsg = "Something went wrong"
-        vm.items = []
+        let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: []))
+        viewModel.setErrorForSnapshot("Something went wrong")
+        viewModel.setItemsForSnapshot([])
 
-        let view = TodoView(vm: vm)
+        let view = TodoView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 

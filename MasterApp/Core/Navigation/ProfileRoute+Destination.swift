@@ -2,7 +2,7 @@ import SwiftUI
 
 extension ProfileRoute {
     @ViewBuilder
-    func destinations() -> some View {
+    func destination(container: AppDIContainer) -> some View {
         switch self {
         case .editProfile:
             ProfileDetailsView()

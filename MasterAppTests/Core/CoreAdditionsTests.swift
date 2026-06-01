@@ -7,15 +7,22 @@ struct AppDIContainerTests {
     @Test func defaultInstance() {
         let container = AppDIContainer()
         #expect(container.networking is NetworkingImpl)
+        #expect(container.graphQLNetworking is GraphQLNetworkingImpl)
     }
 }
 
 @MainActor
-struct ThemeManagerTests {
-    @Test func sharedInstance() {
-        let theme = ThemeManager.shared
+struct AppThemeTests {
+    @Test func lightTheme() {
+        let theme = AppTheme.light
         #expect(theme.background == .white)
         #expect(theme.textPrimary == .black)
+    }
+
+    @Test func darkTheme() {
+        let theme = AppTheme.dark
+        #expect(theme.background == .black)
+        #expect(theme.textPrimary == .white)
     }
 }
 
@@ -41,13 +48,15 @@ struct AppRouteEqualityTests {
 @MainActor
 struct AppRouteImplTests {
     @Test func homeRouteDestinations() {
-        _ = AppRoute.home(type: .secureView).destination()
-        _ = AppRoute.home(type: .graphQLSearch).destination()
-        _ = AppRoute.home(type: .restAPISearch).destination()
+        let container = AppDIContainer()
+        _ = AppRoute.home(type: .secureView).destination(container: container)
+        _ = AppRoute.home(type: .graphQLSearch).destination(container: container)
+        _ = AppRoute.home(type: .restAPISearch).destination(container: container)
     }
 
     @Test func profileRouteDestination() {
-        _ = AppRoute.profile(type: .editProfile).destination()
+        let container = AppDIContainer()
+        _ = AppRoute.profile(type: .editProfile).destination(container: container)
     }
 }
 

@@ -1,19 +1,17 @@
 import Foundation
 
-protocol TodoService {
+protocol TodoService: Sendable {
     func fetchTodos() async throws -> [Todo]
 }
 
 final class TodoServiceImpl: TodoService {
-    private let networking: Networking
+    private let repository: TodoRepository
 
-    init(networking: Networking) {
-        self.networking = networking
+    init(repository: TodoRepository) {
+        self.repository = repository
     }
 
     func fetchTodos() async throws -> [Todo] {
-        try await Task.sleep(nanoseconds: 500_000_000)
-        try Task.checkCancellation()
-        return try await networking.request(APIEndpoint.todos)
+        try await repository.fetchTodos()
     }
 }

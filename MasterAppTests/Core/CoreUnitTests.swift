@@ -182,6 +182,28 @@ struct APIEndpointTests {
             try endpoint.request(with: JSONEncoder())
         }
     }
+
+    @Test func requestWithBodyNonEncodingError() throws {
+        struct NonEncodingFailingEncodable: Encodable, @unchecked Sendable {
+            func encode(to encoder: Encoder) throws {
+                throw NetworkError.unknown
+            }
+        }
+        @MainActor
+        struct TestEndpointWithGenericBodyError: Endpoint {
+            let baseURL: String = "https://example.com"
+            let path: String = "test"
+            let method: HTTPMethod = .POST
+            let headers: [String: String]? = nil
+            let queryItems: [URLQueryItem]? = nil
+            let timeout: TimeInterval = 30
+            var body: Encodable? { NonEncodingFailingEncodable() }
+        }
+        let endpoint = TestEndpointWithGenericBodyError()
+        #expect(throws: NetworkError.encodingError) {
+            try endpoint.request(with: JSONEncoder())
+        }
+    }
 }
 
 @MainActor

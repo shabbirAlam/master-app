@@ -1,9 +1,12 @@
 import SwiftUI
 
 enum CountryBuilder {
-    static func build() -> CountryView {
-        let service = CountryServiceImpl(networking: GraphQLNetworkingImpl())
-        let vm = CountryViewModel(service: service)
-        return CountryView(vm: vm)
+    static func build(container: AppDIContainer = AppDIContainer()) -> CountryView {
+        let viewModel = CountryViewModel(
+            service: CountryServiceImpl(
+                repository: CountryRepositoryImpl(
+                    networking:
+                        container.graphQLNetworking)))
+        return CountryView(viewModel: viewModel, theme: container.theme)
     }
 }

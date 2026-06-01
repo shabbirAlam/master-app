@@ -1,15 +1,16 @@
 import Combine
 import Foundation
+import os
 
 @MainActor
 final class CountryViewModel: ObservableObject {
-    var allCountries: [Country] = []
-    @Published var filteredCountries: [Country] = []
+    @Published private(set) var filteredCountries: [Country] = []
     @Published var searchedText = ""
-    @Published var errorMessage: String?
-    @Published var isLoading = false
+    @Published private(set) var errorMessage: String?
+    @Published private(set) var isLoading = false
 
     private let service: CountryService
+    private var allCountries: [Country] = []
 
     init(service: CountryService) {
         self.service = service
@@ -24,7 +25,12 @@ final class CountryViewModel: ObservableObject {
             errorMessage = nil
         } catch is CancellationError {
             return
+        } catch let error as NetworkError {
+            AppLogger.viewModel.error("Country fetch network error: \(error.errorDescription ?? "", privacy: .public)")
+            allCountries = []
+            errorMessage = error.errorDescription
         } catch {
+            AppLogger.viewModel.error("Country fetch unknown error: \(error.localizedDescription, privacy: .public)")
             allCountries = []
             errorMessage = error.localizedDescription
         }
@@ -38,6 +44,8 @@ final class CountryViewModel: ObservableObject {
             errorMessage = nil
         } catch is CancellationError {
             return
+        } catch let error as NetworkError {
+            errorMessage = error.errorDescription
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -47,7 +55,24 @@ final class CountryViewModel: ObservableObject {
         if searchedText.isEmpty {
             filteredCountries = allCountries
         } else {
-            filteredCountries = allCountries.filter { $0.name.localizedCaseInsensitiveContains(searchedText) }
+            filteredCountries = allCountries.filter {
+                $0.name.localizedCaseInsensitiveContains(searchedText)
+            }
         }
+    }
+
+    // MARK: - Test Helpers
+
+    func setCountriesForSnapshot(_ countries: [Country]) {
+        self.allCountries = countries
+        self.filteredCountries = countries
+    }
+
+    func setLoadingForSnapshot(_ loading: Bool) {
+        self.isLoading = loading
+    }
+
+    func setErrorForSnapshot(_ message: String?) {
+        self.errorMessage = message
     }
 }

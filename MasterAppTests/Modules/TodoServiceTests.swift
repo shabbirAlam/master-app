@@ -2,12 +2,27 @@ import Testing
 @testable import MasterApp
 
 @MainActor
+final class MockTodoRepository: TodoRepository {
+    private var mockData: [Todo]?
+    private var mockError: Error?
+
+    func fetchTodos() async throws -> [Todo] {
+        if let mockError { throw mockError }
+        if let data = mockData { return data }
+        return []
+    }
+
+    func setData(_ data: [Todo]) { mockData = data }
+    func setError(_ error: Error) { mockError = error }
+}
+
+@MainActor
 struct TodoServiceTests {
     @Test func fetchTodosSuccess() async throws {
-        let mock = MockNetworkServiceImpl()
+        let mock = MockTodoRepository()
         mock.setData([Todo(userId: 1, id: 1, title: "test title", body: "test body")])
 
-        let service = TodoServiceImpl(networking: mock)
+        let service = TodoServiceImpl(repository: mock)
         let todos = try await service.fetchTodos()
 
         #expect(todos.count == 1)
@@ -16,10 +31,10 @@ struct TodoServiceTests {
     }
 
     @Test func fetchTodosError() async {
-        let mock = MockNetworkServiceImpl()
+        let mock = MockTodoRepository()
         mock.setError(NetworkError.badStatusCode(500))
 
-        let service = TodoServiceImpl(networking: mock)
+        let service = TodoServiceImpl(repository: mock)
 
         do {
             let _ = try await service.fetchTodos()
@@ -37,10 +52,10 @@ struct TodoServiceTests {
     }
 
     @Test func fetchTodosCancellation() async {
-        let mock = MockNetworkServiceImpl()
+        let mock = MockTodoRepository()
         mock.setData([Todo(userId: 1, id: 1, title: "test", body: "test")])
 
-        let service = TodoServiceImpl(networking: mock)
+        let service = TodoServiceImpl(repository: mock)
 
         let task = Task {
             try await service.fetchTodos()

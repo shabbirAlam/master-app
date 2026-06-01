@@ -3,15 +3,40 @@ import Testing
 @testable import MasterApp
 
 @MainActor
+final class MockCountryRepository: CountryRepository {
+    private var mockData: Data?
+    private var mockError: Error?
+
+    func fetchCountries() async throws -> [Country] {
+        if let mockError { throw mockError }
+        if let data = mockData {
+            return try JSONDecoder().decode(CountriesResponse.self, from: data).countries
+        }
+        return []
+    }
+
+    func fetchCountry(for code: String) async throws -> Country {
+        if let mockError { throw mockError }
+        if let data = mockData {
+            return try JSONDecoder().decode(CountryWrapper.self, from: data).country
+        }
+        throw NetworkError.unknown
+    }
+
+    func setMockData(_ data: Data) { mockData = data }
+    func setError(_ error: Error) { mockError = error }
+}
+
+@MainActor
 struct CountryServiceTests {
     @Test func fetchCountriesSuccess() async throws {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {"countries": [{"code": "IN", "name": "India", "capital": "Delhi"}]}
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let service = CountryServiceImpl(networking: mock)
+        let service = CountryServiceImpl(repository: mock)
         let countries = try await service.fetchCountries()
 
         #expect(countries.count == 1)
@@ -20,13 +45,13 @@ struct CountryServiceTests {
     }
 
     @Test func fetchCountrySuccess() async throws {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {"country": {"code": "IN", "name": "India", "capital": "Delhi"}}
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let service = CountryServiceImpl(networking: mock)
+        let service = CountryServiceImpl(repository: mock)
         let country = try await service.fetchCountry(for: "IN")
 
         #expect(country.name == "India")
@@ -35,10 +60,10 @@ struct CountryServiceTests {
     }
 
     @Test func fetchCountriesError() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         mock.setError(URLError(.notConnectedToInternet))
 
-        let service = CountryServiceImpl(networking: mock)
+        let service = CountryServiceImpl(repository: mock)
 
         do {
             let _ = try await service.fetchCountries()
@@ -49,10 +74,10 @@ struct CountryServiceTests {
     }
 
     @Test func fetchCountryError() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         mock.setError(NetworkError.unknown)
 
-        let service = CountryServiceImpl(networking: mock)
+        let service = CountryServiceImpl(repository: mock)
 
         do {
             let _ = try await service.fetchCountry(for: "IN")

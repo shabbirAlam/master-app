@@ -2,12 +2,12 @@ import SwiftUI
 
 extension AppRoute {
     @ViewBuilder
-    func destination() -> some View {
+    func destination(container: AppDIContainer) -> some View {
         switch self {
         case .home(let details):
-            details.destinations()
+            details.destination(container: container)
         case .profile(let details):
-            details.destinations()
+            details.destination(container: container)
         }
     }
 }

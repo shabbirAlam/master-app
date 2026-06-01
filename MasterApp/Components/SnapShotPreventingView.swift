@@ -1,8 +1,9 @@
 import SwiftUI
+import os
 
 struct SnapShotPreventingView<Content: View>: View {
     var content: Content
-    let pub = NotificationCenter.default
+    let screenshotPublisher = NotificationCenter.default
         .publisher(for: UIApplication.userDidTakeScreenshotNotification)
 
     init(@ViewBuilder content: @escaping () -> Content) {
@@ -12,11 +13,12 @@ struct SnapShotPreventingView<Content: View>: View {
     @State private var hostingController: UIHostingController<Content>?
 
     var body: some View {
-        _SnapShotPreventingView(hostingController: $hostingController)
+        SnapShotPreventingContainer(hostingController: $hostingController)
             .overlay {
-                GeometryReader {
-                    let size = $0.size
-                    Color.clear.preference(key: SizeKey.self, value: size)
+                GeometryReader { proxy in
+                    let size = proxy.size
+                    Color.clear
+                        .preference(key: SizeKey.self, value: size)
                         .onPreferenceChange(SizeKey.self, perform: { value in
                             if value != .zero {
                                 if hostingController == nil {
@@ -30,12 +32,10 @@ struct SnapShotPreventingView<Content: View>: View {
                             }
                         })
                 }
-
             }
-            .onReceive(pub) { _ in
-                print("Admin policy doesn't allow to take screenshot")
+            .onReceive(screenshotPublisher) { _ in
+                AppLogger.secure.notice("Screenshot attempt detected")
             }
-
     }
 }
 

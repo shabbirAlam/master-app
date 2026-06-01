@@ -1,14 +1,7 @@
-//
-//  ProfileView.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 21/04/26.
-//
-
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject var router: Router
+    @EnvironmentObject private var router: Router
 
     var body: some View {
         VStack {
@@ -18,6 +11,7 @@ struct ProfileView: View {
                 Text("Edit profile")
             }
             .accessibilityIdentifier("edit_profile")
+            .accessibilityLabel("Edit profile")
         }
     }
 }

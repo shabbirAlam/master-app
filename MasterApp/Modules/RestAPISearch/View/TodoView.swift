@@ -1,55 +1,99 @@
 import SwiftUI
 
 struct TodoView: View {
-    @StateObject private var vm: TodoViewModel
+    @StateObject private var viewModel: TodoViewModel
+    private let theme: Theme
 
-    init(vm: TodoViewModel) {
-        _vm = StateObject(wrappedValue: vm)
+    init(viewModel: TodoViewModel, theme: Theme = AppTheme.light) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+        self.theme = theme
     }
 
     var body: some View {
         ZStack {
-            Color.white.edgesIgnoringSafeArea(.all)
+            theme.background.ignoresSafeArea()
 
-            VStack {
-                TextField("Search...", text: $vm.searchedText)
-                    .padding(.horizontal, 16)
-                    .frame(height: 40)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.gray, lineWidth: 1)
-                    )
-                    .padding(.horizontal)
-                    .onChange(of: vm.searchedText) { _ in
-                        vm.filterSearch()
-                    }
+            VStack(spacing: 0) {
+                searchField
+                    .padding(.vertical, 8)
 
-                List(Array(vm.items.enumerated()), id: \.element.id) { index, item in
-                    Text(item.title)
-                        .accessibilityIdentifier("todo_label_\(index)")
+                if let error = viewModel.errorMessage {
+                    errorState(error)
+                } else if viewModel.isLoading {
+                    shimmerList
+                } else if viewModel.items.isEmpty {
+                    emptyState
+                } else {
+                    listView
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-            }
-
-            if vm.isLoading {
-                ProgressView()
-            } else if let msg = vm.errorMsg {
-                Text(msg)
-            } else if vm.items.isEmpty && !vm.isLoading {
-                Text("No data found")
             }
         }
         .navigationTitle("Todos")
         .task {
-            await vm.fetchTodos()
+            await viewModel.fetchTodos()
+        }
+    }
+
+    private var searchField: some View {
+        TextField("Search...", text: $viewModel.searchedText)
+            .padding(.horizontal, 16)
+            .frame(height: 40)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.gray, lineWidth: 1)
+            )
+            .padding(.horizontal)
+            .accessibilityIdentifier("todo_search")
+            .onChange(of: viewModel.searchedText) { _ in
+                viewModel.filterSearch()
+            }
+    }
+
+    private var listView: some View {
+        List {
+            ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { index, item in
+                Text(item.title)
+                    .accessibilityIdentifier("todo_label_\(index)")
+                    .accessibilityLabel(item.title)
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .accessibilityIdentifier("todo_list")
+    }
+
+    private var shimmerList: some View {
+        ShimmerList()
+            .accessibilityIdentifier("todo_loading")
+    }
+
+    private var emptyState: some View {
+        VStack {
+            Spacer()
+            Text("No data found")
+                .accessibilityIdentifier("todo_empty")
+            Spacer()
+        }
+    }
+
+    private func errorState(_ message: String) -> some View {
+        VStack {
+            Spacer()
+            Text(message)
+                .foregroundColor(.red)
+                .padding()
+                .accessibilityIdentifier("todo_error")
+            Spacer()
         }
     }
 }
 
+#if DEBUG
 #Preview {
     let mock = PreviewNetworkingMock()
     mock.setData([Todo(userId: 1, id: 1, title: "todo 1", body: "this is todo 1 body")])
-    return TodoView(vm: TodoViewModel(
-        service: TodoServiceImpl(networking: mock)))
+    return TodoView(
+        viewModel: TodoViewModel(service: TodoServiceImpl(repository: TodoRepositoryImpl(networking: mock)))
+    )
 }
+#endif

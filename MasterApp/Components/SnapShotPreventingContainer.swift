@@ -1,16 +1,16 @@
 import SwiftUI
 
-struct _SnapShotPreventingView<Content: View>: UIViewRepresentable {
+struct SnapShotPreventingContainer<Content: View>: UIViewRepresentable {
     typealias UIViewType = UIView
     @Binding var hostingController: UIHostingController<Content>?
 
     func makeUIView(context: Context) -> UIView {
-        let secureTxtField = UITextField()
-        secureTxtField.isSecureTextEntry = true
-        if let textLayoutView = secureTxtField.subviews.last {
+        let secureTextField = UITextField()
+        secureTextField.isSecureTextEntry = true
+        if let textLayoutView = secureTextField.subviews.last {
             textLayoutView.backgroundColor = .clear
         }
-        if let textLayoutView = secureTxtField.subviews.first {
+        if let textLayoutView = secureTextField.subviews.first {
             return textLayoutView
         }
         return UIView()
@@ -21,5 +21,4 @@ struct _SnapShotPreventingView<Content: View>: UIViewRepresentable {
             uiView.addSubview(hostingController.view)
         }
     }
-
 }

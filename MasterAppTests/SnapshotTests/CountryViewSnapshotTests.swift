@@ -8,19 +8,15 @@ final class CountryViewSnapshotTests: XCTestCase {
     let record: SnapshotTestingConfiguration.Record = .never
 
     func test_countryView_withData() {
-        let vm = CountryViewModel(service: SnapshotMockCountryService(data: [
-            Country(code: "IN", name: "India", capital: "New Delhi"),
-            Country(code: "US", name: "United States", capital: "Washington DC"),
-            Country(code: "JP", name: "Japan", capital: "Tokyo"),
-        ]))
-        vm.allCountries = [
+        let countries = [
             Country(code: "IN", name: "India", capital: "New Delhi"),
             Country(code: "US", name: "United States", capital: "Washington DC"),
             Country(code: "JP", name: "Japan", capital: "Tokyo"),
         ]
-        vm.filterCountries()
+        let viewModel = CountryViewModel(service: SnapshotMockCountryService(data: countries))
+        viewModel.setCountriesForSnapshot(countries)
 
-        let view = CountryView(vm: vm)
+        let view = CountryView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -28,20 +24,17 @@ final class CountryViewSnapshotTests: XCTestCase {
     }
 
     func test_countryView_withSearch() {
-        let vm = CountryViewModel(service: SnapshotMockCountryService(data: [
-            Country(code: "IN", name: "India", capital: "New Delhi"),
-            Country(code: "US", name: "United States", capital: "Washington DC"),
-            Country(code: "JP", name: "Japan", capital: "Tokyo"),
-        ]))
-        vm.allCountries = [
+        let countries = [
             Country(code: "IN", name: "India", capital: "New Delhi"),
             Country(code: "US", name: "United States", capital: "Washington DC"),
             Country(code: "JP", name: "Japan", capital: "Tokyo"),
         ]
-        vm.searchedText = "in"
-        vm.filterCountries()
+        let viewModel = CountryViewModel(service: SnapshotMockCountryService(data: countries))
+        viewModel.setCountriesForSnapshot(countries)
+        viewModel.searchedText = "in"
+        viewModel.filterCountries()
 
-        let view = CountryView(vm: vm)
+        let view = CountryView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -49,11 +42,10 @@ final class CountryViewSnapshotTests: XCTestCase {
     }
 
     func test_countryView_empty() {
-        let vm = CountryViewModel(service: SnapshotMockCountryService(data: []))
-        vm.allCountries = []
-        vm.filterCountries()
+        let viewModel = CountryViewModel(service: SnapshotMockCountryService(data: []))
+        viewModel.setCountriesForSnapshot([])
 
-        let view = CountryView(vm: vm)
+        let view = CountryView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -61,10 +53,10 @@ final class CountryViewSnapshotTests: XCTestCase {
     }
 
     func test_countryView_error() {
-        let vm = CountryViewModel(service: SnapshotMockCountryService(data: []))
-        vm.errorMessage = "Network error occurred"
+        let viewModel = CountryViewModel(service: SnapshotMockCountryService(data: []))
+        viewModel.setErrorForSnapshot("Network error occurred")
 
-        let view = CountryView(vm: vm)
+        let view = CountryView(viewModel: viewModel)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 

@@ -20,7 +20,8 @@ struct HomeViewModelTests {
     func featureCountIsThree() {
         let vm = HomeViewModel()
         #expect(vm.items.count == 3)
-        #expect(vm.items[0] == .restAPISearch)
-        #expect(vm.items[0].name == "Rest API Search")
+        #expect(vm.items.contains(.restAPISearch))
+        #expect(vm.items.contains(.graphQLSearch))
+        #expect(vm.items.contains(.secureView))
     }
 }

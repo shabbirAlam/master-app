@@ -1,30 +1,27 @@
-//
-//  ProfileDetailsView.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 21/04/26.
-//
-
 import SwiftUI
 
 struct ProfileDetailsView: View {
-    @EnvironmentObject var router: Router
-    
+    @EnvironmentObject private var router: Router
+
     var body: some View {
-        VStack {
+        VStack(spacing: 16) {
             Button {
                 router.pop()
             } label: {
                 Text("Back")
                     .padding()
             }
-            
+            .accessibilityIdentifier("back_button")
+            .accessibilityLabel("Back")
+
             Button {
                 router.popToRoot()
             } label: {
                 Text("Back to root")
                     .padding()
             }
+            .accessibilityIdentifier("back_to_root")
+            .accessibilityLabel("Back to root")
         }
         .navigationTitle("Profile details")
     }

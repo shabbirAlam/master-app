@@ -1,46 +1,37 @@
-//
-//  HomeView.swift
-//  MasterApp
-//
-//  Created by Md Shabbir Alam on 21/04/26.
-//
-
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject var router: Router
-    @StateObject private var vm: HomeViewModel
-    private let themeManager = ThemeManager.shared
+    @EnvironmentObject private var router: Router
+    @StateObject private var viewModel: HomeViewModel
 
-    init(vm: HomeViewModel = HomeViewModel()) {
-        _vm = StateObject(wrappedValue: vm)
+    init(viewModel: HomeViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     var body: some View {
         ZStack {
-            themeManager.background.edgesIgnoringSafeArea(.all)
-            
-            List(vm.items, id: \.self){ item in
+            viewModel.theme.background.ignoresSafeArea()
+
+            List(viewModel.items, id: \.self) { item in
                 Button {
-                    if let route = vm.route(for: item) {
+                    if let route = viewModel.route(for: item) {
                         router.push(route)
                     }
                 } label: {
                     HStack {
                         Text(item.name)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundStyle(viewModel.theme.textPrimary)
                         Image(systemName: "chevron.right")
+                            .foregroundStyle(viewModel.theme.textPrimary.opacity(0.5))
                     }
-                    .foregroundStyle(themeManager.textPrimary)
                 }
                 .accessibilityIdentifier(item.name)
+                .accessibilityLabel(item.name)
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
             .accessibilityIdentifier("home_view")
         }
     }
-}
-
-#Preview {
-    HomeView()
-        .environmentObject(Router())
 }

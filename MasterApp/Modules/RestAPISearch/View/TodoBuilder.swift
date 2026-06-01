@@ -1,10 +1,11 @@
 import SwiftUI
 
 enum TodoBuilder {
-    static func build() -> TodoView {
-        let container = AppDIContainer()
-        let service = TodoServiceImpl(networking: container.networking)
-        let vm = TodoViewModel(service: service)
-        return TodoView(vm: vm)
+    static func build(container: AppDIContainer = AppDIContainer()) -> TodoView {
+        let viewModel = TodoViewModel(
+            service: TodoServiceImpl(
+                repository: TodoRepositoryImpl(
+                    networking: container.networking)))
+        return TodoView(viewModel: viewModel, theme: container.theme)
     }
 }

@@ -175,8 +175,13 @@ struct GraphQLNetworkingTests {
                 variables: nil
             )
             Issue.record("Expected failure")
-        } catch is DecodingError {
-            #expect(true)
+        } catch let error as NetworkError {
+            switch error {
+            case .decodingError:
+                #expect(true)
+            default:
+                Issue.record("Unexpected error: \(error)")
+            }
         } catch {
             Issue.record("Unexpected error: \(error)")
         }

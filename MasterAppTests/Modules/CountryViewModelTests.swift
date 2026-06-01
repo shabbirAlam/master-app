@@ -3,26 +3,11 @@ import Testing
 @testable import MasterApp
 
 @MainActor
-final class MockGraphQLNetworking: GraphQLNetworking {
-    private var mockData: Data?
-    private var mockError: Error?
-
-    func fetch<T: Decodable>(query: String, variables: [String: AnyEncodable]?) async throws -> T {
-        if let mockError { throw mockError }
-        if let data = mockData { return try JSONDecoder().decode(T.self, from: data) }
-        throw NetworkError.unknown
-    }
-
-    func setMockData(_ data: Data) { mockData = data }
-    func setError(_ error: Error) { mockError = error }
-}
-
-@MainActor
 struct CountryViewModelTests {
 
     @Test
     func fetchCountriesSuccess() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {
             "countries": [
@@ -33,7 +18,7 @@ struct CountryViewModelTests {
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
 
         await vm.fetchCountries()
 
@@ -46,10 +31,10 @@ struct CountryViewModelTests {
 
     @Test
     func fetchCountriesFailure() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         mock.setError(URLError(.notConnectedToInternet))
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
 
         await vm.fetchCountries()
 
@@ -60,7 +45,7 @@ struct CountryViewModelTests {
 
     @Test
     func filterCountries() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {
             "countries": [
@@ -72,7 +57,7 @@ struct CountryViewModelTests {
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
         await vm.fetchCountries()
 
         vm.searchedText = "ind"
@@ -85,7 +70,7 @@ struct CountryViewModelTests {
 
     @Test
     func filterCountriesEmptySearch() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {
             "countries": [
@@ -96,7 +81,7 @@ struct CountryViewModelTests {
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
         await vm.fetchCountries()
 
         vm.searchedText = ""
@@ -107,13 +92,13 @@ struct CountryViewModelTests {
 
     @Test
     func fetchCountrySuccess() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {"country": {"code": "IN", "name": "India", "capital": "Delhi"}}
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
         await vm.fetchCountry(Country(code: "IN", name: "India", capital: "Delhi"))
 
         #expect(vm.isLoading == false)
@@ -122,7 +107,7 @@ struct CountryViewModelTests {
 
     @Test
     func filterCountriesNoMatch() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {
             "countries": [
@@ -132,7 +117,7 @@ struct CountryViewModelTests {
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
         await vm.fetchCountries()
 
         vm.searchedText = "zzzzz"
@@ -143,10 +128,10 @@ struct CountryViewModelTests {
 
     @Test
     func fetchCountryError() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         mock.setError(URLError(.notConnectedToInternet))
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
         let country = Country(code: "XX", name: "Unknown", capital: nil)
         await vm.fetchCountry(country)
 
@@ -156,18 +141,81 @@ struct CountryViewModelTests {
 
     @Test
     func fetchCountriesEmptyData() async {
-        let mock = MockGraphQLNetworking()
+        let mock = MockCountryRepository()
         let jsonData = """
         {"countries": []}
         """.data(using: .utf8)!
         mock.setMockData(jsonData)
 
-        let vm = CountryViewModel(service: CountryServiceImpl(networking: mock))
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
         await vm.fetchCountries()
 
         #expect(vm.isLoading == false)
         #expect(vm.filteredCountries.isEmpty)
-        #expect(vm.allCountries.isEmpty)
         #expect(vm.errorMessage == nil)
+    }
+
+    @Test
+    func setLoadingForSnapshot() async {
+        let mock = MockCountryRepository()
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
+        #expect(vm.isLoading == false)
+
+        vm.setLoadingForSnapshot(true)
+        #expect(vm.isLoading == true)
+
+        vm.setLoadingForSnapshot(false)
+        #expect(vm.isLoading == false)
+    }
+
+    @Test
+    func fetchCountriesCancellation() async {
+        let mock = MockCountryRepository()
+        mock.setError(CancellationError())
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
+
+        await vm.fetchCountries()
+
+        #expect(vm.isLoading == false)
+        #expect(vm.errorMessage == nil)
+    }
+
+    @Test
+    func fetchCountriesGenericError() async {
+        let mock = MockCountryRepository()
+        struct SomeError: Error {}
+        mock.setError(SomeError())
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
+
+        await vm.fetchCountries()
+
+        #expect(vm.isLoading == false)
+        #expect(vm.filteredCountries.isEmpty)
+        #expect(vm.errorMessage != nil)
+    }
+
+    @Test
+    func fetchCountryCancellation() async {
+        let mock = MockCountryRepository()
+        mock.setError(CancellationError())
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
+
+        await vm.fetchCountry(Country(code: "XX", name: "Test", capital: nil))
+
+        #expect(vm.isLoading == false)
+        #expect(vm.errorMessage == nil)
+    }
+
+    @Test
+    func fetchCountryGenericError() async {
+        let mock = MockCountryRepository()
+        struct SomeError: Error {}
+        mock.setError(SomeError())
+        let vm = CountryViewModel(service: CountryServiceImpl(repository: mock))
+
+        await vm.fetchCountry(Country(code: "XX", name: "Test", capital: nil))
+
+        #expect(vm.isLoading == false)
+        #expect(vm.errorMessage != nil)
     }
 }
