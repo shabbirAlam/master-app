@@ -4,8 +4,6 @@ extension HomeRoute {
     @ViewBuilder
     func destinations() -> some View {
         switch self {
-        case .ai:
-            AIBuilder.build()
         case .secureView:
             SecureBuilder.build()
         case .graphQLSearch:

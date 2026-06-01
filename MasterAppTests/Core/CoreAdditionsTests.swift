@@ -22,28 +22,25 @@ struct ThemeManagerTests {
 @MainActor
 struct AppRouteEqualityTests {
     @Test func appRouteEquality() {
-        #expect(AppRoute.home(type: .ai) == AppRoute.home(type: .ai))
-        #expect(AppRoute.home(type: .ai) != AppRoute.home(type: .secureView))
+        #expect(AppRoute.home(type: .secureView) == AppRoute.home(type: .secureView))
+        #expect(AppRoute.home(type: .secureView) != AppRoute.home(type: .graphQLSearch))
         #expect(AppRoute.profile(type: .editProfile) == AppRoute.profile(type: .editProfile))
-        #expect(AppRoute.home(type: .ai) != AppRoute.profile(type: .editProfile))
     }
 
     @Test func appRouteHashable() {
         let routes: Set<AppRoute> = [
-            .home(type: .ai),
             .home(type: .secureView),
             .home(type: .graphQLSearch),
             .home(type: .restAPISearch),
             .profile(type: .editProfile)
         ]
-        #expect(routes.count == 5)
+        #expect(routes.count == 4)
     }
 }
 
 @MainActor
 struct AppRouteImplTests {
     @Test func homeRouteDestinations() {
-        _ = AppRoute.home(type: .ai).destination()
         _ = AppRoute.home(type: .secureView).destination()
         _ = AppRoute.home(type: .graphQLSearch).destination()
         _ = AppRoute.home(type: .restAPISearch).destination()
@@ -92,15 +89,15 @@ struct RouterDuplicateRouteTests {
     @Test func popToWithDuplicateInMiddle() {
         let router = Router()
         router.push(.home(type: .restAPISearch))
-        router.push(.home(type: .ai))
-        router.push(.home(type: .restAPISearch))
         router.push(.home(type: .secureView))
+        router.push(.home(type: .restAPISearch))
+        router.push(.home(type: .graphQLSearch))
 
         router.popTo(.home(type: .restAPISearch))
-        // lastIndex is 2, elementsToRemove = 4 - 3 = 1 → removes secureView
+        // lastIndex is 2, elementsToRemove = 4 - 3 = 1 → removes graphQLSearch
         #expect(router.path.count == 3)
         #expect(router.path[0] == .home(type: .restAPISearch))
-        #expect(router.path[1] == .home(type: .ai))
+        #expect(router.path[1] == .home(type: .secureView))
         #expect(router.path[2] == .home(type: .restAPISearch))
     }
 }

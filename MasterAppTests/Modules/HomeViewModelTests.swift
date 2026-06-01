@@ -14,20 +14,13 @@ struct HomeViewModelTests {
         #expect(vm.route(for: .restAPISearch) == .home(type: .restAPISearch))
         #expect(vm.route(for: .graphQLSearch) == .home(type: .graphQLSearch))
         #expect(vm.route(for: .secureView) == .home(type: .secureView))
-        #expect(vm.route(for: .ai) == .home(type: .ai))
     }
     
     @Test
-    func aiFeatureConditionallyIncluded() {
+    func featureCountIsThree() {
         let vm = HomeViewModel()
-        if AIAvailability.isEnabled() {
-            #expect(vm.items.count == 4)
-            #expect(vm.items[0] == .ai)
-            #expect(vm.items[0].name == "AI")
-        } else {
-            #expect(vm.items.count == 3)
-            #expect(vm.items[0] == .restAPISearch)
-            #expect(vm.items[0].name == "Rest API Search")
-        }
+        #expect(vm.items.count == 3)
+        #expect(vm.items[0] == .restAPISearch)
+        #expect(vm.items[0].name == "Rest API Search")
     }
 }

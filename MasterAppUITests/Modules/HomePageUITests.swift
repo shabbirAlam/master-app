@@ -31,13 +31,6 @@ final class HomePageUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Secure View"].exists)
     }
 
-    func test_homeShowsAIFeature_whenAvailable() {
-        let aiButton = app.buttons["AI"].firstMatch
-        if aiButton.waitForExistence(timeout: 1) {
-            XCTAssertTrue(aiButton.exists)
-        }
-    }
-
     // MARK: - Tab Navigation
 
     func test_tabNavigation_switchesBetweenTabs() {
@@ -105,31 +98,6 @@ final class HomePageUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["This is secure view"].waitForExistence(timeout: 2))
 
         app.navigationBars.buttons.firstMatch.tap()
-        XCTAssertTrue(app.collectionViews["home_view"].waitForExistence(timeout: 2))
-    }
-
-    // MARK: - AI View
-
-    func test_navigateToAIView() {
-        let aiButton = app.buttons["AI"].firstMatch
-        guard aiButton.waitForExistence(timeout: 1) else { return }
-
-        aiButton.tap()
-        let navBar = app.navigationBars["My AI"].firstMatch
-        if navBar.waitForExistence(timeout: 2) {
-            let helloText = app.staticTexts["Hello"]
-            XCTAssertTrue(helloText.exists)
-        }
-    }
-
-    func test_aiView_backToHome() {
-        let aiButton = app.buttons["AI"].firstMatch
-        guard aiButton.waitForExistence(timeout: 1) else { return }
-
-        aiButton.tap()
-        guard app.navigationBars["My AI"].waitForExistence(timeout: 2) else { return }
-
-        app.navigationBars["My AI"].buttons.firstMatch.tap()
         XCTAssertTrue(app.collectionViews["home_view"].waitForExistence(timeout: 2))
     }
 

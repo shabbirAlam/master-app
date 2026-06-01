@@ -36,7 +36,6 @@ struct NetworkErrorTests {
 @MainActor
 struct HomeFeaturesTests {
     @Test func names() {
-        #expect(HomeFeatures.ai.name == "AI")
         #expect(HomeFeatures.secureView.name == "Secure View")
         #expect(HomeFeatures.restAPISearch.name == "Rest API Search")
         #expect(HomeFeatures.graphQLSearch.name == "GraphQL Search")

@@ -7,15 +7,13 @@
 
 import Foundation
 
-enum HomeFeatures {
-    case ai
+enum HomeFeatures: CaseIterable {
     case secureView
     case restAPISearch
     case graphQLSearch
     
     var name: String {
         return switch self {
-        case .ai: "AI"
         case .secureView: "Secure View"
         case .restAPISearch: "Rest API Search"
         case .graphQLSearch: "GraphQL Search"
