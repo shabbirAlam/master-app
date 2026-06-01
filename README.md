@@ -11,5 +11,4 @@ Master App for development help
 * Rest API
 * Graph QL
 * Screenshot and video recording prevention
-* AI chat (min iOS: 26.0)
 *
