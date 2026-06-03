@@ -1,12 +1,13 @@
-import Combine
 import Foundation
+import Observation
 
 @MainActor
-final class CountryViewModel: ObservableObject {
-    @Published private(set) var filteredCountries: [Country] = []
-    @Published var searchedText = ""
-    @Published private(set) var errorMessage: String?
-    @Published private(set) var isLoading = false
+@Observable
+final class CountryViewModel {
+    private(set) var filteredCountries: [Country] = []
+    var searchedText = ""
+    private(set) var errorMessage: String?
+    private(set) var isLoading = false
 
     private let service: CountryService
     private var allCountries: [Country] = []
@@ -25,11 +26,11 @@ final class CountryViewModel: ObservableObject {
         } catch is CancellationError {
             return
         } catch let error as NetworkError {
-            AppLogger.log("Country fetch network error: \(error.errorDescription ?? "")", level: .error)
+            AppLogger.viewModel.log("Country fetch network error: \(error.errorDescription ?? "")", .error)
             allCountries = []
             errorMessage = error.errorDescription
         } catch {
-            AppLogger.log("Country fetch unknown error: \(error.localizedDescription)", level: .error)
+            AppLogger.viewModel.log("Country fetch unknown error: \(error.localizedDescription)", .error)
             allCountries = []
             errorMessage = error.localizedDescription
         }
@@ -44,8 +45,10 @@ final class CountryViewModel: ObservableObject {
         } catch is CancellationError {
             return
         } catch let error as NetworkError {
+            AppLogger.viewModel.log("Country detail fetch error: \(error.errorDescription ?? "")", .error)
             errorMessage = error.errorDescription
         } catch {
+            AppLogger.viewModel.log("Country detail fetch unknown error: \(error.localizedDescription)", .error)
             errorMessage = error.localizedDescription
         }
     }

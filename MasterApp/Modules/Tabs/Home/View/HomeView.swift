@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject private var router: Router
-    @StateObject private var viewModel: HomeViewModel
+    @Environment(Router.self) private var router
+    @State private var viewModel: HomeViewModel
 
     init(viewModel: HomeViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     var body: some View {

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject private var router: Router
+    @Environment(Router.self) private var router
 
     var body: some View {
         VStack {

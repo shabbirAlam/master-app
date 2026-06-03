@@ -9,7 +9,7 @@ final class ProfileViewSnapshotTests: XCTestCase {
 
     func test_profileView() {
         let view = ProfileView()
-            .environmentObject(Router())
+            .environment(Router())
 
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
@@ -24,7 +24,7 @@ final class ProfileDetailsViewSnapshotTests: XCTestCase {
 
     func test_profileDetailsView() {
         let view = ProfileDetailsView()
-            .environmentObject(Router())
+            .environment(Router())
 
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds

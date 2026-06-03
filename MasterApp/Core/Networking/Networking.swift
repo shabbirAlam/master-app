@@ -1,13 +1,10 @@
 import Foundation
 
-// MARK: - Networking
-
 protocol Networking: Sendable {
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
 }
 
-final class NetworkingImpl: Networking, @unchecked Sendable {
-
+final class NetworkingImpl: Networking {
     private let session: URLSession
     private static let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
@@ -20,17 +17,12 @@ final class NetworkingImpl: Networking, @unchecked Sendable {
         return encoder
     }()
 
-    init(configuration: URLSessionConfiguration = .default,
-         delegate: URLSessionDelegate? = nil) {
+    init(configuration: URLSessionConfiguration = .default) {
         configuration.waitsForConnectivity = true
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 60
 
-        self.session = URLSession(
-            configuration: configuration,
-            delegate: delegate,
-            delegateQueue: nil
-        )
+        self.session = URLSession(configuration: configuration)
     }
 
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
@@ -38,12 +30,12 @@ final class NetworkingImpl: Networking, @unchecked Sendable {
 
         let request = try endpoint.request(with: Self.encoder)
 
-        AppLogger.log("Request URL: \(request.url?.absoluteString ?? "nil")", level: .debug)
-        AppLogger.log("Method: \(request.httpMethod ?? "")", level: .debug)
+        AppLogger.network.log("Request URL: \(request.url?.absoluteString ?? "nil")")
+        AppLogger.network.log("Method: \(request.httpMethod ?? "")")
 
         if let httpBody = request.httpBody,
            let json = String(data: httpBody, encoding: .utf8) {
-            AppLogger.log("Body: \(json)", level: .debug)
+            AppLogger.network.log("Body: \(json)")
         }
 
         let (data, response) = try await session.data(for: request)
@@ -53,23 +45,22 @@ final class NetworkingImpl: Networking, @unchecked Sendable {
         }
 
         guard 200..<300 ~= httpResponse.statusCode else {
-            AppLogger.log("Bad status code: \(httpResponse.statusCode)", level: .error)
+            AppLogger.network.log("Bad status code: \(httpResponse.statusCode)", .error)
             throw NetworkError.badStatusCode(httpResponse.statusCode)
         }
 
         if let json = String(data: data, encoding: .utf8) {
-            AppLogger.log("Response: \(json)", level: .debug)
+            AppLogger.network.log("Response: \(json)")
         }
 
         do {
             return try Self.decoder.decode(T.self, from: data)
         } catch let error as DecodingError {
-            AppLogger.log("Decoding error: \(error.localizedDescription)", level: .error)
+            AppLogger.network.log("Decoding error: \(error.localizedDescription)", .error)
             throw NetworkError.decodingError
         } catch {
-            AppLogger.log("Unknown decoding error: \(error.localizedDescription)", level: .error)
+            AppLogger.network.log("Unknown decoding error: \(error.localizedDescription)", .error)
             throw NetworkError.decodingError
         }
     }
 }
-

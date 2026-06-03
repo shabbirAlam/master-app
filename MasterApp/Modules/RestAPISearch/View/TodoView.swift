@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct TodoView: View {
-    @StateObject private var viewModel: TodoViewModel
+    @State private var viewModel: TodoViewModel
     private let theme: Theme
-
+    
     init(viewModel: TodoViewModel, theme: Theme = AppTheme.light) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
         self.theme = theme
     }
 
@@ -88,7 +88,6 @@ struct TodoView: View {
     }
 }
 
-#if DEBUG
 #Preview {
     let mock = PreviewNetworkingMock()
     mock.setData([Todo(userId: 1, id: 1, title: "todo 1", body: "this is todo 1 body")])
@@ -96,4 +95,3 @@ struct TodoView: View {
         viewModel: TodoViewModel(service: TodoServiceImpl(repository: TodoRepositoryImpl(networking: mock)))
     )
 }
-#endif

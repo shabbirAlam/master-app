@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum CountryBuilder {
-    static func build(container: AppDIContainer = AppDIContainer()) -> CountryView {
+    static func build(container: AppDIContainer) -> CountryView {
         let viewModel = CountryViewModel(
             service: CountryServiceImpl(
                 repository: CountryRepositoryImpl(

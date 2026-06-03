@@ -135,9 +135,9 @@ Rules:
 
 * ViewModels must be platform-independent where possible
 * Avoid UIKit/SwiftUI dependencies inside ViewModels
-* Expose immutable state via `@Published private(set)` on state properties
+* Expose immutable state via `private(set) var` on state properties (with `@Observable` managing observation)
 * Avoid massive ViewModels
-* All ViewModels MUST be `@MainActor final class: ObservableObject`
+* All ViewModels MUST be `@MainActor @Observable final class` (use the `@Observable` macro instead of `ObservableObject` + `@Published`)
 * Error state uses a typed `errorMessage: String?` (never expose `Error` directly)
 * Use `AppLogger.viewModel` for all ViewModel-level logging
 
@@ -160,7 +160,7 @@ func setErrorForSnapshot(_ message: String?) {
 }
 ```
 
-These are placed in a `// MARK: - Test Helpers` section and MUST NOT expose setters on `@Published` properties directly.
+These are placed in a `// MARK: - Test Helpers` section and MUST NOT expose setters on `@Observable` properties directly.
 
 ---
 
@@ -239,7 +239,7 @@ Key conventions:
 * Services hold business logic and take repositories via constructor injection
 * ViewModels receive services via constructor injection (no direct repository access)
 * Views receive ViewModel and Theme via init parameters
-* Builders assemble features: `static func build(container:) -> SomeView`
+* Builders assemble features: `static func build() -> some View` (use `@Environment(AppDIContainer.self)` internally)
 * All Core cross-cutting concerns live in `Core/`: logging, networking, storage, design, DI, navigation
 * Test files mirror the source structure under `Tests/`
 * Snapshot tests live in `Tests/SnapshotTests/`
@@ -264,16 +264,16 @@ Key conventions:
 
 Use:
 
-* @State
-* @Binding
-* @StateObject
-* @ObservedObject
-* @EnvironmentObject only when truly necessary
+* `@State` for owned `@Observable` instances
+* `@Environment(Type.self)` for injected `@Observable` instances
+* `@Binding`
+* `@State` for value types
+* `@Bindable` for creating bindings to `@Observable` types in child views
 
 Rules:
 
-* Use @StateObject only for owned lifecycle
-* Use @ObservedObject for injected dependencies
+* Use `@State` + `@Observable` instead of `@StateObject` + `ObservableObject`
+* Use `@Environment(Router.self)` instead of `@EnvironmentObject`
 * Avoid deeply nested state propagation
 * Avoid duplicate sources of truth
 
@@ -358,7 +358,7 @@ init(repository: UserRepositoryProtocol)
 For feature module assembly, use static builder methods that accept `AppDIContainer`:
 
 ```swift
-static func build(container: AppDIContainer = AppDIContainer()) -> SomeView
+static func build() -> some View
 ```
 
 Avoid:
@@ -507,7 +507,7 @@ let record: SnapshotTestingConfiguration.Record = .never // .all to re-record
 func test_todoView_withData() {
     let vm = TodoViewModel(...)
     vm.setItemsForSnapshot([...])
-    let view = TodoView(viewModel: vm, theme: AppTheme.light)
+    let view = TodoView(viewModel: vm)
     assertSnapshot(of: view, as: ...)
 }
 ```

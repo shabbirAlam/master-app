@@ -9,8 +9,8 @@ final class HomeViewSnapshotTests: XCTestCase {
 
     func test_homeView_snapshot() {
         let view = DashboardView()
-            .environmentObject(Router())
-            .environment(\.appContainer, AppDIContainer())
+            .environment(Router())
+            .environment(AppDIContainer())
 
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds

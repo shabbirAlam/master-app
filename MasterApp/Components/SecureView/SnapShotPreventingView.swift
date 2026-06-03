@@ -33,7 +33,7 @@ struct SnapShotPreventingView<Content: View>: View {
                 }
             }
             .onReceive(screenshotPublisher) { _ in
-                AppLogger.log("Screenshot attempt detected", level: .notice)
+                AppLogger.secure.log("Screenshot attempt detected", .notice)
             }
     }
 }

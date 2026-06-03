@@ -1,30 +1,48 @@
-import Foundation
 import OSLog
 
 enum AppLogger {
     private static let subsystem = Bundle.main.bundleIdentifier ?? "com.masterapp"
-    private static let logger = Logger(subsystem: subsystem, category: "AppLogger")
 
-    enum LogLevel {
-        case debug, error, info, warning, notice, critical
-    }
+    enum Level {
+        case debug
+        case info
+        case notice
+        case warning
+        case error
+        case critical
 
-    static func log(_ message: String, level: LogLevel = .debug) {
-#if DEBUG
-        switch level {
-        case .debug:
-            logger.debug("\(message, privacy: .private)")
-        case .error:
-            logger.error("\(message, privacy: .private)")
-        case .info:
-            logger.info("\(message, privacy: .private)")
-        case .warning:
-            logger.warning("\(message, privacy: .private)")
-        case .notice:
-            logger.notice("\(message, privacy: .private)")
-        case .critical:
-            logger.critical("\(message, privacy: .private)")
+        fileprivate var osLogType: OSLogType {
+            switch self {
+            case .debug: .debug
+            case .info: .info
+            case .notice: .default
+            case .warning: .error
+            case .error: .error
+            case .critical: .fault
+            }
         }
-#endif // DEBUG
     }
+
+    struct Category {
+        private let logger: Logger
+
+        fileprivate init(category: String) {
+            self.logger = Logger(subsystem: AppLogger.subsystem, category: category)
+        }
+
+        func log(_ message: String, _ level: Level = .debug) {
+#if DEBUG
+            logger.log(level: level.osLogType, "\(message, privacy: .public)")
+#endif
+        }
+    }
+
+    static let network = Category(category: "Network")
+    static let repository = Category(category: "Repository")
+    static let service = Category(category: "Service")
+    static let viewModel = Category(category: "ViewModel")
+    static let view = Category(category: "View")
+    static let auth = Category(category: "Auth")
+    static let secure = Category(category: "Secure")
+    static let app = Category(category: "App")
 }

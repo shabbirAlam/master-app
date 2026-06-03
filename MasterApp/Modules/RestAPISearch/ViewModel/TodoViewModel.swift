@@ -1,12 +1,13 @@
-import Combine
 import Foundation
+import Observation
 
 @MainActor
-final class TodoViewModel: ObservableObject {
-    @Published private(set) var items: [Todo] = []
-    @Published var searchedText = ""
-    @Published private(set) var errorMessage: String?
-    @Published private(set) var isLoading = false
+@Observable
+final class TodoViewModel {
+    private(set) var items: [Todo] = []
+    var searchedText = ""
+    private(set) var errorMessage: String?
+    private(set) var isLoading = false
 
     private let service: TodoService
     private var allItems: [Todo] = []
@@ -34,12 +35,12 @@ final class TodoViewModel: ObservableObject {
         } catch is CancellationError {
             return
         } catch let error as NetworkError {
-            AppLogger.log("Todo fetch network error: \(error.errorDescription ?? "")", level: .error)
+            AppLogger.viewModel.log("Todo fetch network error: \(error.errorDescription ?? "")", .error)
             allItems = []
             items = []
             errorMessage = error.errorDescription
         } catch {
-            AppLogger.log("Todo fetch unknown error: \(error.localizedDescription)", level: .error)
+            AppLogger.viewModel.log("Todo fetch unknown error: \(error.localizedDescription)", .error)
             allItems = []
             items = []
             errorMessage = error.localizedDescription
@@ -51,8 +52,6 @@ final class TodoViewModel: ObservableObject {
     }
 
     // MARK: - Test Helpers
-    // These methods exist for snapshot tests and previews only. Production code
-    // should drive state through `fetchTodos()` and `filterSearch()`.
 
     func setItemsForSnapshot(_ items: [Todo]) {
         self.allItems = items

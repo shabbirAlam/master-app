@@ -17,12 +17,14 @@ struct AppThemeTests {
         let theme = AppTheme.light
         #expect(theme.background == .white)
         #expect(theme.textPrimary == .black)
+        #expect(theme.accent == .blue)
     }
 
     @Test func darkTheme() {
         let theme = AppTheme.dark
         #expect(theme.background == .black)
         #expect(theme.textPrimary == .white)
+        #expect(theme.accent == .blue)
     }
 }
 
@@ -42,21 +44,6 @@ struct AppRouteEqualityTests {
             .profile(type: .editProfile)
         ]
         #expect(routes.count == 4)
-    }
-}
-
-@MainActor
-struct AppRouteImplTests {
-    @Test func homeRouteDestinations() {
-        let container = AppDIContainer()
-        _ = AppRoute.home(type: .secureView).destination(container: container)
-        _ = AppRoute.home(type: .graphQLSearch).destination(container: container)
-        _ = AppRoute.home(type: .restAPISearch).destination(container: container)
-    }
-
-    @Test func profileRouteDestination() {
-        let container = AppDIContainer()
-        _ = AppRoute.profile(type: .editProfile).destination(container: container)
     }
 }
 

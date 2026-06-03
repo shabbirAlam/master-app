@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct CountryView: View {
-    @StateObject private var viewModel: CountryViewModel
+    @State private var viewModel: CountryViewModel
     private let theme: Theme
 
     init(viewModel: CountryViewModel, theme: Theme = AppTheme.light) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
         self.theme = theme
     }
 
@@ -119,7 +119,6 @@ private struct CountryRow: View {
     }
 }
 
-#if DEBUG
 #Preview {
     let mock = PreviewGraphQLNetworkingMock()
     mock.setData([Country(code: "IN", name: "India", capital: "Delhi")])
@@ -129,4 +128,3 @@ private struct CountryRow: View {
         )
     )
 }
-#endif

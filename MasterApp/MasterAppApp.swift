@@ -7,7 +7,7 @@ struct MasterAppApp: App {
     var body: some Scene {
         WindowGroup {
             DashboardView()
-                .environment(\.appContainer, container)
+                .environment(container)
         }
     }
 }

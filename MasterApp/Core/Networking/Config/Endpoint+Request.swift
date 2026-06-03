@@ -21,10 +21,10 @@ extension Endpoint {
             do {
                 request.httpBody = try encoder.encode(body)
             } catch let error as EncodingError {
-                AppLogger.log("Encoding error: \(error.localizedDescription)", level: .error)
+                AppLogger.network.log("Encoding error: \(error.localizedDescription)", .error)
                 throw NetworkError.encodingError
             } catch {
-                AppLogger.log("Unknown encoding error: \(error.localizedDescription)", level: .error)
+                AppLogger.network.log("Unknown encoding error: \(error.localizedDescription)", .error)
                 throw NetworkError.encodingError
             }
         }

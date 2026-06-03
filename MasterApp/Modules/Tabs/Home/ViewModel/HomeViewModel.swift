@@ -1,9 +1,10 @@
-import Combine
 import Foundation
+import Observation
 
 @MainActor
-final class HomeViewModel: ObservableObject {
-    @Published private(set) var items: [HomeFeatures]
+@Observable
+final class HomeViewModel {
+    private(set) var items: [HomeFeatures]
     let theme: Theme
 
     init(features: [HomeFeatures] = HomeFeatures.allCases, theme: Theme = AppTheme.light) {

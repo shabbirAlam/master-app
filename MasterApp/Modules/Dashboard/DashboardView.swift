@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @StateObject private var router = Router()
-    @Environment(\.appContainer) private var container
+    @Environment(AppDIContainer.self) private var container
+    @State private var router = Router()
 
     @State private var selectedTab = 0
 
@@ -28,11 +28,12 @@ struct DashboardView: View {
                 route.destination(container: container)
             }
         }
-        .environmentObject(router)
+        .environment(router)
     }
 }
 
 #Preview {
+    let container = AppDIContainer()
     DashboardView()
-        .environment(\.appContainer, AppDIContainer())
+        .environment(container)
 }

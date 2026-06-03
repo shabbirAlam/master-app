@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum TodoBuilder {
-    static func build(container: AppDIContainer = AppDIContainer()) -> TodoView {
+    static func build(container: AppDIContainer) -> TodoView {
         let viewModel = TodoViewModel(
             service: TodoServiceImpl(
                 repository: TodoRepositoryImpl(

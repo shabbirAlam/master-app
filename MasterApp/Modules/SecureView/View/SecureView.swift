@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct SecureView: View {
-    @StateObject private var viewModel: SecureViewModel
+    @State private var viewModel: SecureViewModel
 
     init(viewModel: SecureViewModel = SecureViewModel()) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     var body: some View {
