@@ -5,10 +5,12 @@ Master App for development help
 * SwiftUI Navigation
 * Networking
 * Themed app
-* Unit testing
-* UI testing
-* Snapshot testing
 * Rest API
 * Graph QL
 * Screenshot and video recording prevention
 *
+
+## Tests
+* Unit testing
+* UI testing
+* Snapshot testing
