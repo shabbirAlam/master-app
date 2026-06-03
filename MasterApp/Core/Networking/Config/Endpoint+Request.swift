@@ -1,5 +1,4 @@
 import Foundation
-import os
 
 extension Endpoint {
     func request(with encoder: JSONEncoder) throws -> URLRequest {
@@ -22,10 +21,10 @@ extension Endpoint {
             do {
                 request.httpBody = try encoder.encode(body)
             } catch let error as EncodingError {
-                AppLogger.network.error("Encoding error: \(error.localizedDescription, privacy: .public)")
+                AppLogger.log("Encoding error: \(error.localizedDescription)", level: .error)
                 throw NetworkError.encodingError
             } catch {
-                AppLogger.network.error("Unknown encoding error: \(error.localizedDescription, privacy: .public)")
+                AppLogger.log("Unknown encoding error: \(error.localizedDescription)", level: .error)
                 throw NetworkError.encodingError
             }
         }

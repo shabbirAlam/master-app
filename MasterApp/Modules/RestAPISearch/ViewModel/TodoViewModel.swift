@@ -1,6 +1,5 @@
 import Combine
 import Foundation
-import os
 
 @MainActor
 final class TodoViewModel: ObservableObject {
@@ -35,12 +34,12 @@ final class TodoViewModel: ObservableObject {
         } catch is CancellationError {
             return
         } catch let error as NetworkError {
-            AppLogger.viewModel.error("Todo fetch network error: \(error.errorDescription ?? "", privacy: .public)")
+            AppLogger.log("Todo fetch network error: \(error.errorDescription ?? "")", level: .error)
             allItems = []
             items = []
             errorMessage = error.errorDescription
         } catch {
-            AppLogger.viewModel.error("Todo fetch unknown error: \(error.localizedDescription, privacy: .public)")
+            AppLogger.log("Todo fetch unknown error: \(error.localizedDescription)", level: .error)
             allItems = []
             items = []
             errorMessage = error.localizedDescription

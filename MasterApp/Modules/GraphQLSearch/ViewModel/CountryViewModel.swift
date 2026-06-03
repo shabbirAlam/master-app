@@ -1,6 +1,5 @@
 import Combine
 import Foundation
-import os
 
 @MainActor
 final class CountryViewModel: ObservableObject {
@@ -26,11 +25,11 @@ final class CountryViewModel: ObservableObject {
         } catch is CancellationError {
             return
         } catch let error as NetworkError {
-            AppLogger.viewModel.error("Country fetch network error: \(error.errorDescription ?? "", privacy: .public)")
+            AppLogger.log("Country fetch network error: \(error.errorDescription ?? "")", level: .error)
             allCountries = []
             errorMessage = error.errorDescription
         } catch {
-            AppLogger.viewModel.error("Country fetch unknown error: \(error.localizedDescription, privacy: .public)")
+            AppLogger.log("Country fetch unknown error: \(error.localizedDescription)", level: .error)
             allCountries = []
             errorMessage = error.localizedDescription
         }

@@ -11,7 +11,7 @@ final class MockURLProtocol: URLProtocol {
     }
 
     static func removeTestURL(_ url: URL) {
-        lock.withLock { _testURLs.removeValue(forKey: url) }
+        lock.withLock { _ = _testURLs.removeValue(forKey: url) }
     }
 
     override class func canInit(with request: URLRequest) -> Bool {

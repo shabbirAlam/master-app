@@ -1,5 +1,4 @@
 import Foundation
-import os
 
 protocol GraphQLNetworking: Sendable {
     func fetch<T: Decodable>(query: String, variables: [String: AnyEncodable]?) async throws -> T
@@ -29,8 +28,8 @@ final class GraphQLNetworkingImpl: GraphQLNetworking, @unchecked Sendable {
         let body = GraphQLRequest(query: query, variables: variables)
         request.httpBody = try JSONEncoder().encode(body)
 
-        AppLogger.network.debug("GraphQL request URL: \(url.absoluteString, privacy: .public)")
-        AppLogger.network.debug("GraphQL query: \(query, privacy: .private)")
+        AppLogger.log("GraphQL request URL: \(url.absoluteString)", level: .debug)
+        AppLogger.log("GraphQL query: \(query)", level: .debug)
 
         let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -38,19 +37,20 @@ final class GraphQLNetworkingImpl: GraphQLNetworking, @unchecked Sendable {
         }
 
         guard 200..<300 ~= httpResponse.statusCode else {
-            AppLogger.network.error("GraphQL bad status code: \(httpResponse.statusCode, privacy: .public)")
+            AppLogger.log("GraphQL bad status code: \(httpResponse.statusCode)", level: .error)
             throw NetworkError.badStatusCode(httpResponse.statusCode)
         }
 
         if let json = String(data: data, encoding: .utf8) {
-            AppLogger.network.debug("GraphQL response: \(json, privacy: .private)")
+            AppLogger.log("GraphQL response: \(json)", level: .debug)
         }
 
         do {
             return try Self.decoder.decode(GraphQLResponse<T>.self, from: data).data
         } catch {
-            AppLogger.network.error("GraphQL decode error: \(error.localizedDescription, privacy: .public)")
+            AppLogger.log("GraphQL decode error: \(error.localizedDescription)", level: .error)
             throw NetworkError.decodingError
         }
     }
 }
+

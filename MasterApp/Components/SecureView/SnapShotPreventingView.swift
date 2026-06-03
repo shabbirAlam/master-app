@@ -1,5 +1,4 @@
 import SwiftUI
-import os
 
 struct SnapShotPreventingView<Content: View>: View {
     var content: Content
@@ -34,7 +33,7 @@ struct SnapShotPreventingView<Content: View>: View {
                 }
             }
             .onReceive(screenshotPublisher) { _ in
-                AppLogger.secure.notice("Screenshot attempt detected")
+                AppLogger.log("Screenshot attempt detected", level: .notice)
             }
     }
 }

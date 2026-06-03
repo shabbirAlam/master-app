@@ -1,5 +1,4 @@
 import Foundation
-import os
 
 // MARK: - Networking
 
@@ -39,12 +38,12 @@ final class NetworkingImpl: Networking, @unchecked Sendable {
 
         let request = try endpoint.request(with: Self.encoder)
 
-        AppLogger.network.debug("Request URL: \(request.url?.absoluteString ?? "nil", privacy: .public)")
-        AppLogger.network.debug("Method: \(request.httpMethod ?? "", privacy: .public)")
+        AppLogger.log("Request URL: \(request.url?.absoluteString ?? "nil")", level: .debug)
+        AppLogger.log("Method: \(request.httpMethod ?? "")", level: .debug)
 
         if let httpBody = request.httpBody,
            let json = String(data: httpBody, encoding: .utf8) {
-            AppLogger.network.debug("Body: \(json, privacy: .private)")
+            AppLogger.log("Body: \(json)", level: .debug)
         }
 
         let (data, response) = try await session.data(for: request)
@@ -54,22 +53,23 @@ final class NetworkingImpl: Networking, @unchecked Sendable {
         }
 
         guard 200..<300 ~= httpResponse.statusCode else {
-            AppLogger.network.error("Bad status code: \(httpResponse.statusCode, privacy: .public)")
+            AppLogger.log("Bad status code: \(httpResponse.statusCode)", level: .error)
             throw NetworkError.badStatusCode(httpResponse.statusCode)
         }
 
         if let json = String(data: data, encoding: .utf8) {
-            AppLogger.network.debug("Response: \(json, privacy: .private)")
+            AppLogger.log("Response: \(json)", level: .debug)
         }
 
         do {
             return try Self.decoder.decode(T.self, from: data)
         } catch let error as DecodingError {
-            AppLogger.network.error("Decoding error: \(error.localizedDescription, privacy: .public)")
+            AppLogger.log("Decoding error: \(error.localizedDescription)", level: .error)
             throw NetworkError.decodingError
         } catch {
-            AppLogger.network.error("Unknown decoding error: \(error.localizedDescription, privacy: .public)")
+            AppLogger.log("Unknown decoding error: \(error.localizedDescription)", level: .error)
             throw NetworkError.decodingError
         }
     }
 }
+

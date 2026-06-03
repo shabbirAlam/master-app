@@ -3,13 +3,28 @@ import OSLog
 
 enum AppLogger {
     private static let subsystem = Bundle.main.bundleIdentifier ?? "com.masterapp"
+    private static let logger = Logger(subsystem: subsystem, category: "AppLogger")
 
-    static let network = Logger(subsystem: subsystem, category: "network")
-    static let repository = Logger(subsystem: subsystem, category: "repository")
-    static let service = Logger(subsystem: subsystem, category: "service")
-    static let viewModel = Logger(subsystem: subsystem, category: "viewmodel")
-    static let view = Logger(subsystem: subsystem, category: "view")
-    static let auth = Logger(subsystem: subsystem, category: "auth")
-    static let secure = Logger(subsystem: subsystem, category: "secure")
-    static let app = Logger(subsystem: subsystem, category: "app")
+    enum LogLevel {
+        case debug, error, info, warning, notice, critical
+    }
+
+    static func log(_ message: String, level: LogLevel = .debug) {
+#if DEBUG
+        switch level {
+        case .debug:
+            logger.debug("\(message, privacy: .private)")
+        case .error:
+            logger.error("\(message, privacy: .private)")
+        case .info:
+            logger.info("\(message, privacy: .private)")
+        case .warning:
+            logger.warning("\(message, privacy: .private)")
+        case .notice:
+            logger.notice("\(message, privacy: .private)")
+        case .critical:
+            logger.critical("\(message, privacy: .private)")
+        }
+#endif // DEBUG
+    }
 }
