@@ -13,14 +13,3 @@ struct MasterAppApp: App {
         }
     }
 }
-
-private struct AppContainerKey: EnvironmentKey {
-    @MainActor static var defaultValue: AppDIContainer = AppDIContainer()
-}
-
-extension EnvironmentValues {
-    var appContainer: AppDIContainer {
-        get { self[AppContainerKey.self] }
-        set { self[AppContainerKey.self] = newValue }
-    }
-}

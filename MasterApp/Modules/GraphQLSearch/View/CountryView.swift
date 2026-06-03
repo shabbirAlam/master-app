@@ -49,7 +49,7 @@ struct CountryView: View {
             )
             .padding(.horizontal)
             .accessibilityIdentifier("country_search")
-            .onChange(of: viewModel.searchedText) { _ in
+            .onChange(of: viewModel.searchedText) {
                 viewModel.filterCountries()
             }
     }

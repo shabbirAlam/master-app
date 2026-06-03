@@ -44,7 +44,7 @@ struct TodoView: View {
             )
             .padding(.horizontal)
             .accessibilityIdentifier("todo_search")
-            .onChange(of: viewModel.searchedText) { _ in
+            .onChange(of: viewModel.searchedText) {
                 viewModel.filterSearch()
             }
     }
