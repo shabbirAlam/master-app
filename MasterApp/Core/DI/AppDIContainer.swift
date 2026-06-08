@@ -3,7 +3,7 @@ import Observation
 
 /// Centralized dependency container for the app.
 /// All Builders resolve dependencies from this container to ensure consistent
-/// configuration and to make tests easier to write and run.
+/// configuration and to make mock and tests easier to write and run.
 @MainActor
 @Observable
 final class AppDIContainer {

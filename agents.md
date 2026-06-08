@@ -117,6 +117,7 @@ Rules:
 * Views must NOT perform networking
 * Views must NOT contain heavy computations
 * Large Views must be decomposed into reusable child views
+* Every View MUST be in its own file — never define multiple top-level Views in a single file
 * Separate reusable views into separate files
 
 ---
