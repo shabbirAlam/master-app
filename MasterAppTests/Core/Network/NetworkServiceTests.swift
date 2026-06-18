@@ -63,7 +63,7 @@ struct NetworkServiceTests {
             headerFields: nil
         )!
 
-        MockURLProtocol.updateTestURL(expectedURL, value: (data, response, nil))
+        MockURLProtocol.set(expectedURL, value: (data, response, nil))
 
         let config = makeMockSession().configuration
         let service = NetworkingImpl(configuration: config)
@@ -73,7 +73,7 @@ struct NetworkServiceTests {
         #expect(result.userId == 1)
         #expect(result.title == "John")
 
-        MockURLProtocol.removeTestURL(expectedURL)
+        MockURLProtocol.remove(expectedURL)
     }
 
     @Test
@@ -88,7 +88,7 @@ struct NetworkServiceTests {
             headerFields: nil
         )!
 
-        MockURLProtocol.updateTestURL(expectedURL, value: (Data(), response, nil))
+        MockURLProtocol.set(expectedURL, value: (Data(), response, nil))
 
         let config = makeMockSession().configuration
         let service = NetworkingImpl(configuration: config)
@@ -107,7 +107,7 @@ struct NetworkServiceTests {
             Issue.record("Unexpected error type: \(error)")
         }
 
-        MockURLProtocol.removeTestURL(expectedURL)
+        MockURLProtocol.remove(expectedURL)
     }
 
     @Test
@@ -122,7 +122,7 @@ struct NetworkServiceTests {
             textEncodingName: nil
         )
 
-        MockURLProtocol.updateTestURL(expectedURL, value: (Data(), fakeResponse, nil))
+        MockURLProtocol.set(expectedURL, value: (Data(), fakeResponse, nil))
 
         let config = makeMockSession().configuration
         let service = NetworkingImpl(configuration: config)
@@ -140,7 +140,7 @@ struct NetworkServiceTests {
         } catch {
             Issue.record("Unexpected error type: \(error)")
         }
-        MockURLProtocol.removeTestURL(expectedURL)
+        MockURLProtocol.remove(expectedURL)
     }
 
     @Test
@@ -159,7 +159,7 @@ struct NetworkServiceTests {
             headerFields: nil
         )!
 
-        MockURLProtocol.updateTestURL(expectedURL, value: (invalidData, response, nil))
+        MockURLProtocol.set(expectedURL, value: (invalidData, response, nil))
 
         let config = makeMockSession().configuration
         let service = NetworkingImpl(configuration: config)
@@ -178,7 +178,7 @@ struct NetworkServiceTests {
             Issue.record("Unexpected error: \(error)")
         }
 
-        MockURLProtocol.removeTestURL(expectedURL)
+        MockURLProtocol.remove(expectedURL)
     }
 
     @Test
@@ -198,7 +198,7 @@ struct NetworkServiceTests {
             headerFields: nil
         )!
 
-        MockURLProtocol.updateTestURL(expectedURL, value: (mockData, response, nil))
+        MockURLProtocol.set(expectedURL, value: (mockData, response, nil))
 
         let config = makeMockSession().configuration
         let service = NetworkingImpl(configuration: config)
@@ -207,7 +207,7 @@ struct NetworkServiceTests {
 
         #expect(result.title == "posted")
 
-        MockURLProtocol.removeTestURL(expectedURL)
+        MockURLProtocol.remove(expectedURL)
     }
 
     @Test
@@ -215,7 +215,7 @@ struct NetworkServiceTests {
         let endpoint = TestEndpoint(baseURL: "https://rest-network-error.com", path: "data")
         let expectedURL = URL(string: "https://rest-network-error.com/data")!
 
-        MockURLProtocol.updateTestURL(expectedURL, value: (nil, nil, URLError(.notConnectedToInternet)))
+        MockURLProtocol.set(expectedURL, value: (nil, nil, URLError(.notConnectedToInternet)))
 
         let config = makeMockSession().configuration
         let service = NetworkingImpl(configuration: config)
@@ -229,6 +229,6 @@ struct NetworkServiceTests {
             Issue.record("Unexpected error: \(error)")
         }
 
-        MockURLProtocol.removeTestURL(expectedURL)
+        MockURLProtocol.remove(expectedURL)
     }
 }

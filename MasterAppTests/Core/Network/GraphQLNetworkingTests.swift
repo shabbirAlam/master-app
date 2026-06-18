@@ -19,7 +19,7 @@ struct GraphQLNetworkingTests {
             headerFields: nil
         )
 
-        MockURLProtocol.updateTestURL(url, value: (responseData, response, nil))
+        MockURLProtocol.set(url, value: (responseData, response, nil))
 
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
@@ -35,7 +35,7 @@ struct GraphQLNetworkingTests {
         #expect(result.countries[0].name == "India")
         #expect(result.countries[0].code == "IN")
 
-        MockURLProtocol.removeTestURL(url)
+        MockURLProtocol.remove(url)
     }
 
     @Test
@@ -49,7 +49,7 @@ struct GraphQLNetworkingTests {
             headerFields: nil
         )
 
-        MockURLProtocol.updateTestURL(url, value: (Data(), response, nil))
+        MockURLProtocol.set(url, value: (Data(), response, nil))
 
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
@@ -73,7 +73,7 @@ struct GraphQLNetworkingTests {
             Issue.record("Unexpected error: \(error)")
         }
 
-        MockURLProtocol.removeTestURL(url)
+        MockURLProtocol.remove(url)
     }
 
     @Test
@@ -91,7 +91,7 @@ struct GraphQLNetworkingTests {
             headerFields: nil
         )
 
-        MockURLProtocol.updateTestURL(url, value: (responseData, response, nil))
+        MockURLProtocol.set(url, value: (responseData, response, nil))
 
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
@@ -106,7 +106,7 @@ struct GraphQLNetworkingTests {
         #expect(result.country.name == "India")
         #expect(result.country.code == "IN")
 
-        MockURLProtocol.removeTestURL(url)
+        MockURLProtocol.remove(url)
     }
 
     @Test
@@ -120,7 +120,7 @@ struct GraphQLNetworkingTests {
             textEncodingName: nil
         )
 
-        MockURLProtocol.updateTestURL(url, value: (Data(), fakeResponse, nil))
+        MockURLProtocol.set(url, value: (Data(), fakeResponse, nil))
 
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
@@ -144,7 +144,7 @@ struct GraphQLNetworkingTests {
             Issue.record("Unexpected error: \(error)")
         }
 
-        MockURLProtocol.removeTestURL(url)
+        MockURLProtocol.remove(url)
     }
 
     @Test
@@ -162,7 +162,7 @@ struct GraphQLNetworkingTests {
             headerFields: nil
         )
 
-        MockURLProtocol.updateTestURL(url, value: (invalidData, response, nil))
+        MockURLProtocol.set(url, value: (invalidData, response, nil))
 
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
@@ -186,6 +186,6 @@ struct GraphQLNetworkingTests {
             Issue.record("Unexpected error: \(error)")
         }
 
-        MockURLProtocol.removeTestURL(url)
+        MockURLProtocol.remove(url)
     }
 }

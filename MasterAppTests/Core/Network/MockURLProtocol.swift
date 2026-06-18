@@ -3,15 +3,16 @@ import os
 
 final class MockURLProtocol: URLProtocol {
 
-    private static let lock = OSAllocatedUnfairLock()
-    private static nonisolated(unsafe) var _testURLs: [URL: (data: Data?, response: URLResponse?, error: Error?)] = [:]
+    private static let testURLs = OSAllocatedUnfairLock(
+        initialState: [URL: (data: Data?, response: URLResponse?, error: Error?)]()
+    )
 
-    static func updateTestURL(_ url: URL, value: (data: Data?, response: URLResponse?, error: Error?)) {
-        lock.withLock { _testURLs[url] = value }
+    static func set(_ url: URL, value: (data: Data?, response: URLResponse?, error: Error?)) {
+        testURLs.withLock { $0[url] = value }
     }
 
-    static func removeTestURL(_ url: URL) {
-        lock.withLock { _ = _testURLs.removeValue(forKey: url) }
+    static func remove(_ url: URL) {
+        testURLs.withLock { _ = $0.removeValue(forKey: url) }
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -28,14 +29,14 @@ final class MockURLProtocol: URLProtocol {
             return
         }
 
-        let (data, response, error) = Self.lock.withLock { Self._testURLs[url] } ?? (nil, nil, nil)
+        let value = Self.testURLs.withLock { $0[url] }
 
-        if let error {
+        if let error = value?.error {
             client?.urlProtocol(self, didFailWithError: error)
             return
         }
 
-        if let response {
+        if let response = value?.response {
             client?.urlProtocol(
                 self,
                 didReceive: response,
@@ -43,7 +44,7 @@ final class MockURLProtocol: URLProtocol {
             )
         }
 
-        if let data {
+        if let data = value?.data {
             client?.urlProtocol(self, didLoad: data)
         }
 
