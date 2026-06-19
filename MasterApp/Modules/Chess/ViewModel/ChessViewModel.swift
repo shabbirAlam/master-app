@@ -137,6 +137,9 @@ final class ChessViewModel {
     func restartGame() {
         resetBoardState()
         statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
+        if case .vsComputer = gameMode, game.currentTurn != userColor {
+            triggerAIMove()
+        }
     }
 
     func resetGame() {
@@ -192,6 +195,10 @@ final class ChessViewModel {
             statusMessage = "Check! \(game.currentTurn.rawValue.capitalized)'s turn"
         } else {
             statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
+        }
+
+        if case .vsComputer = mode, game.currentTurn != userColor {
+            triggerAIMove()
         }
     }
 
