@@ -22,6 +22,8 @@ extension HomeRoute {
             CountryBuilder.build(container: container)
         case .restAPISearch:
             TodoBuilder.build(container: container)
+        case .chess:
+            ChessBuilder.build(container: container)
         }
     }
 }

@@ -1,783 +1,98 @@
-# agents.md
+# Repository Guidelines
 
-# Project Overview
+## Project Overview
+This repository contains a Swift 6 iOS app built with SwiftUI, MVVM, Clean Architecture, async/await, structured concurrency, protocol-oriented design, and test-driven engineering practices. Prioritize long-term maintainability, accessibility, reliability, security, and predictable architecture over short-term implementation speed.
 
-This is a modern enterprise-grade iOS application built using:
+## Project Structure & Module Organization
+Source code lives in `MasterApp/`. Shared cross-cutting code belongs in `MasterApp/Core/`, reusable UI in `MasterApp/Components/`, and feature code in `MasterApp/Modules/<Feature>/`.
 
-* Swift 6
-* SwiftUI
-* MVVM + Clean Architecture
-* SOLID Principles
-* async/await
-* Structured Concurrency
-* Modular architecture
-* Protocol-oriented programming
-* Test-driven engineering practices
-
-Primary engineering goals:
-
-* Scalability
-* Maintainability
-* Performance
-* Reliability
-* Testability
-* Accessibility
-* Security
-* Reusability
-* Predictable architecture consistency
-
-The codebase should always prioritize long-term maintainability over short-term implementation speed.
-
----
-
-# Core Engineering Principles
-
-All generated or modified code MUST:
-
-* follow SOLID principles
-* follow Apple Human Interface Guidelines
-* follow Apple performance best practices
-* remain modular and reusable
-* be production-ready
-* avoid technical debt
-* support future scalability
-* remain highly testable
-* preserve backward compatibility unless explicitly instructed otherwise
-
-Prefer explicit, maintainable, readable code over overly clever implementations.
-
----
-
-# Architecture
-
-## Primary Architecture
-
-Use:
-
-* MVVM
-* Clean Architecture
-* Repository Pattern
-* Dependency Injection via `AppDIContainer`
-* Protocol Abstractions
-
----
-
-## Dependency Injection Pattern
-
-Use a centralized `AppDIContainer` (`@MainActor final class`) that builds the full dependency graph:
-
-```swift
-AppDIContainer
-  ├── Networking (NetworkingImpl)
-  ├── GraphQLNetworking (GraphQLNetworkingImpl)
-  ├── KeyValueStore (InMemoryKeyValueStore)
-  ├── Theme (AppTheme)
-  ├── Repositories (TodoRepositoryImpl, CountryRepositoryImpl)
-  └── Services (TodoServiceImpl, CountryServiceImpl)
-```
-
-Rules:
-* Container is provided via SwiftUI `EnvironmentKey` (`\.appContainer`)
-* Views access dependencies through `@Environment(\.appContainer) var container`
-* Builders (`TodoBuilder`, `CountryBuilder`, `SecureBuilder`) receive `container: AppDIContainer`
-* Never use singletons or global mutable state for DI
-* Container defaults use production implementations for convenience
-
-```swift
-// Environment key setup
-private struct AppContainerKey: EnvironmentKey {
-    static let defaultValue: AppDIContainer = AppDIContainer()
-}
-
-extension EnvironmentValues {
-    var appContainer: AppDIContainer {
-        get { self[AppContainerKey.self] }
-        set { self[AppContainerKey.self] }
-    }
-}
-```
-
----
-
-## Layer Responsibilities
-
-### View
-
-Responsibilities:
-
-* rendering UI
-* bindings
-* user interaction forwarding
-* lightweight state handling only
-
-Rules:
-
-* Views must remain lightweight
-* Views must NOT contain business logic
-* Views must NOT perform networking
-* Views must NOT contain heavy computations
-* Large Views must be decomposed into reusable child views
-* Every View MUST be in its own file — never define multiple top-level Views in a single file
-* Separate reusable views into separate files
-
----
-
-### ViewModel
-
-Responsibilities:
-
-* presentation logic
-* state management
-* orchestration
-* async operations
-* UI-ready transformations
-
-Rules:
-
-* ViewModels must be platform-independent where possible
-* Avoid UIKit/SwiftUI dependencies inside ViewModels
-* Expose immutable state via `private(set) var` on state properties (with `@Observable` managing observation)
-* Avoid massive ViewModels
-* All ViewModels MUST be `@MainActor @Observable final class` (use the `@Observable` macro instead of `ObservableObject` + `@Published`)
-* Error state uses a typed `errorMessage: String?` (never expose `Error` directly)
-* Use `AppLogger.viewModel` for all ViewModel-level logging
-
-### ViewModel Test Helpers
-
-For snapshot testing and SwiftUI previews, add explicit test-helper methods:
-
-```swift
-func setItemsForSnapshot(_ items: [Todo]) {
-    self.allItems = items
-    self.items = items
-}
-
-func setLoadingForSnapshot(_ loading: Bool) {
-    self.isLoading = loading
-}
-
-func setErrorForSnapshot(_ message: String?) {
-    self.errorMessage = message
-}
-```
-
-These are placed in a `// MARK: - Test Helpers` section and MUST NOT expose setters on `@Observable` properties directly.
-
----
-
-### UseCases / Services
-
-Responsibilities:
-
-* business logic
-* orchestration
-* domain rules
-* feature workflows
-
-Rules:
-
-* Business rules must NOT leak into Views
-* Keep domain logic isolated and testable
-
----
-
-### Repository
-
-Responsibilities:
-
-* networking abstraction
-* database abstraction
-* caching abstraction
-* data source coordination
-
-Rules:
-
-* Repositories must be protocol-driven
-* Avoid direct networking calls outside repositories
-* Support mocking for tests
-
----
-
-# Project Structure
-
-Follow this structure strictly:
+Each feature should stay isolated and follow the existing folder pattern:
 
 ```text
-Modules/
-    FeatureA/
-        Model/
-        View/
-        ViewModel/
-        Service/
-        Repository/
-
-Core/
-    Networking/
-        Config/
-        GraphQL/
-    Extensions/
-    Utilities/
-    DesignSystem/
-    DI/
-    Storage/
-    Logging/
-    Navigation/
-
-Components/
-Tests/
-    Core/
-        Network/
-    Modules/
-    SnapshotTests/
-Resources/
+MasterApp/Modules/<Feature>/
+    Model/
+    View/
+    ViewModel/
+    Service/
+    Repository/
 ```
 
-Each feature should remain isolated and modular.
+Tests mirror the app structure in `MasterAppTests/` and `MasterAppUITests/`. Snapshot tests and baselines live in `MasterAppTests/SnapshotTests/` and `MasterAppTests/SnapshotTests/__Snapshots__/`.
 
-Key conventions:
+## Build, Test, and Development Commands
+Use the shared Xcode schemes in `MasterApp.xcodeproj/xcshareddata/xcschemes/`.
 
-* Each feature has its own `Repository/` folder with a protocol and `Impl` class
-* Services hold business logic and take repositories via constructor injection
-* ViewModels receive services via constructor injection (no direct repository access)
-* Views receive ViewModel and Theme via init parameters
-* Builders assemble features: `static func build() -> some View` (use `@Environment(AppDIContainer.self)` internally)
-* All Core cross-cutting concerns live in `Core/`: logging, networking, storage, design, DI, navigation
-* Test files mirror the source structure under `Tests/`
-* Snapshot tests live in `Tests/SnapshotTests/`
+- `xcodebuild -scheme MasterApp -project MasterApp.xcodeproj build` builds the app.
+- `xcodebuild -scheme MasterAppTests -project MasterApp.xcodeproj test` runs unit and snapshot tests.
+- `xcodebuild -scheme MasterAppUITests -project MasterApp.xcodeproj test` runs UI tests.
 
----
+When practical, build first, then run the most relevant test target. Use `MasterApp.xctestplan` for coverage-aware validation.
 
-# SwiftUI Rules
+## Architecture Rules
+Use MVVM + Clean Architecture with Repository and Service layers. Views render UI and forward user actions only. ViewModels own presentation state and orchestration. Services contain business workflows. Repositories coordinate networking, persistence, and data sources.
 
-## General Rules
+Use constructor injection by default. Wire dependencies through `AppDIContainer`; do not introduce singletons or global mutable state. Builders such as `TodoBuilder`, `CountryBuilder`, and feature-specific builders should receive or resolve dependencies from the container and return `some View`.
 
-* Keep body implementations small and composable
-* Prefer composition over inheritance
-* Extract reusable UI components aggressively
-* Prefer immutable data flow
-* Support Dynamic Type
-* Support Dark Mode
-* Support accessibility
+Do not bypass layers. Views must not call networking directly, repositories must not contain UI logic, and business rules must not leak into SwiftUI bodies.
 
----
+## SwiftUI & State Management
+Keep `body` implementations small and composable. Extract reusable subviews into their own files, and keep one primary top-level `View` per file. Support Dynamic Type, Dark Mode, VoiceOver, and accessibility identifiers for UI tests.
 
-## State Management
+Use the Observation framework patterns already present in the app:
 
-Use:
+- `@State` for owned `@Observable` instances and value state.
+- `@Environment(...)` for injected dependencies.
+- `@Binding` for value bindings.
+- `@Bindable` when a child view needs bindings into an `@Observable` type.
 
-* `@State` for owned `@Observable` instances
-* `@Environment(Type.self)` for injected `@Observable` instances
-* `@Binding`
-* `@State` for value types
-* `@Bindable` for creating bindings to `@Observable` types in child views
+Avoid `ObservableObject`, `@Published`, `@StateObject`, and `@EnvironmentObject` for new code unless maintaining older code requires it.
 
-Rules:
+## ViewModel Rules
+All ViewModels should be `@MainActor @Observable final class` types. Expose state as `private(set)` where callers should not mutate it directly. Use typed UI error state such as `errorMessage: String?`; do not expose raw `Error` values to views.
 
-* Use `@State` + `@Observable` instead of `@StateObject` + `ObservableObject`
-* Use `@Environment(Router.self)` instead of `@EnvironmentObject`
-* Avoid deeply nested state propagation
-* Avoid duplicate sources of truth
+ViewModels receive services through initializers and should avoid SwiftUI or UIKit dependencies where possible. Log ViewModel-level events with `AppLogger.viewModel`.
 
----
+For previews and snapshots, add explicit helpers in a `// MARK: - Test Helpers` section, such as `setLoadingForSnapshot(_:)` and `setErrorForSnapshot(_:)`. Do not make state publicly settable only for tests.
 
-## Performance Rules
+## Networking, Errors, and Concurrency
+Networking should use `URLSession`, async/await, `Codable`, typed errors, request cancellation, timeout handling, secure headers, and response validation. Keep networking abstractions under `MasterApp/Core/Networking/` and feature data access inside repositories.
 
-Avoid:
+Use domain-specific errors such as `NetworkError`. Avoid `fatalError()`, `try!`, force unwraps, force casts, and silently swallowed failures. Errors should be actionable for debugging while preserving a recoverable user experience.
 
-* unnecessary re-renders
-* heavy computations inside body
-* excessive AnyView usage
-* deeply nested view hierarchies
-* blocking the main thread
+Long-running operations must support cancellation with `try Task.checkCancellation()` where appropriate. UI updates must occur on the MainActor. Use actors for shared mutable state when needed, and respect Swift 6 strict concurrency.
 
-Prefer:
+## Logging & Security
+Use structured logging through `AppLogger`; never use `print()` in production code. Files using `AppLogger` should import `os` when required by the logging API. Mark interpolated sensitive values as private and avoid logging personally identifiable information.
 
-* LazyVStack
-* LazyHStack
-* EquatableView where appropriate
-* memoized computations when needed
+Never hardcode API keys, tokens, or secrets. Store sensitive data securely, prefer Keychain where appropriate, and use HTTPS-only network flows.
 
----
+## Testing Guidelines
+Use Swift Testing for unit and snapshot tests, and XCTest for UI tests that rely on `XCUIApplication`. New behavior should include focused tests where applicable, especially for ViewModels, services, repositories, async flows, edge cases, and failure handling.
 
-# Swift Concurrency Rules
+ViewModel tests should be `@MainActor`. Prefer protocol mocks with private mutable state. Keep tests deterministic and avoid testing SwiftUI internals directly.
 
-Use:
+For snapshot tests, record intentionally with `.all`, inspect the generated baseline, then commit with `.never`. Snapshot test files should import `Testing`, `SnapshotTesting`, `SwiftUI`, and `@testable import MasterApp`.
 
-* async/await
-* structured concurrency
-* Task
-* actors where appropriate
+## Performance, Memory, and Design System
+Avoid heavy computation in SwiftUI `body`, unnecessary re-renders, excessive `AnyView`, deep view nesting, blocking the main thread, and unnecessary allocations. Prefer lazy containers for large lists and review performance-sensitive changes with Instruments when needed.
 
-Avoid:
+Watch for retain cycles, strong captures in async closures, leaking tasks, and excessive state updates. Reuse design-system primitives from `MasterApp/Core/DesignSystem/` for typography, spacing, colors, buttons, loaders, and error states instead of hardcoding styling.
 
-* callback-based APIs
-* completion-handler pyramids
-* unnecessary DispatchQueue.main.async
-* detached tasks unless absolutely necessary
+## Coding Style & Imports
+Prefer clarity over brevity. Use explicit names, small focused functions, value types where appropriate, and protocol abstractions at module boundaries. Preserve public APIs unless a breaking change is explicitly requested.
 
----
+Typical imports:
 
-## Cancellation
+- Views: `SwiftUI`, plus `os` only when using view logging.
+- ViewModels: `Foundation`, `Observation`, plus `os` when needed.
+- Services, repositories, and networking: `Foundation`, plus `os` when logging.
+- Unit tests: `Testing`, `@testable import MasterApp`, and additional modules only as needed.
+- UI tests: `XCTest`.
 
-Long-running operations MUST support cancellation.
+## Commit & Pull Request Guidelines
+Keep commits focused and avoid unrelated refactors. Recent history uses short imperative messages such as `chess added`, `code refactored`, and `fix multiple window sharing same navigation obj issue`; prefer clearer variants like `Add chess module` or `Fix shared navigation state`.
 
-Always check cancellation for:
+Pull requests should explain what changed, why it changed, and how it was verified. Include screenshots or screen recordings for UI changes. Call out snapshot updates, test-plan changes, migration concerns, and concurrency-sensitive behavior.
 
-* streaming
-* uploads/downloads
-* search
-* polling
-* AI/network requests
-
-Example:
-
-```swift id="ivnl2u"
-try Task.checkCancellation()
-```
-
----
-
-## Thread Safety
-
-* UI updates MUST occur on MainActor
-* Shared mutable state should use actors where appropriate
-* Avoid data races
-* Respect Swift 6 strict concurrency
-
----
-
-# Dependency Injection
-
-Use constructor injection by default.
-
-Example:
-
-```swift
-init(repository: UserRepositoryProtocol)
-```
-
-For feature module assembly, use static builder methods that accept `AppDIContainer`:
-
-```swift
-static func build() -> some View
-```
-
-Avoid:
-
-* hidden dependencies
-* hardcoded singletons
-* global mutable state
-
-The central DI container (`AppDIContainer`) wires all dependencies:
-
-```swift
-let container = AppDIContainer()
-container.todoService   // returns TodoServiceImpl wired with NetworkingImpl
-container.countryService // returns CountryServiceImpl wired with GraphQLNetworkingImpl
-```
-
----
-
-# Networking Standards
-
-Use:
-
-* URLSession
-* async/await
-* Codable
-* typed errors
-* protocol abstractions
-
-Requirements:
-
-* proper error handling
-* retry support where appropriate
-* timeout handling
-* request cancellation
-* secure headers
-* response validation
-
-Avoid:
-
-* force casts
-* loosely typed networking
-* business logic inside networking layer
-
----
-
-# Error Handling
-
-Use:
-
-* typed errors
-* domain-specific errors (e.g., `NetworkError`)
-* recoverable UI states
-
-The app defines a `NetworkError` enum with typed cases:
-
-```swift
-enum NetworkError: LocalizedError, Equatable {
-    case unknown
-    case invalidURL
-    case decodingError
-    case encodingError
-    case invalidResponse
-    case badStatusCode(Int)
-}
-```
-
-Avoid:
-
-```swift
-fatalError()
-try!
-force unwraps
-```
-
-Errors should:
-
-* provide actionable debugging information
-* preserve user experience
-* avoid app crashes
-
----
-
-# Testing Standards
-
-## Coverage Requirements
-
-* Minimum test coverage: 90%
-* All new code MUST include tests where applicable
-
----
-
-## Required Test Types
-
-### Unit Tests
-
-Focus on:
-
-* ViewModels
-* repositories
-* UseCases
-* async flows
-* edge cases
-* failure handling
-
-All ViewModel tests MUST be annotated `@MainActor` and use `@Test` macros from Swift Testing.
-
-Mocks for repository protocols use `@MainActor final class` with private state:
-
-```swift
-@MainActor
-final class MockTodoRepository: TodoRepository {
-    private var mockData: [Todo]?
-    private var mockError: Error?
-    ...
-}
-```
-
----
-
-### UI Tests
-
-Cover:
-
-* navigation flows
-* user journeys
-* accessibility identifiers
-* critical interactions
-
-Use `XCTest` for UI tests (compatibility with XCUIApplication).
-
----
-
-### Snapshot Tests
-
-Use where appropriate for:
-
-* reusable UI components
-* design validation
-* regression prevention
-
-Snapshot tests use `SnapshotTesting` library with Swift Testing and `@MainActor struct`:
-
-```swift
-let record: SnapshotTestingConfiguration.Record = .never // .all to re-record
-
-func test_todoView_withData() {
-    let vm = TodoViewModel(...)
-    vm.setItemsForSnapshot([...])
-    let view = TodoView(viewModel: vm)
-    assertSnapshot(of: view, as: ...)
-}
-```
-
-Use `.never` in committed code and `.all` when intentionally re-recording baselines.
-
----
-
-## Testing Rules
-
-* Tests must be deterministic
-* Avoid flaky async tests
-* Use protocol mocks
-* Prefer isolated testing
-* Avoid testing SwiftUI internals directly
-* All test structs/test classes must be `@MainActor` when ViewModel is `@MainActor`
-
----
-
-# Accessibility
-
-All generated UI must:
-
-* support VoiceOver
-* support Dynamic Type
-* use accessibility labels
-* use accessibility identifiers for UI tests
-* maintain sufficient contrast
-
-Accessibility is NOT optional.
-
----
-
-# Security Rules
-
-Never:
-
-* hardcode API keys
-* expose secrets
-* log sensitive user data
-* store tokens insecurely
-
-Use:
-
-* Keychain
-* secure storage
-* backend token exchange
-* HTTPS only
-
-Sensitive data must never appear in logs.
-
----
-
-# Logging & Analytics
-
-Use structured logging via OSLog (`Logger`).
-
-Never use `print()` in production code.
-
-## AppLogger Usage
-
-Use the categorized `AppLogger` enum:
-
-```swift
-AppLogger.network.error("...")
-AppLogger.repository.info("...")
-AppLogger.service.debug("...")
-AppLogger.viewModel.warning("...")
-AppLogger.view.info("...")
-AppLogger.auth.notice("...")
-AppLogger.secure.notice("...")
-AppLogger.app.error("...")
-```
-
-All files using `AppLogger` must add `import os`.
-
-Use privacy annotations for interpolated values:
-
-```swift
-AppLogger.viewModel.error("Error: \(error.localizedDescription, privacy: .public)")
-```
-
-Logs should:
-
-* be meaningful
-* avoid PII (mark as `privacy: .private` for user data)
-* support debugging
-* support observability
-
----
-
-# Performance Requirements
-
-Always optimize for:
-
-* launch time
-* memory usage
-* scroll performance
-* battery efficiency
-* networking efficiency
-
-Avoid:
-
-* unnecessary allocations
-* retain cycles
-* excessive state updates
-* blocking operations
-
-Use Instruments when performance-sensitive code changes occur.
-
----
-
-# AI Agent Instructions
-
-When generating code:
-
-* preserve architecture consistency
-* preserve modularity
-* avoid unrelated refactors
-* maintain naming consistency
-* generate production-grade code
-* generate testable code
-* prefer reusable abstractions
-* maintain Swift 6 compatibility
-* always use new modern swift syntax
-* preserve public APIs unless explicitly instructed otherwise
-
----
-
-# Import Rules
-
-Always add the correct module imports for each file type:
-
-* **ViewModels**: `import Combine` (for `@Published`), `import os` (for `AppLogger`), `import Foundation`
-* **Views**: `import SwiftUI`, `import os` (if using `AppLogger.view`)
-* **Services**: `import Foundation`, `import os`
-* **Repositories**: `import Foundation`, `import os`
-* **Networking**: `import Foundation`, `import os`
-* **Tests**: `import Testing`, `@testable import MasterApp`; add `import Foundation` if using Data/JSON, `import SwiftUI` if constructing views
-* **Snapshot Tests**: `import Testing`, `import SnapshotTesting`, `import SwiftUI`, `@testable import MasterApp`
-
----
-
-# AI Code Generation Rules
-
-Always:
-
-* generate compile-safe code
-* generate concurrency-safe code
-* generate testable code
-* generate scalable code
-* follow Apple best practices
-* prefer protocol abstractions
-* prefer value types where appropriate
-
-Avoid:
-
-* overengineering
-* unnecessary dependencies
-* giant files
-* force unwraps
-* hidden side effects
-
----
-
-# Post-Implementation Validation
-
-After completing changes ALWAYS:
-
-1. Ensure project compiles successfully
-2. Run impacted tests
-3. Verify no concurrency warnings
-4. Verify no memory leaks introduced
-5. Verify accessibility compatibility
-6. Verify SwiftUI previews compile if applicable
-7. Run application in simulator
-8. Verify new functionality manually
-9. Ensure linting/style consistency
-10. Ensure no unrelated files were modified
-
----
-
-# Git & PR Standards
-
-Commits should:
-
-* remain focused
-* avoid mixing unrelated changes
-* preserve clean git history
-
-Preferred commit style:
-
-```text id="o9plb8"
-Add streaming support for AI chat responses
-Fix actor isolation issue in repository layer
-Refactor payment flow ViewModel into modular components
-```
-
----
-
-# Code Style
-
-* Prefer clarity over brevity
-* One primary type per file
-* Prefer explicit naming
-* Avoid abbreviations
-* Keep functions focused
-* Keep files maintainable in size
-* Avoid deep nesting
-
----
-
-# Design System
-
-Prefer reusable:
-
-* typography
-* spacing
-* colors
-* buttons
-* loaders
-* error states
-
-Avoid hardcoded styling values where possible.
-
----
-
-# Memory Management
-
-Avoid:
-
-* retain cycles
-* strong self captures
-* leaking Tasks
-
-Always review:
-
-* async closures
-* Combine subscriptions
-* Task lifecycles
-
----
-
-# Forbidden Practices
-
-Never:
-
-* use force unwraps in production code
-* introduce hidden side effects
-* add unrelated refactors
-* bypass architecture layers
-* duplicate business logic
-* ignore compiler warnings
-* suppress errors silently
-* add unnecessary dependencies
-
----
-
-# Definition of Done
-
-A feature is NOT complete until:
-
-* code compiles
-* tests pass
-* accessibility validated
-* architecture preserved
-* edge cases handled
-* concurrency safety verified
-* performance considered
-* manual validation completed
-* no major warnings remain
-* code is production-ready
+## Definition of Done
+Before considering work complete, ensure the project compiles, impacted tests pass, accessibility is preserved, architecture boundaries remain intact, cancellation and error paths are handled, concurrency warnings are addressed, and no unrelated files were modified.

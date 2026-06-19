@@ -20,4 +20,5 @@ enum HomeRoute: Hashable {
     case secureView
     case graphQLSearch
     case restAPISearch
+    case chess
 }

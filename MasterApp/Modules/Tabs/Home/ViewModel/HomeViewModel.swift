@@ -17,6 +17,7 @@ final class HomeViewModel {
         case .secureView: return .home(type: .secureView)
         case .graphQLSearch: return .home(type: .graphQLSearch)
         case .restAPISearch: return .home(type: .restAPISearch)
+        case .chess: return .home(type: .chess)
         }
     }
 }

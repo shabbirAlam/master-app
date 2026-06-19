@@ -11,12 +11,14 @@ enum HomeFeatures: CaseIterable {
     case secureView
     case restAPISearch
     case graphQLSearch
+    case chess
     
     var name: String {
         return switch self {
         case .secureView: "Secure View"
         case .restAPISearch: "Rest API Search"
         case .graphQLSearch: "GraphQL Search"
+        case .chess: "Chess"
         }
     }
 }
