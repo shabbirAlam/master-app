@@ -15,10 +15,13 @@ final class ChessViewModel {
     var showPromotionDialog = false
     private(set) var promotionMoves: [Move] = []
     private(set) var isAIThinking = false
+    private(set) var userLastMoveTime: Double?
+    private(set) var computerLastMoveTime: Double?
 
     private let ratingService: ChessRatingService
     private var aiTask: Task<Void, Never>?
     private var hasAppliedRatingUpdate = false
+    private var turnStartTime: Date
 
     init(
         ratingService: ChessRatingService = ChessRatingServiceImpl(
@@ -30,6 +33,7 @@ final class ChessViewModel {
         self.game = GameState()
         self.userRating = profile.userRating
         self.computerRating = profile.computerRating
+        self.turnStartTime = Date()
         self.statusMessage = "Select game mode to start"
     }
 
@@ -46,6 +50,9 @@ final class ChessViewModel {
         validMoves = []
         ratingChangeMessage = nil
         hasAppliedRatingUpdate = false
+        userLastMoveTime = nil
+        computerLastMoveTime = nil
+        turnStartTime = Date()
         statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
         if mode == .vsComputer {
             AppLogger.viewModel.log("Game started in vsComputer mode", .info)
@@ -97,6 +104,9 @@ final class ChessViewModel {
     }
 
     private func executeMove(_ move: Move) {
+        userLastMoveTime = Date().timeIntervalSince(turnStartTime)
+        turnStartTime = Date()
+
         game.applyMove(move)
         selectedPosition = nil
         validMoves = []
@@ -127,6 +137,9 @@ final class ChessViewModel {
         validMoves = []
         ratingChangeMessage = nil
         hasAppliedRatingUpdate = false
+        userLastMoveTime = nil
+        computerLastMoveTime = nil
+        turnStartTime = Date()
         statusMessage = "Select game mode to start"
         gameMode = nil
     }
@@ -138,23 +151,30 @@ final class ChessViewModel {
 
     private func triggerAIMove() {
         aiTask?.cancel()
+        let capturedGame = game
+        let capturedRating = computerRating
         isAIThinking = true
         statusMessage = "Computer (\(computerRating)) is thinking..."
         aiTask = Task { [weak self] in
             do {
-                let aiRating = self?.computerRating ?? ChessRatingProfile.defaultRating
-                try await Task.sleep(nanoseconds: Self.thinkingDelay(for: aiRating))
+                try await Task.sleep(nanoseconds: 50_000_000)
                 guard let self else { return }
                 try Task.checkCancellation()
 
-                let moves = self.game.allLegalMoves(for: .black)
-                guard let bestMove = GameState.selectAIMove(
-                    from: moves,
-                    in: self.game,
-                    rating: self.computerRating
-                ) else { return }
+                let moves = capturedGame.allLegalMoves(for: .black)
+
+                let bestMove = await Task.detached {
+                    GameState.selectAIMove(from: moves, in: capturedGame, rating: capturedRating)
+                }.value
+
                 try Task.checkCancellation()
+                guard let bestMove else {
+                    self.isAIThinking = false
+                    return
+                }
                 self.game.applyMove(bestMove)
+                self.computerLastMoveTime = Date().timeIntervalSince(self.turnStartTime)
+                self.turnStartTime = Date()
                 self.selectedPosition = nil
                 self.validMoves = []
 
@@ -209,20 +229,25 @@ final class ChessViewModel {
         statusMessage = "\(baseMessage) \(ratingMessage)"
     }
 
-    private static func thinkingDelay(for rating: Int) -> UInt64 {
-        switch rating {
-        case ..<700:
-            250_000_000
-        case ..<1200:
-            450_000_000
-        case ..<1600:
-            650_000_000
-        default:
-            850_000_000
-        }
+    // MARK: - Test Helpers
+
+    var userLastMoveTimeString: String? {
+        formatMoveTime(userLastMoveTime)
     }
 
-    // MARK: - Test Helpers
+    var computerLastMoveTimeString: String? {
+        formatMoveTime(computerLastMoveTime)
+    }
+
+    private func formatMoveTime(_ time: Double?) -> String? {
+        guard let t = time else { return nil }
+        if t < 60 {
+            return String(format: "%.1fs", t)
+        }
+        let minutes = Int(t) / 60
+        let seconds = Int(t) % 60
+        return "\(minutes)m \(seconds)s"
+    }
 
     func setGameForSnapshot(_ game: GameState) {
         self.game = game

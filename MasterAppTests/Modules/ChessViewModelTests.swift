@@ -584,6 +584,28 @@ struct ChessViewModelTests {
         #expect(game.piece(at: Position(row: 7, col: 7)) == nil)
     }
 
+    @Test func gameState_nonRookMoveToRookFileDoesNotRemoveCastlingRights() {
+        var game = GameState()
+        game.board = Self.emptyBoard()
+        game.board[7][4] = ChessPiece(type: .king, color: .white)
+        game.board[7][7] = ChessPiece(type: .rook, color: .white)
+        game.board[3][5] = ChessPiece(type: .bishop, color: .white)
+        game.board[0][4] = ChessPiece(type: .king, color: .black)
+        game.currentTurn = .white
+
+        let bishopMove = Move(
+            from: Position(row: 3, col: 5),
+            to: Position(row: 5, col: 7),
+            captured: nil,
+            promotion: nil,
+            isCastling: false,
+            isEnPassant: false
+        )
+        game.applyMove(bishopMove)
+
+        #expect(game.castlingRights[.white]?.kingside == true)
+    }
+
     // MARK: - GameState - Checkmate
 
     @Test func gameState_checkmate() {

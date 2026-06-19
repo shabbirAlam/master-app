@@ -4,7 +4,7 @@ enum PieceColor: String, Equatable, Hashable, CaseIterable, Sendable {
     case white
     case black
 
-    var opponent: PieceColor { self == .white ? .black : .white }
+    nonisolated var opponent: PieceColor { self == .white ? .black : .white }
 }
 
 enum PieceType: String, Equatable, Hashable, CaseIterable, Sendable {
@@ -22,9 +22,13 @@ enum PieceType: String, Equatable, Hashable, CaseIterable, Sendable {
     }
 }
 
-struct ChessPiece: Equatable, Hashable, Sendable {
+struct ChessPiece: Hashable, Sendable {
     let type: PieceType
     let color: PieceColor
+
+    nonisolated static func == (lhs: ChessPiece, rhs: ChessPiece) -> Bool {
+        lhs.type == rhs.type && lhs.color == rhs.color
+    }
 
     var symbol: String {
         switch (color, type) {
@@ -43,7 +47,7 @@ struct ChessPiece: Equatable, Hashable, Sendable {
         }
     }
 
-    var value: Int {
+    nonisolated var value: Int {
         switch type {
         case .pawn:   1
         case .knight: 3
@@ -57,9 +61,13 @@ struct ChessPiece: Equatable, Hashable, Sendable {
     var notationSymbol: String { type.notationSymbol }
 }
 
-struct Position: Equatable, Hashable, Sendable {
+struct Position: Hashable, Sendable {
     let row: Int
     let col: Int
+
+    nonisolated static func == (lhs: Position, rhs: Position) -> Bool {
+        lhs.row == rhs.row && lhs.col == rhs.col
+    }
 
     var algebraic: String {
         let file = String(UnicodeScalar(97 + col)!)
@@ -101,14 +109,14 @@ enum GameStatus: Equatable, Sendable {
     case checkmate(winner: PieceColor)
     case stalemate
 
-    var isGameOver: Bool {
+    nonisolated var isGameOver: Bool {
         switch self {
         case .checkmate, .stalemate: true
         case .playing, .check: false
         }
     }
 
-    var message: String {
+    nonisolated var message: String {
         switch self {
         case .playing: "Playing"
         case .check: "Check!"
@@ -165,16 +173,16 @@ struct GameState: Equatable, Sendable {
         return board
     }
 
-    func piece(at position: Position) -> ChessPiece? {
+    nonisolated func piece(at position: Position) -> ChessPiece? {
         guard (0..<8).contains(position.row), (0..<8).contains(position.col) else { return nil }
         return board[position.row][position.col]
     }
 
-    func isInBounds(_ pos: Position) -> Bool {
+    nonisolated func isInBounds(_ pos: Position) -> Bool {
         (0..<8).contains(pos.row) && (0..<8).contains(pos.col)
     }
 
-    func findKing(_ color: PieceColor) -> Position? {
+    nonisolated func findKing(_ color: PieceColor) -> Position? {
         for row in 0..<8 {
             for col in 0..<8 {
                 if board[row][col] == ChessPiece(type: .king, color: color) {
@@ -185,7 +193,7 @@ struct GameState: Equatable, Sendable {
         return nil
     }
 
-    func isSquareAttacked(_ pos: Position, by color: PieceColor) -> Bool {
+    nonisolated func isSquareAttacked(_ pos: Position, by color: PieceColor) -> Bool {
         let pawnDir: Int = color == .white ? 1 : -1
         for dCol in [-1, 1] {
             let attackerPos = Position(row: pos.row + pawnDir, col: pos.col + dCol)
@@ -245,12 +253,12 @@ struct GameState: Equatable, Sendable {
         return false
     }
 
-    func isInCheck(_ color: PieceColor) -> Bool {
+    nonisolated func isInCheck(_ color: PieceColor) -> Bool {
         guard let kingPos = findKing(color) else { return false }
         return isSquareAttacked(kingPos, by: color.opponent)
     }
 
-    func pseudoLegalMoves(at position: Position) -> [Move] {
+    nonisolated func pseudoLegalMoves(at position: Position) -> [Move] {
         guard let movingPiece = self.piece(at: position), movingPiece.color == currentTurn else { return [] }
         var moves: [Move] = []
 
@@ -415,7 +423,7 @@ struct GameState: Equatable, Sendable {
         return moves
     }
 
-    func legalMoves(at position: Position) -> [Move] {
+    nonisolated func legalMoves(at position: Position) -> [Move] {
         guard let opponentKingPos = findKing(currentTurn.opponent) else { return [] }
         return pseudoLegalMoves(at: position).filter { move in
             guard move.to != opponentKingPos else { return false }
@@ -425,7 +433,7 @@ struct GameState: Equatable, Sendable {
         }
     }
 
-    func allLegalMoves(for color: PieceColor? = nil) -> [Move] {
+    nonisolated func allLegalMoves(for color: PieceColor? = nil) -> [Move] {
         let color = color ?? currentTurn
         var allMoves: [Move] = []
         for row in 0..<8 {
@@ -439,12 +447,12 @@ struct GameState: Equatable, Sendable {
         return allMoves
     }
 
-    mutating func applyMove(_ move: Move) {
+    nonisolated mutating func applyMove(_ move: Move) {
         _applyMoveWithoutStatusUpdate(move)
         updateStatus()
     }
 
-    private mutating func _applyMoveWithoutStatusUpdate(_ move: Move) {
+    private nonisolated mutating func _applyMoveWithoutStatusUpdate(_ move: Move) {
         let piece = board[move.from.row][move.from.col]!
 
         if move.isEnPassant {
@@ -477,17 +485,29 @@ struct GameState: Equatable, Sendable {
             castlingRights[piece.color] = CastlingRights(kingside: false, queenside: false)
         }
         if piece.type == .rook {
-            if move.from.col == 0 { castlingRights[piece.color]?.queenside = false }
-            if move.from.col == 7 { castlingRights[piece.color]?.kingside = false }
-        }
-        if move.to.col == 0 {
-            castlingRights[move.to.row == 0 ? .black : .white]?.queenside = false
-        }
-        if move.to.col == 7 {
-            castlingRights[move.to.row == 0 ? .black : .white]?.kingside = false
+            if move.from == Position(row: piece.color == .white ? 7 : 0, col: 0) {
+                castlingRights[piece.color]?.queenside = false
+            }
+            if move.from == Position(row: piece.color == .white ? 7 : 0, col: 7) {
+                castlingRights[piece.color]?.kingside = false
+            }
         }
 
         if let captured = move.captured {
+            if captured.type == .rook {
+                switch move.to {
+                case Position(row: 7, col: 0):
+                    castlingRights[.white]?.queenside = false
+                case Position(row: 7, col: 7):
+                    castlingRights[.white]?.kingside = false
+                case Position(row: 0, col: 0):
+                    castlingRights[.black]?.queenside = false
+                case Position(row: 0, col: 7):
+                    castlingRights[.black]?.kingside = false
+                default:
+                    break
+                }
+            }
             capturedPieces[piece.color]?.append(captured)
         }
 
@@ -495,7 +515,7 @@ struct GameState: Equatable, Sendable {
         currentTurn = currentTurn.opponent
     }
 
-    mutating func updateStatus() {
+    nonisolated mutating func updateStatus() {
         let allMoves = allLegalMoves(for: currentTurn)
         if allMoves.isEmpty {
             if isInCheck(currentTurn) {
@@ -510,33 +530,68 @@ struct GameState: Equatable, Sendable {
         }
     }
 
-    static func selectAIMove(from moves: [Move], in game: GameState, rating: Int) -> Move? {
+    nonisolated static func selectAIMove(from moves: [Move], in game: GameState, rating: Int) -> Move? {
         guard !moves.isEmpty else { return nil }
 
         let profile = ChessAIProfile(rating: rating)
         let orderedMoves = moves.sorted { lhs, rhs in
-            heuristicScore(for: lhs, in: game) > heuristicScore(for: rhs, in: game)
+            fastMoveOrderScore(for: lhs) > fastMoveOrderScore(for: rhs)
         }
         var scoredMoves: [(Move, Int)] = []
 
-        for move in orderedMoves {
-            var newGame = game
-            newGame.applyMove(move)
-
-            var score = heuristicScore(for: move, in: game)
-            if profile.searchDepth > 1, !newGame.status.isGameOver {
+        if profile.searchDepth > 3 {
+            let quickMoves = orderedMoves.prefix(8)
+            for move in quickMoves {
+                var newGame = game
+                newGame.applyMove(move)
+                var score = heuristicScore(for: move, in: game)
                 score += -negamax(
                     game: newGame,
-                    depth: profile.searchDepth - 1,
+                    depth: min(profile.searchDepth - 2, 2),
                     alpha: -100_000,
                     beta: 100_000,
                     maximizingColor: .black
                 )
-            } else {
-                score += evaluateBoard(newGame, for: .black)
+                scoredMoves.append((move, score))
             }
-
-            scoredMoves.append((move, score))
+            scoredMoves.sort { $0.1 > $1.1 }
+            let candidates = scoredMoves.prefix(profile.candidateCount + 2)
+            scoredMoves = candidates.map { ($0.0, 0) }
+            for i in scoredMoves.indices {
+                var newGame = game
+                newGame.applyMove(scoredMoves[i].0)
+                var score = heuristicScore(for: scoredMoves[i].0, in: game)
+                if !newGame.status.isGameOver {
+                    score += -negamax(
+                        game: newGame,
+                        depth: profile.searchDepth - 1,
+                        alpha: -100_000,
+                        beta: 100_000,
+                        maximizingColor: .black
+                    )
+                } else {
+                    score += evaluateBoard(newGame, for: .black)
+                }
+                scoredMoves[i].1 = score
+            }
+        } else {
+            for move in orderedMoves {
+                var newGame = game
+                newGame.applyMove(move)
+                var score = heuristicScore(for: move, in: game)
+                if profile.searchDepth > 1, !newGame.status.isGameOver {
+                    score += -negamax(
+                        game: newGame,
+                        depth: profile.searchDepth - 1,
+                        alpha: -100_000,
+                        beta: 100_000,
+                        maximizingColor: .black
+                    )
+                } else {
+                    score += evaluateBoard(newGame, for: .black)
+                }
+                scoredMoves.append((move, score))
+            }
         }
 
         scoredMoves.sort { $0.1 > $1.1 }
@@ -554,7 +609,21 @@ struct GameState: Equatable, Sendable {
         return randomizedMoves.max(by: { $0.1 < $1.1 })?.0
     }
 
-    private static func negamax(
+    private nonisolated static func fastMoveOrderScore(for move: Move) -> Int {
+        var score = 0
+        if let captured = move.captured {
+            score += captured.value * 100
+        }
+        if move.promotion != nil {
+            score += 900
+        }
+        if move.isCastling {
+            score += 50
+        }
+        return score
+    }
+
+    private nonisolated static func negamax(
         game: GameState,
         depth: Int,
         alpha: Int,
@@ -575,10 +644,22 @@ struct GameState: Equatable, Sendable {
         var bestScore = -100_000
         var alpha = alpha
         let orderedMoves = moves.sorted { lhs, rhs in
-            heuristicScore(for: lhs, in: game) > heuristicScore(for: rhs, in: game)
+            fastMoveOrderScore(for: lhs) > fastMoveOrderScore(for: rhs)
         }
 
-        for move in orderedMoves {
+        let maxWidth: Int
+        if depth >= 4 {
+            maxWidth = 4
+        } else if depth >= 3 {
+            maxWidth = 6
+        } else if depth >= 2 {
+            maxWidth = 10
+        } else {
+            maxWidth = orderedMoves.count
+        }
+        let limitedMoves = orderedMoves.prefix(maxWidth)
+
+        for move in limitedMoves {
             var nextGame = game
             nextGame.applyMove(move)
             let score = -negamax(
@@ -598,7 +679,7 @@ struct GameState: Equatable, Sendable {
         return bestScore
     }
 
-    private static func terminalOrEvaluationScore(
+    private nonisolated static func terminalOrEvaluationScore(
         for game: GameState,
         maximizingColor: PieceColor
     ) -> Int {
@@ -612,7 +693,7 @@ struct GameState: Equatable, Sendable {
         }
     }
 
-    private static func evaluateBoard(_ game: GameState, for maximizingColor: PieceColor) -> Int {
+    private nonisolated static func evaluateBoard(_ game: GameState, for maximizingColor: PieceColor) -> Int {
         var materialScore = 0
         var centerScore = 0
 
@@ -640,7 +721,7 @@ struct GameState: Equatable, Sendable {
         return materialScore + centerScore + mobilityScore + checkBonus
     }
 
-    private static func heuristicScore(for move: Move, in game: GameState) -> Int {
+    private nonisolated static func heuristicScore(for move: Move, in game: GameState) -> Int {
         var score = 0
 
         if let captured = move.captured {
@@ -677,7 +758,7 @@ private struct ChessAIProfile {
     let candidateCount: Int
     let randomness: Int
 
-    init(rating: Int) {
+    nonisolated init(rating: Int) {
         switch rating {
         case ..<700:
             self.searchDepth = 1
@@ -695,8 +776,20 @@ private struct ChessAIProfile {
             self.searchDepth = 2
             self.candidateCount = 2
             self.randomness = 35
-        default:
+        case ..<1800:
             self.searchDepth = 3
+            self.candidateCount = 2
+            self.randomness = 0
+        case ..<2000:
+            self.searchDepth = 3
+            self.candidateCount = 1
+            self.randomness = 0
+        case ..<2200:
+            self.searchDepth = 3
+            self.candidateCount = 1
+            self.randomness = 0
+        default:
+            self.searchDepth = 4
             self.candidateCount = 1
             self.randomness = 0
         }

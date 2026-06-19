@@ -119,6 +119,7 @@ struct ChessView: View {
             boardView
             capturedRow(.black)
             moveHistoryRow
+            userTimeRow
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -142,9 +143,15 @@ struct ChessView: View {
     private var statusBar: some View {
         VStack(spacing: 6) {
             if viewModel.gameMode == .vsComputer {
-                HStack(spacing: 12) {
+                HStack(spacing: 16) {
                     Text("You: \(viewModel.userRating)")
-                    Text("PC: \(viewModel.computerRating)")
+                    HStack(spacing: 4) {
+                        Text("PC: \(viewModel.computerRating)")
+                        if let time = viewModel.computerLastMoveTimeString {
+                            Text("(\(time))")
+                                .monospacedDigit()
+                        }
+                    }
                 }
                 .font(.caption)
                 .foregroundColor(theme.textPrimary.opacity(0.7))
@@ -282,6 +289,28 @@ struct ChessView: View {
             .padding(.vertical, 4)
         }
         .frame(height: 30)
+    }
+
+    private var userTimeRow: some View {
+        HStack {
+            if viewModel.gameMode == .vsComputer {
+                Text("Your last move: ")
+                    .font(.caption)
+                    .foregroundColor(theme.textPrimary.opacity(0.6))
+                if let time = viewModel.userLastMoveTimeString {
+                    Text(time)
+                        .font(.caption)
+                        .foregroundColor(theme.textPrimary)
+                        .monospacedDigit()
+                } else {
+                    Text("--")
+                        .font(.caption)
+                        .foregroundColor(theme.textPrimary.opacity(0.4))
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 4)
     }
 
     @ViewBuilder
