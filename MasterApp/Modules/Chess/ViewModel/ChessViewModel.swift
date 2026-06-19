@@ -6,6 +6,7 @@ import Observation
 final class ChessViewModel {
     private(set) var game: GameState
     private(set) var gameMode: GameMode?
+    private(set) var userColor: PieceColor = .white
     private(set) var selectedPosition: Position?
     private(set) var validMoves: [Position] = []
     private(set) var statusMessage: String = "Welcome"
@@ -43,7 +44,8 @@ final class ChessViewModel {
         }
     }
 
-    func setGameMode(_ mode: GameMode) {
+    func setGameMode(_ mode: GameMode, with color: PieceColor = .white) {
+        userColor = color
         gameMode = mode
         game = GameState()
         selectedPosition = nil
@@ -54,8 +56,11 @@ final class ChessViewModel {
         computerLastMoveTime = nil
         turnStartTime = Date()
         statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
-        if mode == .vsComputer {
+        if case .vsComputer = mode {
             AppLogger.viewModel.log("Game started in vsComputer mode", .info)
+            if game.currentTurn != userColor {
+                triggerAIMove()
+            }
         } else {
             AppLogger.viewModel.log("Game started in twoPlayer mode", .info)
         }
@@ -64,7 +69,7 @@ final class ChessViewModel {
     func selectSquare(at position: Position) {
         guard let mode = gameMode else { return }
         guard !game.status.isGameOver else { return }
-        if mode == .vsComputer && game.currentTurn == .black { return }
+        if case .vsComputer = mode, game.currentTurn != userColor { return }
         guard !isAIThinking else { return }
 
         if selectedPosition == position {
@@ -123,12 +128,23 @@ final class ChessViewModel {
             statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
         }
 
-        if gameMode == .vsComputer && game.currentTurn == .black {
+        if case .vsComputer = gameMode, game.currentTurn != userColor {
             triggerAIMove()
         }
     }
 
+    func restartGame() {
+        resetBoardState()
+        statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
+    }
+
     func resetGame() {
+        resetBoardState()
+        statusMessage = "Select game mode to start"
+        gameMode = nil
+    }
+
+    private func resetBoardState() {
         aiTask?.cancel()
         aiTask = nil
         isAIThinking = false
@@ -140,8 +156,6 @@ final class ChessViewModel {
         userLastMoveTime = nil
         computerLastMoveTime = nil
         turnStartTime = Date()
-        statusMessage = "Select game mode to start"
-        gameMode = nil
     }
 
     func updateComputerRating(_ rating: Int) {
@@ -153,6 +167,7 @@ final class ChessViewModel {
         aiTask?.cancel()
         let capturedGame = game
         let capturedRating = computerRating
+        let computerColor = userColor.opponent
         isAIThinking = true
         statusMessage = "Computer (\(computerRating)) is thinking..."
         aiTask = Task { [weak self] in
@@ -161,10 +176,10 @@ final class ChessViewModel {
                 guard let self else { return }
                 try Task.checkCancellation()
 
-                let moves = capturedGame.allLegalMoves(for: .black)
+                let moves = capturedGame.allLegalMoves(for: computerColor)
 
                 let bestMove = await Task.detached {
-                    GameState.selectAIMove(from: moves, in: capturedGame, rating: capturedRating)
+                    ChessAIEngine.selectAIMove(from: moves, in: capturedGame, rating: capturedRating, for: computerColor)
                 }.value
 
                 try Task.checkCancellation()
@@ -200,7 +215,7 @@ final class ChessViewModel {
 
     private func finalizeCompletedGameIfNeeded() {
         let baseMessage = game.status.message
-        guard gameMode == .vsComputer, !hasAppliedRatingUpdate else {
+        guard case .vsComputer = gameMode, !hasAppliedRatingUpdate else {
             statusMessage = baseMessage
             return
         }
@@ -208,7 +223,7 @@ final class ChessViewModel {
         let outcome: ChessMatchOutcome
         switch game.status {
         case .checkmate(let winner):
-            outcome = winner == .white ? .win : .loss
+            outcome = winner == userColor ? .win : .loss
         case .stalemate:
             outcome = .draw
         case .playing, .check:

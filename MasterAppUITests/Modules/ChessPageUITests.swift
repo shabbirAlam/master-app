@@ -76,9 +76,10 @@ final class ChessPageUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Chess"].waitForExistence(timeout: 2))
         app.buttons["chess_two_player"].firstMatch.tap()
 
-        let menuButton = app.buttons["chess_back_menu"].firstMatch
+        let menuButton = app.buttons["chess_menu_button"].firstMatch
         XCTAssertTrue(menuButton.waitForExistence(timeout: 1))
         menuButton.tap()
+        app.buttons["Menu"].firstMatch.tap()
 
         // Should see mode selection again
         let vsComputer = app.buttons["chess_vs_computer"].firstMatch
@@ -90,9 +91,10 @@ final class ChessPageUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Chess"].waitForExistence(timeout: 2))
         app.buttons["chess_two_player"].firstMatch.tap()
 
-        let newGameButton = app.buttons["chess_new_game"].firstMatch
-        XCTAssertTrue(newGameButton.waitForExistence(timeout: 1))
-        newGameButton.tap()
+        let menuButton = app.buttons["chess_menu_button"].firstMatch
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 1))
+        menuButton.tap()
+        app.buttons["Restart"].firstMatch.tap()
 
         // Board should still be visible (game mode still .twoPlayer)
         let statusLabel = app.staticTexts["chess_status"].firstMatch

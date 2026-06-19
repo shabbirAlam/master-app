@@ -2,7 +2,30 @@ import SwiftUI
 
 struct ChessView: View {
     @State private var viewModel: ChessViewModel
+    @State private var pendingAction: ChessMenuAction?
+    @State private var selectedColor: PieceColor = .white
+    @State private var isAutoAnimating = false
+    @State private var autoDisplayColor: PieceColor = .white
     private let theme: Theme
+
+    private enum ChessMenuAction: Identifiable {
+        case restart, close
+        var id: Self { self }
+
+        var title: String {
+            switch self {
+            case .restart: "Restart Game"
+            case .close: "Close Game"
+            }
+        }
+
+        var message: String {
+            switch self {
+            case .restart: "Are you sure you want to restart? Current progress will be lost."
+            case .close: "Are you sure you want to close? Current progress will be lost."
+            }
+        }
+    }
 
     private let boardSize: CGFloat
     private let squareSize: CGFloat
@@ -15,6 +38,10 @@ struct ChessView: View {
         self.squareSize = (screenWidth - 32) / 8
     }
 
+    private var needsConfirmation: Bool {
+        !viewModel.game.moveHistory.isEmpty && !viewModel.game.status.isGameOver
+    }
+
     var body: some View {
         ZStack {
             theme.background.ignoresSafeArea()
@@ -22,6 +49,53 @@ struct ChessView: View {
         }
         .navigationTitle("Chess")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(viewModel.gameMode != nil)
+        .toolbar {
+            if viewModel.gameMode != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button("Restart") {
+                            if needsConfirmation {
+                                pendingAction = .restart
+                            } else {
+                                viewModel.restartGame()
+                            }
+                        }
+                        Button("Close") {
+                            if needsConfirmation {
+                                pendingAction = .close
+                            } else {
+                                viewModel.backToMenu()
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityIdentifier("chess_menu_button")
+                }
+            }
+        }
+        .alert(
+            pendingAction?.title ?? "",
+            isPresented: .init(
+                get: { pendingAction != nil },
+                set: { if !$0 { pendingAction = nil } }
+            ),
+            presenting: pendingAction
+        ) { action in
+            Button("Cancel", role: .cancel) {
+                pendingAction = nil
+            }
+            Button("OK") {
+                switch action {
+                case .restart: viewModel.restartGame()
+                case .close: viewModel.backToMenu()
+                }
+                pendingAction = nil
+            }
+        } message: { action in
+            Text(action.message)
+        }
     }
 
     @ViewBuilder
@@ -45,9 +119,42 @@ struct ChessView: View {
 
             ratingSetupView
 
+            VStack(spacing: 12) {
+                Text("Your Color")
+                    .font(.headline)
+                    .foregroundColor(theme.textPrimary)
+
+                HStack(spacing: 12) {
+                    colorButton(.white, label: "White", icon: "♔")
+                    colorButton(.black, label: "Black", icon: "♚")
+                    Button {
+                        startAutoAnimation()
+                    } label: {
+                        VStack(spacing: 4) {
+                            Text("⚡")
+                                .font(.title)
+                            Text(isAutoAnimating ? "..." : "Auto")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(isAutoAnimating ? Color.orange.opacity(0.25) : Color.purple.opacity(0.15))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isAutoAnimating ? Color.orange : Color.purple, lineWidth: 2)
+                        )
+                    }
+                    .disabled(isAutoAnimating)
+                    .accessibilityIdentifier("chess_color_auto")
+                }
+            }
+            .padding(.horizontal, 40)
+
             VStack(spacing: 16) {
                 Button {
-                    viewModel.setGameMode(.vsComputer)
+                    viewModel.setGameMode(.vsComputer, with: selectedColor)
                 } label: {
                     HStack {
                         Image(systemName: "cpu")
@@ -63,7 +170,7 @@ struct ChessView: View {
                 .accessibilityIdentifier("chess_vs_computer")
 
                 Button {
-                    viewModel.setGameMode(.twoPlayer)
+                    viewModel.setGameMode(.twoPlayer, with: selectedColor)
                 } label: {
                     HStack {
                         Image(systemName: "person.2")
@@ -113,11 +220,16 @@ struct ChessView: View {
 
     private var gameView: some View {
         VStack(spacing: 8) {
-            topBar
             statusBar
-            capturedRow(.white)
-            boardView
-            capturedRow(.black)
+            if viewModel.userColor == .black {
+                capturedRow(.black)
+                boardView
+                capturedRow(.white)
+            } else {
+                capturedRow(.white)
+                boardView
+                capturedRow(.black)
+            }
             moveHistoryRow
             userTimeRow
             Spacer()
@@ -125,24 +237,9 @@ struct ChessView: View {
         .padding(.horizontal, 16)
     }
 
-    private var topBar: some View {
-        HStack {
-            Button("Menu") {
-                viewModel.backToMenu()
-            }
-            .accessibilityIdentifier("chess_back_menu")
-            Spacer()
-            Button("New Game") {
-                viewModel.resetGame()
-            }
-            .accessibilityIdentifier("chess_new_game")
-        }
-        .padding(.vertical, 4)
-    }
-
     private var statusBar: some View {
         VStack(spacing: 6) {
-            if viewModel.gameMode == .vsComputer {
+            if case .vsComputer = viewModel.gameMode {
                 HStack(spacing: 16) {
                     Text("You: \(viewModel.userRating)")
                     HStack(spacing: 4) {
@@ -188,20 +285,25 @@ struct ChessView: View {
         .padding(.horizontal, 4)
     }
 
+    private var boardRows: [Int] {
+        viewModel.userColor == .black ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7]
+    }
+
+    private var columnsReversed: Bool {
+        viewModel.userColor == .black
+    }
+
     private var boardView: some View {
         VStack(spacing: 0) {
-            ForEach(0..<8, id: \.self) { row in
+            ForEach(boardRows, id: \.self) { row in
                 HStack(spacing: 0) {
-                    ForEach(0..<8, id: \.self) { col in
+                    ForEach(0..<8, id: \.self) { i in
+                        let col = columnsReversed ? 7 - i : i
                         squareView(row: row, col: col)
                     }
                 }
             }
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.gray.opacity(0.5), lineWidth: 2)
-        )
         .sheet(isPresented: $viewModel.showPromotionDialog) {
             promotionSheet
         }
@@ -214,6 +316,9 @@ struct ChessView: View {
         let isValidMove = viewModel.validMoves.contains(position)
         let isLastMove = viewModel.game.moveHistory.last.map { $0.to == position || $0.from == position } ?? false
         let piece = viewModel.game.piece(at: position)
+        let bottomRow = boardRows.last
+        let isFileLabel = row == bottomRow
+        let isRankLabel = columnsReversed ? col == 7 : col == 0
 
         return ZStack {
             Rectangle()
@@ -234,6 +339,25 @@ struct ChessView: View {
             if let piece {
                 Text(piece.symbol)
                     .font(.system(size: squareSize * 0.7))
+            }
+
+            if isRankLabel {
+                Text("\(8 - row)")
+                    .font(.system(size: 9))
+                    .foregroundColor(theme.textPrimary.opacity(0.5))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.leading, 2)
+                    .padding(.top, 1)
+            }
+
+            if isFileLabel {
+                let fileChar = String(UnicodeScalar(97 + col)!)
+                Text(fileChar)
+                    .font(.system(size: 9))
+                    .foregroundColor(theme.textPrimary.opacity(0.5))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, 2)
+                    .padding(.bottom, 1)
             }
         }
         .frame(width: squareSize, height: squareSize)
@@ -272,6 +396,54 @@ struct ChessView: View {
         return label
     }
 
+    private func colorButton(_ color: PieceColor, label: String, icon: String) -> some View {
+        let isSelected = isAutoAnimating ? autoDisplayColor == color : selectedColor == color
+        return Button {
+            selectedColor = color
+        } label: {
+            VStack(spacing: 4) {
+                Text(icon)
+                    .font(.title)
+                Text(label)
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(color == .white ? Color.white.opacity(0.3) : Color.black.opacity(0.15))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.accentColor, lineWidth: isSelected ? 2 : 0)
+            )
+        }
+        .disabled(isAutoAnimating)
+        .accessibilityIdentifier("chess_color_\(label.lowercased())")
+    }
+
+    private func startAutoAnimation() {
+        isAutoAnimating = true
+        autoDisplayColor = .white
+
+        let finalColor: PieceColor = Bool.random() ? .white : .black
+        let totalSteps = 10
+        var currentStep = 0
+
+        Timer.scheduledTimer(withTimeInterval: 0.10, repeats: true) { timer in
+            currentStep += 1
+            autoDisplayColor = autoDisplayColor == .white ? .black : .white
+
+            if currentStep >= totalSteps {
+                timer.invalidate()
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    autoDisplayColor = finalColor
+                    selectedColor = finalColor
+                    isAutoAnimating = false
+                }
+            }
+        }
+    }
+
     private var moveHistoryRow: some View {
         ScrollView(.horizontal, showsIndicators: true) {
             HStack(spacing: 4) {
@@ -293,7 +465,7 @@ struct ChessView: View {
 
     private var userTimeRow: some View {
         HStack {
-            if viewModel.gameMode == .vsComputer {
+            if case .vsComputer = viewModel.gameMode {
                 Text("Your last move: ")
                     .font(.caption)
                     .foregroundColor(theme.textPrimary.opacity(0.6))
