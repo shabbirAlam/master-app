@@ -8,6 +8,7 @@ struct GameState: Equatable, Sendable {
     var capturedPieces: [PieceColor: [ChessPiece]]
     var enPassantTarget: Position?
     var castlingRights: [PieceColor: CastlingRights]
+    private(set) var undoStack: [GameState] = []
 
     struct CastlingRights: Equatable, Sendable {
         var kingside: Bool
@@ -317,8 +318,15 @@ struct GameState: Equatable, Sendable {
     }
 
     nonisolated mutating func applyMove(_ move: Move) {
+        undoStack.append(self)
         _applyMoveWithoutStatusUpdate(move)
         updateStatus()
+    }
+
+    nonisolated mutating func undoLastMove() -> Bool {
+        guard let previous = undoStack.popLast() else { return false }
+        self = previous
+        return true
     }
 
     private nonisolated mutating func _applyMoveWithoutStatusUpdate(_ move: Move) {

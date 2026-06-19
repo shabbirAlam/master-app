@@ -125,24 +125,24 @@ struct ChessView: View {
                     .foregroundColor(theme.textPrimary)
 
                 HStack(spacing: 12) {
-                    colorButton(.white, label: "White", icon: "♔")
-                    colorButton(.black, label: "Black", icon: "♚")
+                    colorButton(.white, label: "White", icon: "crown.fill")
+                    colorButton(.black, label: "Black", icon: "crown.fill")
                     Button {
                         startAutoAnimation()
                     } label: {
-                        VStack(spacing: 4) {
-                            Text("⚡")
-                                .font(.title)
+                        VStack(spacing: 3) {
+                            Image(systemName: "bolt.fill")
+                                .font(.system(size: 18, weight: .medium))
                             Text(isAutoAnimating ? "..." : "Auto")
-                                .font(.caption)
+                                .font(.system(size: 10))
                                 .fontWeight(.medium)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, 9)
                         .background(isAutoAnimating ? Color.orange.opacity(0.25) : Color.purple.opacity(0.15))
-                        .cornerRadius(12)
+                        .cornerRadius(10)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: 10)
                                 .stroke(isAutoAnimating ? Color.orange : Color.purple, lineWidth: 2)
                         )
                     }
@@ -150,6 +150,17 @@ struct ChessView: View {
                     .accessibilityIdentifier("chess_color_auto")
                 }
             }
+            .padding(.horizontal, 40)
+
+            Toggle(isOn: $viewModel.undoEnabled) {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.caption)
+                    Text("Undo")
+                        .font(.caption)
+                }
+            }
+            .toggleStyle(.switch)
             .padding(.horizontal, 40)
 
             VStack(spacing: 16) {
@@ -232,6 +243,22 @@ struct ChessView: View {
             }
             moveHistoryRow
             userTimeRow
+            HStack {
+                Spacer()
+                if viewModel.undoEnabled && !viewModel.game.undoStack.isEmpty {
+                    Button {
+                        viewModel.undoLastMove()
+                    } label: {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.system(size: 16))
+                            .padding(10)
+                            .background(Color.gray.opacity(0.15))
+                            .clipShape(Circle())
+                    }
+                    .accessibilityIdentifier("chess_undo_button")
+                }
+            }
+            .padding(.horizontal, 4)
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -401,19 +428,20 @@ struct ChessView: View {
         return Button {
             selectedColor = color
         } label: {
-            VStack(spacing: 4) {
-                Text(icon)
-                    .font(.title)
+            VStack(spacing: 3) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(color == .white ? .white : .black)
                 Text(label)
-                    .font(.caption)
+                    .font(.system(size: 10))
                     .fontWeight(.medium)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(color == .white ? Color.white.opacity(0.3) : Color.black.opacity(0.15))
-            .cornerRadius(12)
+            .padding(.vertical, 9)
+            .background(Color.purple.opacity(0.15))
+            .cornerRadius(10)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 10)
                     .stroke(Color.accentColor, lineWidth: isSelected ? 2 : 0)
             )
         }

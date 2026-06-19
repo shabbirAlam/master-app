@@ -18,6 +18,7 @@ final class ChessViewModel {
     private(set) var isAIThinking = false
     private(set) var userLastMoveTime: Double?
     private(set) var computerLastMoveTime: Double?
+    var undoEnabled = false
 
     private let ratingService: ChessRatingService
     private var aiTask: Task<Void, Never>?
@@ -161,6 +162,37 @@ final class ChessViewModel {
     func updateComputerRating(_ rating: Int) {
         let profile = ratingService.updateComputerRating(rating)
         computerRating = profile.computerRating
+    }
+
+    func undoLastMove() {
+        guard undoEnabled, !game.undoStack.isEmpty else { return }
+        guard let mode = gameMode else { return }
+        aiTask?.cancel()
+        aiTask = nil
+        isAIThinking = false
+
+        if case .vsComputer = mode {
+            if game.undoStack.count >= 2 {
+                _ = game.undoLastMove()
+            }
+        }
+        guard game.undoLastMove() else { return }
+
+        ratingChangeMessage = nil
+        hasAppliedRatingUpdate = false
+        userLastMoveTime = nil
+        computerLastMoveTime = nil
+        selectedPosition = nil
+        validMoves = []
+        turnStartTime = Date()
+
+        if game.status.isGameOver {
+            statusMessage = game.status.message
+        } else if case .check = game.status {
+            statusMessage = "Check! \(game.currentTurn.rawValue.capitalized)'s turn"
+        } else {
+            statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
+        }
     }
 
     private func triggerAIMove() {
