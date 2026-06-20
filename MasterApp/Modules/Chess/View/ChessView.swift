@@ -100,24 +100,10 @@ struct ChessView: View {
 
     @ViewBuilder
     private var content: some View {
-        if viewModel.isGeneratingPuzzle {
-            loadingView
-        } else if viewModel.gameMode == nil {
+        if viewModel.gameMode == nil {
             modeSelectionView
         } else {
             gameView
-        }
-    }
-
-    private var loadingView: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Generating puzzle...")
-                .font(.headline)
-                .foregroundColor(theme.textPrimary.opacity(0.7))
-            Spacer()
         }
     }
 
@@ -209,22 +195,6 @@ struct ChessView: View {
                     .cornerRadius(12)
                 }
                 .accessibilityIdentifier("chess_two_player")
-
-                Button {
-                    viewModel.startPuzzle()
-                } label: {
-                    HStack {
-                        Image(systemName: "puzzlepiece.extension")
-                            .font(.title2)
-                        Text("Puzzle")
-                            .font(.title3)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.orange.opacity(0.15))
-                    .cornerRadius(12)
-                }
-                .accessibilityIdentifier("chess_puzzle")
             }
             .padding(.horizontal, 40)
         }
@@ -272,27 +242,23 @@ struct ChessView: View {
                 capturedRow(.black)
             }
             moveHistoryRow
-            if case .puzzle = viewModel.gameMode {
-                puzzleFooter
-            } else {
-                userTimeRow
-                HStack {
-                    Spacer()
-                    if viewModel.undoEnabled && !viewModel.game.undoStack.isEmpty {
-                        Button {
-                            viewModel.undoLastMove()
-                        } label: {
-                            Image(systemName: "arrow.uturn.backward")
-                                .font(.system(size: 16))
-                                .padding(10)
-                                .background(Color.gray.opacity(0.15))
-                                .clipShape(Circle())
-                        }
-                        .accessibilityIdentifier("chess_undo_button")
+            userTimeRow
+            HStack {
+                Spacer()
+                if viewModel.undoEnabled && !viewModel.game.undoStack.isEmpty {
+                    Button {
+                        viewModel.undoLastMove()
+                    } label: {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.system(size: 16))
+                            .padding(10)
+                            .background(Color.gray.opacity(0.15))
+                            .clipShape(Circle())
                     }
+                    .accessibilityIdentifier("chess_undo_button")
                 }
-                .padding(.horizontal, 4)
             }
+            .padding(.horizontal, 4)
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -315,163 +281,19 @@ struct ChessView: View {
                 .foregroundColor(theme.textPrimary.opacity(0.7))
             }
 
-            if case .puzzle = viewModel.gameMode {
-                VStack(spacing: 6) {
-                    HStack {
-                        Text("You: \(viewModel.userRating)")
-                            .font(.caption)
-                            .foregroundColor(theme.textPrimary.opacity(0.7))
-                        if let puzzleElo = viewModel.currentPuzzleElo {
-                            Text("Puzzle: \(puzzleElo)")
-                                .font(.caption)
-                                .foregroundColor(theme.textPrimary.opacity(0.7))
-                        }
-                        Spacer()
-                    }
-
-                    switch viewModel.puzzleState {
-                    case .success:
-                        Label("Puzzle solved!", systemImage: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.headline)
-                    case .failure:
-                        Text(viewModel.statusMessage)
-                            .foregroundColor(.red)
-                            .font(.headline)
-                    case .playing, .inactive:
-                        HStack {
-                            Circle()
-                                .fill(viewModel.game.currentTurn == .white ? Color.white : Color.black)
-                                .frame(width: 12, height: 12)
-                                .overlay(Circle().stroke(Color.gray, lineWidth: 1))
-                            Text(viewModel.statusMessage)
-                                .font(.headline)
-                                .foregroundColor(theme.textPrimary)
-                        }
-                    }
-                }
-            } else {
-                HStack {
-                    Circle()
-                        .fill(viewModel.game.currentTurn == .white ? Color.white : Color.black)
-                        .frame(width: 12, height: 12)
-                        .overlay(Circle().stroke(Color.gray, lineWidth: 1))
-                    Text(viewModel.statusMessage)
-                        .font(.headline)
-                        .foregroundColor(theme.textPrimary)
-                }
+            HStack {
+                Circle()
+                    .fill(viewModel.game.currentTurn == .white ? Color.white : Color.black)
+                    .frame(width: 12, height: 12)
+                    .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                Text(viewModel.statusMessage)
+                    .font(.headline)
+                    .foregroundColor(theme.textPrimary)
             }
         }
         .padding(.vertical, 4)
         .accessibilityLabel(viewModel.statusMessage)
         .accessibilityIdentifier("chess_status")
-    }
-
-    @ViewBuilder
-    private var puzzleFooter: some View {
-        if viewModel.puzzleState == .success {
-            VStack(spacing: 12) {
-                Toggle(isOn: $viewModel.useRandomPuzzleElo) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "shuffle")
-                            .font(.caption)
-                        Text("Random Difficulty")
-                            .font(.caption)
-                    }
-                }
-                .toggleStyle(.switch)
-
-                Button {
-                    viewModel.nextPuzzle()
-                } label: {
-                    HStack {
-                        Image(systemName: "forward.fill")
-                        Text("Next Puzzle")
-                    }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.orange.opacity(0.2))
-                    .cornerRadius(10)
-                }
-                .accessibilityIdentifier("chess_next_puzzle")
-            }
-        } else if viewModel.puzzleState == .failure {
-            VStack(spacing: 12) {
-                Toggle(isOn: $viewModel.useRandomPuzzleElo) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "shuffle")
-                            .font(.caption)
-                        Text("Random Difficulty")
-                            .font(.caption)
-                    }
-                }
-                .toggleStyle(.switch)
-
-                HStack(spacing: 12) {
-                    Button {
-                        viewModel.retryPuzzle()
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.counterclockwise")
-                            Text("Retry")
-                        }
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.blue.opacity(0.2))
-                        .cornerRadius(10)
-                    }
-                    .accessibilityIdentifier("chess_retry_puzzle")
-
-                    Button {
-                        viewModel.nextPuzzle()
-                    } label: {
-                        HStack {
-                            Image(systemName: "forward.fill")
-                            Text("Next")
-                        }
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.orange.opacity(0.2))
-                        .cornerRadius(10)
-                    }
-                    .accessibilityIdentifier("chess_next_puzzle")
-                }
-            }
-        } else if viewModel.puzzleState == .playing {
-            VStack(spacing: 12) {
-                Toggle(isOn: $viewModel.useRandomPuzzleElo) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "shuffle")
-                            .font(.caption)
-                        Text("Random Difficulty")
-                            .font(.caption)
-                    }
-                }
-                .toggleStyle(.switch)
-
-                HStack {
-                    Button {
-                        viewModel.showHint()
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "lightbulb.fill")
-                            Text("Hint")
-                        }
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.yellow.opacity(0.25))
-                        .cornerRadius(8)
-                    }
-                    .accessibilityIdentifier("chess_hint_button")
-                    Spacer()
-                }
-            }
-        }
     }
 
     private func capturedRow(_ color: PieceColor) -> some View {
@@ -524,12 +346,10 @@ struct ChessView: View {
         let bottomRow = boardRows.last
         let isFileLabel = row == bottomRow
         let isRankLabel = columnsReversed ? col == 7 : col == 0
-        let isHint = viewModel.hintPosition == position
-        let isHintDestination = viewModel.hintDestination == position
 
         return ZStack {
             Rectangle()
-                .fill(squareColor(isLight: isLight, isSelected: isSelected, isValidMove: isValidMove, isLastMove: isLastMove, isHint: isHint))
+                .fill(squareColor(isLight: isLight, isSelected: isSelected, isValidMove: isValidMove, isLastMove: isLastMove))
 
             if isValidMove {
                 if piece != nil {
@@ -541,18 +361,6 @@ struct ChessView: View {
                         .fill(Color.gray.opacity(0.5))
                         .frame(width: squareSize * 0.25, height: squareSize * 0.25)
                 }
-            }
-
-            if isHint {
-                Rectangle()
-                    .stroke(Color.blue, lineWidth: 3)
-                    .padding(2)
-            }
-
-            if isHintDestination {
-                Circle()
-                    .stroke(Color.blue, lineWidth: 3)
-                    .padding(8)
             }
 
             if let piece {
@@ -588,10 +396,7 @@ struct ChessView: View {
         .accessibilityLabel(accessibilityLabel(for: piece, at: position, isSelected: isSelected, isValidMove: isValidMove))
     }
 
-    private func squareColor(isLight: Bool, isSelected: Bool, isValidMove: Bool, isLastMove: Bool, isHint: Bool) -> Color {
-        if isHint {
-            return Color.blue.opacity(0.3)
-        }
+    private func squareColor(isLight: Bool, isSelected: Bool, isValidMove: Bool, isLastMove: Bool) -> Color {
         if isSelected {
             return Color.yellow.opacity(0.6)
         }

@@ -4,7 +4,6 @@ protocol ChessRatingService: Sendable {
     func loadProfile() -> ChessRatingProfile
     func updateComputerRating(_ rating: Int) -> ChessRatingProfile
     func applyMatchOutcome(_ outcome: ChessMatchOutcome) -> ChessRatingProfile
-    func applyPuzzleOutcome(_ outcome: ChessPuzzleOutcome) -> ChessRatingProfile
 }
 
 struct ChessRatingServiceImpl: ChessRatingService {
@@ -39,22 +38,6 @@ struct ChessRatingServiceImpl: ChessRatingService {
         let actualScore = score(for: outcome)
         let delta = Int((kFactor * (actualScore - expectedScore)).rounded())
         profile.userRating = ChessRatingProfile.clamp(profile.userRating + delta)
-        store.saveProfile(profile)
-        return profile
-    }
-
-    func applyPuzzleOutcome(_ outcome: ChessPuzzleOutcome) -> ChessRatingProfile {
-        var profile = store.loadProfile()
-
-        switch outcome {
-        case .solvedWithoutHints:
-            let puzzleKFactor: Double = 10
-            let delta = Int((puzzleKFactor * 1.0).rounded())
-            profile.userRating = ChessRatingProfile.clamp(profile.userRating + delta)
-        case .solvedWithHints, .failed:
-            break
-        }
-
         store.saveProfile(profile)
         return profile
     }

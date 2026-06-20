@@ -19,33 +19,11 @@ final class ChessViewModel {
     private(set) var userLastMoveTime: Double?
     private(set) var computerLastMoveTime: Double?
     var undoEnabled = false
-    private(set) var puzzleState: PuzzleState = .inactive
-    private(set) var puzzleStepIndex = 0
-    private(set) var currentPuzzle: ChessPuzzle?
-    private(set) var hintPosition: Position?
-    private(set) var hintDestination: Position?
-    private(set) var hintLevel: Int = 0 // 0 = none, 1 = source, 2 = dest, 3 = full move
-    private(set) var isGeneratingPuzzle = false
-    var useRandomPuzzleElo = false
-    private(set) var currentPuzzleElo: Int?
-    private(set) var hintUsedInCurrentPuzzle = false
-
-    enum PuzzleState: Equatable {
-        case inactive
-        case playing
-        case success
-        case failure
-    }
 
     private let ratingService: ChessRatingService
     private var aiTask: Task<Void, Never>?
-    private var puzzleTask: Task<Void, Never>?
     private var hasAppliedRatingUpdate = false
     private var turnStartTime: Date
-
-    private func movesMatch(_ a: Move, _ b: Move) -> Bool {
-        a.from == b.from && a.to == b.to && a.promotion == b.promotion
-    }
 
     init(
         ratingService: ChessRatingService = ChessRatingServiceImpl(
@@ -137,68 +115,11 @@ final class ChessViewModel {
 
         game.applyMove(move)
         selectedPosition = nil
-        hintPosition = nil
         validMoves = []
 
         if game.status.isGameOver {
-            if case .puzzle = gameMode {
-                if game.status.isCheckmate(winner: userColor) {
-                    puzzleState = .success
-                    statusMessage = "Puzzle solved! Checkmate!"
-                    finalizePuzzleCompletionIfNeeded()
-                } else {
-                    puzzleState = .failure
-                    statusMessage = game.status.message
-                }
-            } else {
-                finalizeCompletedGameIfNeeded()
-            }
+            finalizeCompletedGameIfNeeded()
             AppLogger.viewModel.log("Game over: \(statusMessage)", .notice)
-            return
-        }
-
-        if case .puzzle = gameMode {
-            guard let puzzle = currentPuzzle else { return }
-
-            guard puzzleStepIndex < puzzle.userMoves.count,
-                  movesMatch(move, puzzle.userMoves[puzzleStepIndex]) else {
-                puzzleState = .failure
-                statusMessage = "Wrong move! Try again."
-                return
-            }
-            puzzleStepIndex += 1
-
-            if game.status.isCheckmate(winner: userColor) ||
-               ChessPuzzleGenerator.materialAdvantage(game, for: userColor) >= 300 {
-                puzzleState = .success
-                statusMessage = "Puzzle solved!"
-                finalizePuzzleCompletionIfNeeded()
-                return
-            }
-
-            if puzzleStepIndex >= puzzle.userMoves.count {
-                puzzleState = .failure
-                statusMessage = "Puzzle failed."
-                return
-            }
-
-            if puzzleStepIndex - 1 < puzzle.aiMoves.count {
-                let aiMove = puzzle.aiMoves[puzzleStepIndex - 1]
-                game.applyMove(aiMove)
-
-                if game.status.isGameOver {
-                    if game.status.isCheckmate(winner: userColor) {
-                        puzzleState = .success
-                        statusMessage = "Puzzle solved! Checkmate!"
-                    } else {
-                        puzzleState = .failure
-                        statusMessage = game.status.message
-                    }
-                    return
-                }
-            }
-
-            statusMessage = "Puzzle step \(puzzleStepIndex)/\(puzzle.userMoves.count)"
             return
         }
 
@@ -223,10 +144,6 @@ final class ChessViewModel {
     }
 
     func restartGame() {
-        if case .puzzle = gameMode {
-            retryPuzzle()
-            return
-        }
         resetBoardState()
         statusMessage = "\(game.currentTurn.rawValue.capitalized)'s turn"
         if gameMode != .twoPlayer, game.currentTurn != userColor {
@@ -236,9 +153,6 @@ final class ChessViewModel {
 
     func resetGame() {
         resetBoardState()
-        puzzleState = .inactive
-        puzzleStepIndex = 0
-        currentPuzzle = nil
         statusMessage = "Select game mode to start"
         gameMode = nil
     }
@@ -246,8 +160,6 @@ final class ChessViewModel {
     private func resetBoardState() {
         aiTask?.cancel()
         aiTask = nil
-        puzzleTask?.cancel()
-        puzzleTask = nil
         isAIThinking = false
         game = GameState()
         selectedPosition = nil
@@ -262,111 +174,6 @@ final class ChessViewModel {
     func updateComputerRating(_ rating: Int) {
         let profile = ratingService.updateComputerRating(rating)
         computerRating = profile.computerRating
-    }
-
-    func startPuzzle() {
-        guard !isGeneratingPuzzle else { return }
-        isGeneratingPuzzle = true
-        aiTask?.cancel()
-        aiTask = nil
-        puzzleTask?.cancel()
-        puzzleTask = nil
-        currentPuzzle = nil
-        game = GameState()
-        isAIThinking = false
-        gameMode = .puzzle
-        puzzleState = .playing
-        puzzleStepIndex = 0
-        hintPosition = nil
-        selectedPosition = nil
-        validMoves = []
-        hintUsedInCurrentPuzzle = false
-        hintLevel = 0
-        statusMessage = "Generating puzzle..."
-
-        let puzzleElo = useRandomPuzzleElo ? generateRandomPuzzleElo() : userRating
-        currentPuzzleElo = puzzleElo
-
-        puzzleTask = Task.detached(priority: .userInitiated) { [weak self] in
-            let puzzle = await MainActor.run {
-                ChessPuzzleGenerator.generate(puzzleRating: puzzleElo)
-            }
-            await MainActor.run { [weak self] in
-                guard let self = self else { return }
-                self.puzzleTask = nil
-                self.isGeneratingPuzzle = false
-                guard !Task.isCancelled else { return }
-
-                self.currentPuzzle = puzzle
-                self.game = puzzle.initialState
-                self.userColor = puzzle.userColor
-                self.ratingChangeMessage = nil
-                self.hasAppliedRatingUpdate = false
-                self.userLastMoveTime = nil
-                self.computerLastMoveTime = nil
-                self.turnStartTime = Date()
-                self.statusMessage = "Puzzle step 0/\(puzzle.userMoves.count)"
-            }
-        }
-    }
-
-    func nextPuzzle() {
-        startPuzzle()
-    }
-
-    func retryPuzzle() {
-        guard let puzzle = currentPuzzle else { startPuzzle(); return }
-        aiTask?.cancel()
-        aiTask = nil
-        isAIThinking = false
-        game = puzzle.initialState
-        selectedPosition = nil
-        validMoves = []
-        ratingChangeMessage = nil
-        hasAppliedRatingUpdate = false
-        userLastMoveTime = nil
-        computerLastMoveTime = nil
-        turnStartTime = Date()
-        puzzleState = .playing
-        puzzleStepIndex = 0
-        hintPosition = nil
-        hintUsedInCurrentPuzzle = false
-        hintLevel = 0
-        statusMessage = "Puzzle step 0/\(puzzle.userMoves.count)"
-    }
-
-    private func generateRandomPuzzleElo() -> Int {
-        let variance = Int.random(in: -400...400)
-        let puzzleElo = userRating + variance
-        return ChessRatingProfile.clamp(puzzleElo)
-    }
-
-    func showHint() {
-        guard let puzzle = currentPuzzle, puzzleState == .playing else { return }
-        guard puzzleStepIndex < puzzle.userMoves.count else { return }
-
-        hintUsedInCurrentPuzzle = true
-
-        // Cycle hint levels 1 -> 2 -> 3. Call again to escalate.
-        hintLevel = min(3, hintLevel + 1)
-        let move = puzzle.userMoves[puzzleStepIndex]
-        switch hintLevel {
-        case 1:
-            hintPosition = move.from
-            hintDestination = nil
-        case 2:
-            hintPosition = move.from
-            hintDestination = move.to
-        case 3:
-            hintPosition = move.from
-            hintDestination = move.to
-        default:
-            hintPosition = nil
-            hintDestination = nil
-        }
-
-        AppLogger.viewModel
-            .log("hint level: \(hintLevel) from: \(move.from.algebraic) to: \(move.to.algebraic)")
     }
 
     func undoLastMove() {
@@ -435,29 +242,10 @@ final class ChessViewModel {
                 self.validMoves = []
 
                 if self.game.status.isGameOver {
-                    if case .puzzle = self.gameMode {
-                        if self.game.status.isCheckmate(winner: self.userColor) {
-                            self.puzzleState = .success
-                            self.statusMessage = "Puzzle solved! Checkmate!"
-                            self.finalizePuzzleCompletionIfNeeded()
-                        } else {
-                            self.puzzleState = .failure
-                            self.statusMessage = self.game.status.message
-                        }
-                    } else {
-                        self.finalizeCompletedGameIfNeeded()
-                    }
+                    self.finalizeCompletedGameIfNeeded()
                 } else if case .check = self.game.status {
                     let turn = self.game.currentTurn.rawValue.capitalized
-                    if case .puzzle = self.gameMode {
-                        let total = self.currentPuzzle?.userMoves.count ?? ChessPuzzleGenerator.maxStep
-                        self.statusMessage = "Puzzle step \(self.puzzleStepIndex)/\(total)"
-                    } else {
-                        self.statusMessage = "Check! \(turn)'s turn"
-                    }
-                } else if case .puzzle = self.gameMode {
-                    let total = self.currentPuzzle?.userMoves.count ?? ChessPuzzleGenerator.maxStep
-                    self.statusMessage = "Puzzle step \(self.puzzleStepIndex)/\(total)"
+                    self.statusMessage = "Check! \(turn)'s turn"
                 } else {
                     self.statusMessage = "\(self.game.currentTurn.rawValue.capitalized)'s turn"
                 }
@@ -505,25 +293,6 @@ final class ChessViewModel {
         statusMessage = "\(baseMessage) \(ratingMessage)"
     }
 
-    private func finalizePuzzleCompletionIfNeeded() {
-        guard case .puzzle = gameMode, !hasAppliedRatingUpdate, puzzleState == .success else {
-            return
-        }
-
-        let outcome: ChessPuzzleOutcome = hintUsedInCurrentPuzzle ? .solvedWithHints : .solvedWithoutHints
-        let previousRating = userRating
-        let updatedProfile = ratingService.applyPuzzleOutcome(outcome)
-        userRating = updatedProfile.userRating
-        hasAppliedRatingUpdate = true
-
-        if outcome == .solvedWithoutHints {
-            let delta = userRating - previousRating
-            let deltaPrefix = delta > 0 ? "+" : ""
-            ratingChangeMessage = "Rating \(deltaPrefix)\(delta)"
-            statusMessage = "\(statusMessage) \(ratingChangeMessage ?? "")"
-        }
-    }
-
     // MARK: - Test Helpers
 
     var userLastMoveTimeString: String? {
@@ -559,21 +328,5 @@ final class ChessViewModel {
     func setRatingsForSnapshot(userRating: Int, computerRating: Int) {
         self.userRating = userRating
         self.computerRating = computerRating
-    }
-
-    /// Test helper: set a full puzzle into the view model for snapshot/testing.
-    func setCurrentPuzzleForSnapshot(_ puzzle: ChessPuzzle) {
-        self.currentPuzzle = puzzle
-        self.game = puzzle.initialState
-        self.userColor = puzzle.userColor
-        self.gameMode = .puzzle
-        self.puzzleState = .playing
-        self.puzzleStepIndex = 0
-        self.hintLevel = 0
-        self.hintPosition = nil
-        self.hintDestination = nil
-        self.hintUsedInCurrentPuzzle = false
-        self.currentPuzzleElo = puzzle.puzzleRating
-        self.statusMessage = "Puzzle step 0/\(puzzle.userMoves.count)"
     }
 }
