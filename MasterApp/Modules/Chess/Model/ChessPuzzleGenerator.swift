@@ -31,7 +31,7 @@ struct ChessPuzzleGenerator {
     /// Generate a puzzle. Pass a puzzleRating to influence candidate generation.
     /// If preferredType is provided the generator will attempt to produce that type.
     static func generate(puzzleRating: Int = 1200, preferredType: PuzzleType? = nil) -> ChessPuzzle {
-        for _ in 0..<80 {
+        for _ in 0..<200 {
             if Task.isCancelled { break }
             let state = randomPosition()
 
@@ -118,7 +118,7 @@ struct ChessPuzzleGenerator {
         let params = generationParameters(for: rating)
         let materialThreshold = params.materialThreshold
 
-        for _ in 0..<maxStep {
+        for stepIndex in 0..<maxStep {
             if Task.isCancelled { return nil }
 
             // Decide goal for this search
@@ -135,7 +135,8 @@ struct ChessPuzzleGenerator {
                 goal: goal,
                 candidateWidth: params.candidateWidth
             ) else {
-                return nil
+                // If we found at least one move, return what we have
+                return userMoves.isEmpty ? nil : (userMoves, aiMoves, .tactical, materialThreshold)
             }
 
             userMoves.append(userMove)
@@ -150,15 +151,18 @@ struct ChessPuzzleGenerator {
                 return nil
             }
 
-            // Tactical success: material advantage reached
+            // Tactical success: material advantage reached - only return if we have 2+ moves
             let currentMaterial = materialAdvantage(currentState, for: userColor)
-            if userMoves.count >= 1, currentMaterial >= materialThreshold, currentMaterial > initialMaterial {
+            if userMoves.count >= 2, currentMaterial >= materialThreshold, currentMaterial > initialMaterial {
                 return (userMoves, aiMoves, .tactical, materialThreshold)
             }
 
             // Choose a deterministic AI reply using a strong engine setting to avoid randomness
             let aiCandidateMoves = currentState.allLegalMoves(for: aiColor)
-            guard !aiCandidateMoves.isEmpty else { return nil }
+            guard !aiCandidateMoves.isEmpty else {
+                // If no AI moves but we have user moves, return what we have
+                return userMoves.isEmpty ? nil : (userMoves, aiMoves, .tactical, materialThreshold)
+            }
 
             guard let aiMove = ChessAIEngine.selectAIMove(
                 from: aiCandidateMoves,
@@ -166,7 +170,7 @@ struct ChessPuzzleGenerator {
                 rating: 1000,
                 for: aiColor
             ) else {
-                return nil
+                return userMoves.isEmpty ? nil : (userMoves, aiMoves, .tactical, materialThreshold)
             }
 
             aiMoves.append(aiMove)
@@ -181,7 +185,8 @@ struct ChessPuzzleGenerator {
             }
         }
 
-        return nil
+        // If we have moves, return them
+        return userMoves.isEmpty ? nil : (userMoves, aiMoves, .tactical, materialThreshold)
     }
 
     private static func findWinningMove(

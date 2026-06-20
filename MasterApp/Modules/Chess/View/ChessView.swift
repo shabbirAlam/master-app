@@ -318,8 +318,11 @@ struct ChessView: View {
             if case .puzzle = viewModel.gameMode {
                 VStack(spacing: 6) {
                     HStack {
-                        if viewModel.useRandomPuzzleElo, let puzzleElo = viewModel.currentPuzzleElo {
-                            Text("Puzzle Difficulty: \(puzzleElo)")
+                        Text("You: \(viewModel.userRating)")
+                            .font(.caption)
+                            .foregroundColor(theme.textPrimary.opacity(0.7))
+                        if let puzzleElo = viewModel.currentPuzzleElo {
+                            Text("Puzzle: \(puzzleElo)")
                                 .font(.caption)
                                 .foregroundColor(theme.textPrimary.opacity(0.7))
                         }
