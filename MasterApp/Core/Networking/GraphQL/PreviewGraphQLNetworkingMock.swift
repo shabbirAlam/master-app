@@ -17,6 +17,10 @@ final class PreviewGraphQLNetworkingMock: GraphQLNetworking, Sendable {
         throw NetworkError.unknown
     }
 
+    func setData(_ data: Data) {
+        mockData = data
+    }
+
     func setData<T: Encodable>(_ data: T) {
         mockData = try? JSONEncoder().encode(data)
     }
