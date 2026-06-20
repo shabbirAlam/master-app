@@ -151,9 +151,9 @@ struct ChessPuzzleGenerator {
                 return nil
             }
 
-            // Tactical success: material advantage reached - only return if we have 2+ moves
+            // Tactical success: material advantage reached
             let currentMaterial = materialAdvantage(currentState, for: userColor)
-            if userMoves.count >= 2, currentMaterial >= materialThreshold, currentMaterial > initialMaterial {
+            if currentMaterial >= materialThreshold, currentMaterial > initialMaterial {
                 return (userMoves, aiMoves, .tactical, materialThreshold)
             }
 
