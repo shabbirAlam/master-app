@@ -31,7 +31,7 @@ struct ChessPuzzleGenerator {
     /// Generate a puzzle. Pass a puzzleRating to influence candidate generation.
     /// If preferredType is provided the generator will attempt to produce that type.
     static func generate(puzzleRating: Int = 1200, preferredType: PuzzleType? = nil) -> ChessPuzzle {
-        for _ in 0..<300 {
+        for _ in 0..<80 {
             if Task.isCancelled { break }
             let state = randomPosition()
 
@@ -45,44 +45,17 @@ struct ChessPuzzleGenerator {
 
             let userColor = state.currentTurn
 
-            // Try to build a solution according to the preferred type first (if any),
-            // otherwise try checkmate then tactical.
-            if let preferred = preferredType {
-                if let tuple = buildSolution(state, for: userColor, rating: puzzleRating, desiredType: preferred) {
-                    return ChessPuzzle(
-                        initialState: state,
-                        userMoves: tuple.userMoves,
-                        aiMoves: tuple.aiMoves,
-                        userColor: userColor,
-                        puzzleType: tuple.puzzleType,
-                        puzzleRating: puzzleRating,
-                        targetMaterialGain: tuple.targetMaterialGain
-                    )
-                }
-            } else {
-                if let tuple = buildSolution(state, for: userColor, rating: puzzleRating, desiredType: .checkmate) {
-                    return ChessPuzzle(
-                        initialState: state,
-                        userMoves: tuple.userMoves,
-                        aiMoves: tuple.aiMoves,
-                        userColor: userColor,
-                        puzzleType: tuple.puzzleType,
-                        puzzleRating: puzzleRating,
-                        targetMaterialGain: tuple.targetMaterialGain
-                    )
-                }
-
-                if let tuple = buildSolution(state, for: userColor, rating: puzzleRating, desiredType: .tactical) {
-                    return ChessPuzzle(
-                        initialState: state,
-                        userMoves: tuple.userMoves,
-                        aiMoves: tuple.aiMoves,
-                        userColor: userColor,
-                        puzzleType: tuple.puzzleType,
-                        puzzleRating: puzzleRating,
-                        targetMaterialGain: tuple.targetMaterialGain
-                    )
-                }
+            // Prefer tactical over checkmate for speed
+            if let tuple = buildSolution(state, for: userColor, rating: puzzleRating, desiredType: .tactical) {
+                return ChessPuzzle(
+                    initialState: state,
+                    userMoves: tuple.userMoves,
+                    aiMoves: tuple.aiMoves,
+                    userColor: userColor,
+                    puzzleType: tuple.puzzleType,
+                    puzzleRating: puzzleRating,
+                    targetMaterialGain: tuple.targetMaterialGain
+                )
             }
         }
 
@@ -105,7 +78,7 @@ struct ChessPuzzleGenerator {
     private static func randomPosition() -> GameState {
         var state = GameState()
 
-        let moveCount = Int.random(in: 8...25)
+        let moveCount = Int.random(in: 5...12)
 
         for _ in 0..<moveCount {
             if state.status.isGameOver { break }
@@ -190,7 +163,7 @@ struct ChessPuzzleGenerator {
             guard let aiMove = ChessAIEngine.selectAIMove(
                 from: aiCandidateMoves,
                 in: currentState,
-                rating: min(1800, ChessRatingProfile.maximumRating),
+                rating: 1000,
                 for: aiColor
             ) else {
                 return nil
@@ -252,7 +225,7 @@ struct ChessPuzzleGenerator {
                     let opponentMoves = after.allLegalMoves(for: side.opponent)
                     if !opponentMoves.isEmpty {
                         var safe = true
-                        for opponentMove in opponentMoves.prefix(6) {
+                        for opponentMove in opponentMoves.prefix(3) {
                             var replyState = after
                             replyState.applyMove(opponentMove)
                             if materialAdvantage(replyState, for: side) < threshold {
@@ -274,7 +247,7 @@ struct ChessPuzzleGenerator {
             let aiMoves = after.allLegalMoves(for: aiColor)
             guard !aiMoves.isEmpty else { continue }
 
-            guard let aiMove = ChessAIEngine.selectAIMove(from: aiMoves, in: after, rating: min(1800, ChessRatingProfile.maximumRating), for: aiColor) else { continue }
+            guard let aiMove = ChessAIEngine.selectAIMove(from: aiMoves, in: after, rating: 1000, for: aiColor) else { continue }
 
             var afterAI = after
             afterAI.applyMove(aiMove)
@@ -315,15 +288,15 @@ struct ChessPuzzleGenerator {
         let r = ChessRatingProfile.clamp(rating)
         switch r {
         case ..<700:
-            return GenerationParams(searchDepth: 2, candidateWidth: 4, materialThreshold: 300)
+            return GenerationParams(searchDepth: 1, candidateWidth: 3, materialThreshold: 300)
         case 700..<1100:
-            return GenerationParams(searchDepth: 2, candidateWidth: 6, materialThreshold: 300)
+            return GenerationParams(searchDepth: 1, candidateWidth: 4, materialThreshold: 300)
         case 1100..<1500:
-            return GenerationParams(searchDepth: 3, candidateWidth: 8, materialThreshold: 400)
+            return GenerationParams(searchDepth: 2, candidateWidth: 5, materialThreshold: 400)
         case 1500..<1900:
-            return GenerationParams(searchDepth: 4, candidateWidth: 10, materialThreshold: 500)
+            return GenerationParams(searchDepth: 2, candidateWidth: 6, materialThreshold: 500)
         default:
-            return GenerationParams(searchDepth: 5, candidateWidth: 14, materialThreshold: 600)
+            return GenerationParams(searchDepth: 2, candidateWidth: 8, materialThreshold: 600)
         }
     }
 }

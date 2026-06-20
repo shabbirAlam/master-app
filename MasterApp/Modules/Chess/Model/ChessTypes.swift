@@ -139,3 +139,9 @@ enum GameMode: Equatable, Sendable {
     case twoPlayer
     case puzzle
 }
+
+enum ChessPuzzleOutcome: Sendable {
+    case solvedWithoutHints
+    case solvedWithHints
+    case failed
+}

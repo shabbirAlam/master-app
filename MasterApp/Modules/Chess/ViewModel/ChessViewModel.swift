@@ -26,6 +26,9 @@ final class ChessViewModel {
     private(set) var hintDestination: Position?
     private(set) var hintLevel: Int = 0 // 0 = none, 1 = source, 2 = dest, 3 = full move
     private(set) var isGeneratingPuzzle = false
+    var useRandomPuzzleElo = false
+    private(set) var currentPuzzleElo: Int?
+    private(set) var hintUsedInCurrentPuzzle = false
 
     enum PuzzleState: Equatable {
         case inactive
@@ -142,6 +145,7 @@ final class ChessViewModel {
                 if game.status.isCheckmate(winner: userColor) {
                     puzzleState = .success
                     statusMessage = "Puzzle solved! Checkmate!"
+                    finalizePuzzleCompletionIfNeeded()
                 } else {
                     puzzleState = .failure
                     statusMessage = game.status.message
@@ -168,6 +172,7 @@ final class ChessViewModel {
                ChessPuzzleGenerator.materialAdvantage(game, for: userColor) >= 300 {
                 puzzleState = .success
                 statusMessage = "Puzzle solved!"
+                finalizePuzzleCompletionIfNeeded()
                 return
             }
 
@@ -275,11 +280,16 @@ final class ChessViewModel {
         hintPosition = nil
         selectedPosition = nil
         validMoves = []
+        hintUsedInCurrentPuzzle = false
+        hintLevel = 0
         statusMessage = "Generating puzzle..."
+
+        let puzzleElo = useRandomPuzzleElo ? generateRandomPuzzleElo() : userRating
+        currentPuzzleElo = puzzleElo
 
         puzzleTask = Task.detached(priority: .userInitiated) { [weak self] in
             let puzzle = await MainActor.run {
-                ChessPuzzleGenerator.generate()
+                ChessPuzzleGenerator.generate(puzzleRating: puzzleElo)
             }
             await MainActor.run { [weak self] in
                 guard let self = self else { return }
@@ -320,12 +330,22 @@ final class ChessViewModel {
         puzzleState = .playing
         puzzleStepIndex = 0
         hintPosition = nil
+        hintUsedInCurrentPuzzle = false
+        hintLevel = 0
         statusMessage = "Puzzle step 0/\(puzzle.userMoves.count)"
+    }
+
+    private func generateRandomPuzzleElo() -> Int {
+        let variance = Int.random(in: -400...400)
+        let puzzleElo = userRating + variance
+        return ChessRatingProfile.clamp(puzzleElo)
     }
 
     func showHint() {
         guard let puzzle = currentPuzzle, puzzleState == .playing else { return }
         guard puzzleStepIndex < puzzle.userMoves.count else { return }
+
+        hintUsedInCurrentPuzzle = true
 
         // Cycle hint levels 1 -> 2 -> 3. Call again to escalate.
         hintLevel = min(3, hintLevel + 1)
@@ -419,6 +439,7 @@ final class ChessViewModel {
                         if self.game.status.isCheckmate(winner: self.userColor) {
                             self.puzzleState = .success
                             self.statusMessage = "Puzzle solved! Checkmate!"
+                            self.finalizePuzzleCompletionIfNeeded()
                         } else {
                             self.puzzleState = .failure
                             self.statusMessage = self.game.status.message
@@ -484,6 +505,25 @@ final class ChessViewModel {
         statusMessage = "\(baseMessage) \(ratingMessage)"
     }
 
+    private func finalizePuzzleCompletionIfNeeded() {
+        guard case .puzzle = gameMode, !hasAppliedRatingUpdate, puzzleState == .success else {
+            return
+        }
+
+        let outcome: ChessPuzzleOutcome = hintUsedInCurrentPuzzle ? .solvedWithHints : .solvedWithoutHints
+        let previousRating = userRating
+        let updatedProfile = ratingService.applyPuzzleOutcome(outcome)
+        userRating = updatedProfile.userRating
+        hasAppliedRatingUpdate = true
+
+        if outcome == .solvedWithoutHints {
+            let delta = userRating - previousRating
+            let deltaPrefix = delta > 0 ? "+" : ""
+            ratingChangeMessage = "Rating \(deltaPrefix)\(delta)"
+            statusMessage = "\(statusMessage) \(ratingChangeMessage ?? "")"
+        }
+    }
+
     // MARK: - Test Helpers
 
     var userLastMoveTimeString: String? {
@@ -532,6 +572,8 @@ final class ChessViewModel {
         self.hintLevel = 0
         self.hintPosition = nil
         self.hintDestination = nil
+        self.hintUsedInCurrentPuzzle = false
+        self.currentPuzzleElo = puzzle.puzzleRating
         self.statusMessage = "Puzzle step 0/\(puzzle.userMoves.count)"
     }
 }

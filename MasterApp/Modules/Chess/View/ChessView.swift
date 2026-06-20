@@ -316,24 +316,35 @@ struct ChessView: View {
             }
 
             if case .puzzle = viewModel.gameMode {
-                switch viewModel.puzzleState {
-                case .success:
-                    Label("Puzzle solved!", systemImage: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.headline)
-                case .failure:
-                    Text(viewModel.statusMessage)
-                        .foregroundColor(.red)
-                        .font(.headline)
-                case .playing, .inactive:
+                VStack(spacing: 6) {
                     HStack {
-                        Circle()
-                            .fill(viewModel.game.currentTurn == .white ? Color.white : Color.black)
-                            .frame(width: 12, height: 12)
-                            .overlay(Circle().stroke(Color.gray, lineWidth: 1))
-                        Text(viewModel.statusMessage)
+                        if viewModel.useRandomPuzzleElo, let puzzleElo = viewModel.currentPuzzleElo {
+                            Text("Puzzle Difficulty: \(puzzleElo)")
+                                .font(.caption)
+                                .foregroundColor(theme.textPrimary.opacity(0.7))
+                        }
+                        Spacer()
+                    }
+
+                    switch viewModel.puzzleState {
+                    case .success:
+                        Label("Puzzle solved!", systemImage: "checkmark.circle.fill")
+                            .foregroundColor(.green)
                             .font(.headline)
-                            .foregroundColor(theme.textPrimary)
+                    case .failure:
+                        Text(viewModel.statusMessage)
+                            .foregroundColor(.red)
+                            .font(.headline)
+                    case .playing, .inactive:
+                        HStack {
+                            Circle()
+                                .fill(viewModel.game.currentTurn == .white ? Color.white : Color.black)
+                                .frame(width: 12, height: 12)
+                                .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                            Text(viewModel.statusMessage)
+                                .font(.headline)
+                                .foregroundColor(theme.textPrimary)
+                        }
                     }
                 }
             } else {
@@ -356,43 +367,23 @@ struct ChessView: View {
     @ViewBuilder
     private var puzzleFooter: some View {
         if viewModel.puzzleState == .success {
-            Button {
-                viewModel.nextPuzzle()
-            } label: {
-                HStack {
-                    Image(systemName: "forward.fill")
-                    Text("Next Puzzle")
-                }
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.orange.opacity(0.2))
-                .cornerRadius(10)
-            }
-            .accessibilityIdentifier("chess_next_puzzle")
-        } else if viewModel.puzzleState == .failure {
-            HStack(spacing: 12) {
-                Button {
-                    viewModel.retryPuzzle()
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.counterclockwise")
-                        Text("Retry")
+            VStack(spacing: 12) {
+                Toggle(isOn: $viewModel.useRandomPuzzleElo) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "shuffle")
+                            .font(.caption)
+                        Text("Random Difficulty")
+                            .font(.caption)
                     }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.blue.opacity(0.2))
-                    .cornerRadius(10)
                 }
-                .accessibilityIdentifier("chess_retry_puzzle")
+                .toggleStyle(.switch)
 
                 Button {
                     viewModel.nextPuzzle()
                 } label: {
                     HStack {
                         Image(systemName: "forward.fill")
-                        Text("Next")
+                        Text("Next Puzzle")
                     }
                     .font(.headline)
                     .frame(maxWidth: .infinity)
@@ -402,24 +393,80 @@ struct ChessView: View {
                 }
                 .accessibilityIdentifier("chess_next_puzzle")
             }
-        } else if viewModel.puzzleState == .playing {
-            HStack {
-                Button {
-                    viewModel.showHint()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "lightbulb.fill")
-                        Text("Hint")
+        } else if viewModel.puzzleState == .failure {
+            VStack(spacing: 12) {
+                Toggle(isOn: $viewModel.useRandomPuzzleElo) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "shuffle")
+                            .font(.caption)
+                        Text("Random Difficulty")
+                            .font(.caption)
                     }
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.yellow.opacity(0.25))
-                    .cornerRadius(8)
                 }
-                .accessibilityIdentifier("chess_hint_button")
-                Spacer()
+                .toggleStyle(.switch)
+
+                HStack(spacing: 12) {
+                    Button {
+                        viewModel.retryPuzzle()
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                            Text("Retry")
+                        }
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(10)
+                    }
+                    .accessibilityIdentifier("chess_retry_puzzle")
+
+                    Button {
+                        viewModel.nextPuzzle()
+                    } label: {
+                        HStack {
+                            Image(systemName: "forward.fill")
+                            Text("Next")
+                        }
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.orange.opacity(0.2))
+                        .cornerRadius(10)
+                    }
+                    .accessibilityIdentifier("chess_next_puzzle")
+                }
+            }
+        } else if viewModel.puzzleState == .playing {
+            VStack(spacing: 12) {
+                Toggle(isOn: $viewModel.useRandomPuzzleElo) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "shuffle")
+                            .font(.caption)
+                        Text("Random Difficulty")
+                            .font(.caption)
+                    }
+                }
+                .toggleStyle(.switch)
+
+                HStack {
+                    Button {
+                        viewModel.showHint()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "lightbulb.fill")
+                            Text("Hint")
+                        }
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.yellow.opacity(0.25))
+                        .cornerRadius(8)
+                    }
+                    .accessibilityIdentifier("chess_hint_button")
+                    Spacer()
+                }
             }
         }
     }
