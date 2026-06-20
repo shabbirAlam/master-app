@@ -116,6 +116,14 @@ enum GameStatus: Equatable, Sendable {
         }
     }
 
+    nonisolated var isCheckmate: Bool {
+        if case .checkmate = self { true } else { false }
+    }
+
+    nonisolated func isCheckmate(winner color: PieceColor) -> Bool {
+        if case .checkmate(let winner) = self, winner == color { true } else { false }
+    }
+
     nonisolated var message: String {
         switch self {
         case .playing: "Playing"
@@ -129,4 +137,5 @@ enum GameStatus: Equatable, Sendable {
 enum GameMode: Equatable, Sendable {
     case vsComputer
     case twoPlayer
+    case puzzle
 }
