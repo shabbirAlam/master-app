@@ -10,7 +10,7 @@ enum PieceColor: String, Equatable, Hashable, CaseIterable, Sendable {
 enum PieceType: String, Equatable, Hashable, CaseIterable, Sendable {
     case king, queen, rook, bishop, knight, pawn
 
-    var notationSymbol: String {
+    nonisolated var notationSymbol: String {
         switch self {
         case .king: "K"
         case .queen: "Q"
@@ -58,7 +58,7 @@ struct ChessPiece: Hashable, Sendable {
         }
     }
 
-    var notationSymbol: String { type.notationSymbol }
+    nonisolated var notationSymbol: String { type.notationSymbol }
 }
 
 struct Position: Hashable, Sendable {
@@ -69,7 +69,7 @@ struct Position: Hashable, Sendable {
         lhs.row == rhs.row && lhs.col == rhs.col
     }
 
-    var algebraic: String {
+    nonisolated var algebraic: String {
         let file = String(Character(UnicodeScalar(97 + col) ?? "a"))
         let rank = String(8 - row)
         return file + rank
@@ -100,6 +100,10 @@ struct Move: Equatable, Hashable, Sendable {
             result += " e.p."
         }
         return result
+    }
+
+    nonisolated var uci: String {
+        from.algebraic + to.algebraic + (promotion.map { $0.notationSymbol.lowercased() } ?? "")
     }
 }
 

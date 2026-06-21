@@ -81,7 +81,7 @@ struct ChessViewModelExtendedTests {
     // MARK: - vsComputer user plays black
 
     @Test func viewModel_vsComputerBlackInitial() async {
-        let vm = ChessViewModel()
+        let vm = ChessViewModel(chessKitService: MockChessKitService())
         vm.setGameMode(.vsComputer, with: .black)
 
         #expect(vm.isAIThinking) // AI (white) starts

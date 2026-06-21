@@ -23,7 +23,7 @@ enum AppLogger {
         }
     }
 
-    struct Category {
+    struct Category: Sendable {
         private let logger: Logger
 
         fileprivate init(category: String) {
@@ -44,5 +44,6 @@ enum AppLogger {
     static let view = Category(category: "View")
     static let auth = Category(category: "Auth")
     static let secure = Category(category: "Secure")
+    static let chessAI = Category(category: "ChessAI")
     static let app = Category(category: "App")
 }

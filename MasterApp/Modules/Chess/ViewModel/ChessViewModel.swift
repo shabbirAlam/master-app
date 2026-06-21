@@ -25,23 +25,29 @@ final class ChessViewModel {
     private var hasAppliedRatingUpdate = false
     private var turnStartTime: Date
 
+    private let chessKitService: ChessKitAIService
+
     init(
         ratingService: ChessRatingService = ChessRatingServiceImpl(
             store: InMemoryChessRatingStore()
-        )
+        ),
+        chessKitService: ChessKitAIService = ChessKitAIServiceImpl()
     ) {
         self.ratingService = ratingService
+        self.chessKitService = chessKitService
         let profile = ratingService.loadProfile()
         self.game = GameState()
         self.userRating = profile.userRating
         self.computerRating = profile.computerRating
         self.turnStartTime = Date()
         self.statusMessage = "Select game mode to start"
+        Task { await chessKitService.start() }
     }
 
     nonisolated deinit {
         Task { @MainActor [weak self] in
             self?.aiTask?.cancel()
+            await self?.chessKitService.stop()
         }
     }
 
@@ -224,11 +230,12 @@ final class ChessViewModel {
                 guard let self else { return }
                 try Task.checkCancellation()
 
-                let moves = capturedGame.allLegalMoves(for: computerColor)
-
-                let bestMove = await Task.detached {
-                    ChessAIEngine.selectAIMove(from: moves, in: capturedGame, rating: capturedRating, for: computerColor)
-                }.value
+                let moveTime = moveTime(for: capturedRating)
+                let bestMove = try await self.chessKitService.selectMove(
+                    from: capturedGame,
+                    for: computerColor,
+                    moveTime: moveTime
+                )
 
                 try Task.checkCancellation()
                 guard let bestMove else {
@@ -253,6 +260,8 @@ final class ChessViewModel {
             } catch {
                 if let self {
                     self.isAIThinking = false
+                    self.statusMessage = "Computer error: \(error.localizedDescription)"
+                    AppLogger.viewModel.log("AI move failed: \(error.localizedDescription)", .error)
                 }
             }
         }
@@ -291,6 +300,16 @@ final class ChessViewModel {
         let ratingMessage = delta == 0 ? "Rating unchanged" : "Rating \(deltaPrefix)\(delta)"
         ratingChangeMessage = ratingMessage
         statusMessage = "\(baseMessage) \(ratingMessage)"
+    }
+
+    private func moveTime(for rating: Int) -> Int {
+        switch rating {
+        case ..<700: 300
+        case ..<1000: 500
+        case ..<1400: 1000
+        case ..<1800: 1500
+        default: 2000
+        }
     }
 
     // MARK: - Test Helpers

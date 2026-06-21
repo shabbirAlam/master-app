@@ -11,6 +11,7 @@ final class AppDIContainer {
     let networking: Networking
     let graphQLNetworking: GraphQLNetworking
     let chessRatingService: ChessRatingService
+    let chessKitService: ChessKitAIService
 
     init(
         theme: Theme = AppTheme.light,
@@ -18,11 +19,13 @@ final class AppDIContainer {
         graphQLNetworking: GraphQLNetworking = GraphQLNetworkingImpl(),
         chessRatingService: ChessRatingService = ChessRatingServiceImpl(
             store: UserDefaultsChessRatingStore()
-        )
+        ),
+        chessKitService: ChessKitAIService = ChessKitAIServiceImpl()
     ) {
         self.theme = theme
         self.networking = networking
         self.graphQLNetworking = graphQLNetworking
         self.chessRatingService = chessRatingService
+        self.chessKitService = chessKitService
     }
 }

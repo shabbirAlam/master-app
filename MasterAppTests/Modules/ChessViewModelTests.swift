@@ -1,6 +1,16 @@
 import Testing
 @testable import MasterApp
 
+/// Test double that returns the first legal move immediately.
+actor MockChessKitService: ChessKitAIService {
+    func start() async {}
+    func stop() async {}
+
+    func selectMove(from game: GameState, for color: PieceColor, moveTime milliseconds: Int) async throws -> Move? {
+        game.allLegalMoves(for: color).first
+    }
+}
+
 @MainActor
 struct ChessViewModelTests {
 
@@ -879,97 +889,6 @@ struct ChessViewModelTests {
         #expect(game.status == .playing)
     }
 
-    // MARK: - GameState - selectAIMove
-
-    @Test func gameState_selectAIMove_returnsMove() {
-        var game = GameState()
-        game.board = Self.emptyBoard()
-        game.board[6][0] = ChessPiece(type: .pawn, color: .black)
-        game.board[0][4] = ChessPiece(type: .king, color: .black)
-        game.board[7][4] = ChessPiece(type: .king, color: .white)
-        game.currentTurn = .black
-
-        let moves = game.allLegalMoves(for: .black)
-        let selected = ChessAIEngine.selectAIMove(from: moves, in: game, rating: 600, for: .black)
-        #expect(selected != nil)
-        #expect(moves.contains(where: { $0 == selected }))
-    }
-
-    @Test func gameState_selectAIMove_emptyReturnsNil() {
-        let selected = ChessAIEngine.selectAIMove(from: [], in: GameState(), rating: 600, for: .black)
-        #expect(selected == nil)
-    }
-
-    @Test func gameState_selectAIMove_prefersCapture() {
-        var game = GameState()
-        game.board = Self.emptyBoard()
-        game.board[4][4] = ChessPiece(type: .rook, color: .black)
-        game.board[5][4] = ChessPiece(type: .pawn, color: .white) // capturable
-        game.board[0][4] = ChessPiece(type: .king, color: .black)
-        game.board[7][4] = ChessPiece(type: .king, color: .white)
-        game.currentTurn = .black
-
-        let moves = game.allLegalMoves(for: .black)
-        let selected = ChessAIEngine.selectAIMove(from: moves, in: game, rating: 1_200, for: .black)
-        #expect(selected != nil)
-    }
-
-    @Test func gameState_selectAIMove_depth2() {
-        var game = GameState()
-        game.board = Self.emptyBoard()
-        game.board[6][0] = ChessPiece(type: .pawn, color: .black)
-        game.board[0][4] = ChessPiece(type: .king, color: .black)
-        game.board[7][4] = ChessPiece(type: .king, color: .white)
-        game.currentTurn = .black
-
-        let moves = game.allLegalMoves(for: .black)
-        let selected = ChessAIEngine.selectAIMove(from: moves, in: game, rating: 1_000, for: .black)
-        #expect(selected != nil)
-        #expect(moves.contains(where: { $0 == selected }))
-    }
-
-    @Test func gameState_selectAIMove_depth3() {
-        var game = GameState()
-        game.board = Self.emptyBoard()
-        game.board[4][4] = ChessPiece(type: .rook, color: .black)
-        game.board[5][4] = ChessPiece(type: .pawn, color: .white)
-        game.board[0][4] = ChessPiece(type: .king, color: .black)
-        game.board[7][4] = ChessPiece(type: .king, color: .white)
-        game.currentTurn = .black
-
-        let moves = game.allLegalMoves(for: .black)
-        let selected = ChessAIEngine.selectAIMove(from: moves, in: game, rating: 1_700, for: .black)
-        #expect(selected != nil)
-    }
-
-    @Test func gameState_selectAIMove_depth5() {
-        var game = GameState()
-        game.board = Self.emptyBoard()
-        game.board[4][4] = ChessPiece(type: .rook, color: .black)
-        game.board[5][4] = ChessPiece(type: .pawn, color: .white)
-        game.board[0][4] = ChessPiece(type: .king, color: .black)
-        game.board[7][4] = ChessPiece(type: .king, color: .white)
-        game.currentTurn = .black
-
-        let moves = game.allLegalMoves(for: .black)
-        let selected = ChessAIEngine.selectAIMove(from: moves, in: game, rating: 2_300, for: .black)
-        #expect(selected != nil)
-    }
-
-    @Test func gameState_selectAIMove_withRandomness() {
-        var game = GameState()
-        game.board = Self.emptyBoard()
-        game.board[6][0] = ChessPiece(type: .pawn, color: .black)
-        game.board[0][4] = ChessPiece(type: .king, color: .black)
-        game.board[7][4] = ChessPiece(type: .king, color: .white)
-        game.currentTurn = .black
-
-        let moves = game.allLegalMoves(for: .black)
-        // Rating 600 has high randomness (220) and depth 1
-        let selected = ChessAIEngine.selectAIMove(from: moves, in: game, rating: 600, for: .black)
-        #expect(selected != nil)
-    }
-
     // MARK: - Chess Rating
 
     @Test func chessRatingProfile_defaults() {
@@ -1061,92 +980,6 @@ struct ChessViewModelTests {
         // Expected score is very small, loss gives 0.0, delta = 24*(0 - 0.00000178) = ~0
         // Clamped: userRating = max(100, 100 + (-0)) = 100
         #expect(updated.userRating >= 100)
-    }
-
-    // MARK: - ChessAIProfile
-
-    @Test func chessAIProfile_below700() {
-        let profile = ChessAIProfile(rating: 500)
-        #expect(profile.searchDepth == 1)
-        #expect(profile.candidateCount == 6)
-        #expect(profile.randomness == 220)
-    }
-
-    @Test func chessAIProfile_700to899() {
-        let profile = ChessAIProfile(rating: 800)
-        #expect(profile.searchDepth == 1)
-        #expect(profile.candidateCount == 4)
-        #expect(profile.randomness == 140)
-    }
-
-    @Test func chessAIProfile_900to1199() {
-        let profile = ChessAIProfile(rating: 1_000)
-        #expect(profile.searchDepth == 2)
-        #expect(profile.candidateCount == 3)
-        #expect(profile.randomness == 80)
-    }
-
-    @Test func chessAIProfile_1200to1599() {
-        let profile = ChessAIProfile(rating: 1_400)
-        #expect(profile.searchDepth == 2)
-        #expect(profile.candidateCount == 2)
-        #expect(profile.randomness == 35)
-    }
-
-    @Test func chessAIProfile_1600to1799() {
-        let profile = ChessAIProfile(rating: 1_700)
-        #expect(profile.searchDepth == 3)
-        #expect(profile.candidateCount == 2)
-        #expect(profile.randomness == 0)
-    }
-
-    @Test func chessAIProfile_1800to1999() {
-        let profile = ChessAIProfile(rating: 1_900)
-        #expect(profile.searchDepth == 3)
-        #expect(profile.candidateCount == 1)
-        #expect(profile.randomness == 0)
-    }
-
-    @Test func chessAIProfile_2000to2199() {
-        let profile = ChessAIProfile(rating: 2_100)
-        #expect(profile.searchDepth == 4)
-        #expect(profile.candidateCount == 1)
-        #expect(profile.randomness == 0)
-    }
-
-    @Test func chessAIProfile_2200plus() {
-        let profile = ChessAIProfile(rating: 2_300)
-        #expect(profile.searchDepth == 5)
-        #expect(profile.candidateCount == 1)
-        #expect(profile.randomness == 0)
-    }
-
-    @Test func chessAIProfile_boundaryValues() {
-        let p699 = ChessAIProfile(rating: 699)
-        #expect(p699.searchDepth == 1)
-
-        let p700 = ChessAIProfile(rating: 700)
-        #expect(p700.searchDepth == 1)
-        #expect(p700.randomness == 140)
-
-        let p899 = ChessAIProfile(rating: 899)
-        #expect(p899.randomness == 140)
-
-        let p900 = ChessAIProfile(rating: 900)
-        #expect(p900.searchDepth == 2)
-        #expect(p900.randomness == 80)
-
-        let p1199 = ChessAIProfile(rating: 1_199)
-        #expect(p1199.searchDepth == 2)
-
-        let p1200 = ChessAIProfile(rating: 1_200)
-        #expect(p1200.candidateCount == 2)
-
-        let p2199 = ChessAIProfile(rating: 2_199)
-        #expect(p2199.searchDepth == 4)
-
-        let p2200 = ChessAIProfile(rating: 2_200)
-        #expect(p2200.searchDepth == 5)
     }
 
     @Test func gameState_castlingRights_equality() {
@@ -1360,7 +1193,7 @@ struct ChessViewModelTests {
     }
 
     @Test func viewModel_vsComputer_userColorBlack() async {
-        let vm = ChessViewModel()
+        let vm = ChessViewModel(chessKitService: MockChessKitService())
         vm.setGameMode(.vsComputer, with: .black)
 
         #expect(vm.userColor == .black)
