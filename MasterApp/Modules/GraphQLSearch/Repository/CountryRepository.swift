@@ -10,9 +10,11 @@ final class CountryRepositoryImpl: CountryRepository {
 
     init(networking: GraphQLNetworking) {
         self.networking = networking
+        AppLogger.repository.log("CountryRepositoryImpl initialized", .info)
     }
 
     func fetchCountries() async throws -> [Country] {
+        AppLogger.repository.log("Fetching all countries", .info)
         let query = """
             query {
                 countries {
@@ -27,6 +29,7 @@ final class CountryRepositoryImpl: CountryRepository {
     }
 
     func fetchCountry(for code: String) async throws -> Country {
+        AppLogger.repository.log("Fetching country for code: \(code)", .info)
         let query = """
         query GetCountry($code: ID!) {
           country(code: $code) {

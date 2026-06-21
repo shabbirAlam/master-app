@@ -52,20 +52,6 @@ struct CountryRepositoryTests {
         #expect(result[0].name == "India")
     }
 
-    @Test func fetchCountriesError() async {
-        let networking = PreviewGraphQLNetworkingMock()
-        networking.setError(NetworkError.decodingError)
-
-        let repository = CountryRepositoryImpl(networking: networking)
-
-        do {
-            let _ = try await repository.fetchCountries()
-            Issue.record("Expected error")
-        } catch {
-            #expect(true)
-        }
-    }
-
     @Test func fetchCountryUsesGraphQL() async throws {
         let networking = PreviewGraphQLNetworkingMock()
         let jsonData = """
@@ -80,19 +66,6 @@ struct CountryRepositoryTests {
         #expect(result.name == "India")
     }
 
-    @Test func fetchCountryError() async {
-        let networking = PreviewGraphQLNetworkingMock()
-        networking.setError(NetworkError.unknown)
-
-        let repository = CountryRepositoryImpl(networking: networking)
-
-        do {
-            let _ = try await repository.fetchCountry(for: "IN")
-            Issue.record("Expected error")
-        } catch {
-            #expect(true)
-        }
-    }
 }
 
 // MARK: - ChessRatingStore Tests

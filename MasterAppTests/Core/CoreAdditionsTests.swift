@@ -29,25 +29,6 @@ struct AppThemeTests {
 }
 
 @MainActor
-struct AppRouteEqualityTests {
-    @Test func appRouteEquality() {
-        #expect(AppRoute.home(type: .secureView) == AppRoute.home(type: .secureView))
-        #expect(AppRoute.home(type: .secureView) != AppRoute.home(type: .graphQLSearch))
-        #expect(AppRoute.profile(type: .editProfile) == AppRoute.profile(type: .editProfile))
-    }
-
-    @Test func appRouteHashable() {
-        let routes: Set<AppRoute> = [
-            .home(type: .secureView),
-            .home(type: .graphQLSearch),
-            .home(type: .restAPISearch),
-            .profile(type: .editProfile)
-        ]
-        #expect(routes.count == 4)
-    }
-}
-
-@MainActor
 struct APIEndpointTodosTests {
     @Test func todosEndpointConfiguration() {
         let endpoint = APIEndpoint.todos

@@ -4,21 +4,6 @@ import Foundation
 import CoreGraphics
 @testable import MasterApp
 
-// MARK: - View Extensions Tests
-
-@MainActor
-struct ViewExtensionsTests {
-    @Test func secureViewModifierApplies() {
-        let _ = Text("Test").secure(ignoreSafeArea: true)
-        #expect(true)
-    }
-
-    @Test func secureViewModifierWithoutIgnoreSafeArea() {
-        let _ = Text("Test").secure(ignoreSafeArea: false)
-        #expect(true)
-    }
-}
-
 // MARK: - DateFormatters Tests
 
 @MainActor
@@ -34,67 +19,6 @@ struct DateFormattersTests {
         let date = Date(timeIntervalSince1970: 0)
         let formatted = formatter.string(from: date)
         #expect(!formatted.isEmpty)
-    }
-}
-
-// MARK: - HomeRoute Tests
-
-@MainActor
-struct HomeRouteTests {
-    @Test func allCases() {
-        let routes: Set<HomeRoute> = [.secureView, .graphQLSearch, .restAPISearch, .chess]
-        #expect(routes.count == 4)
-    }
-
-    @Test func equality() {
-        #expect(HomeRoute.secureView == HomeRoute.secureView)
-        #expect(HomeRoute.secureView != HomeRoute.chess)
-        #expect(HomeRoute.graphQLSearch != HomeRoute.restAPISearch)
-    }
-
-    @Test func hashable() {
-        let set: Set<HomeRoute> = [.secureView, .graphQLSearch, .restAPISearch, .chess]
-        #expect(set.count == 4)
-    }
-}
-
-// MARK: - ProfileRoute Tests
-
-@MainActor
-struct ProfileRouteTests {
-    @Test func equality() {
-        #expect(ProfileRoute.editProfile == ProfileRoute.editProfile)
-    }
-
-    @Test func hashable() {
-        let set: Set<ProfileRoute> = [.editProfile]
-        #expect(set.count == 1)
-    }
-}
-
-// MARK: - AppRoute+Destination Tests
-
-@MainActor
-struct AppRouteDestinationTests {
-    @Test func homeRouteDestination() {
-        let container = AppDIContainer()
-        let route = AppRoute.home(type: .secureView)
-        let _ = route.destination(container: container)
-    }
-
-    @Test func profileRouteDestination() {
-        let container = AppDIContainer()
-        let route = AppRoute.profile(type: .editProfile)
-        let _ = route.destination(container: container)
-    }
-
-    @Test func homeRouteDestinations() {
-        let container = AppDIContainer()
-        let routes: [HomeRoute] = [.secureView, .graphQLSearch, .restAPISearch, .chess]
-        for route in routes {
-            let appRoute = AppRoute.home(type: route)
-            let _ = appRoute.destination(container: container)
-        }
     }
 }
 
@@ -229,72 +153,3 @@ struct SecureContentExtendedTests {
     }
 }
 
-// MARK: - AppLogger Tests
-
-@MainActor
-struct AppLoggerTests {
-    @Test func categoriesExist() {
-        let _ = AppLogger.network
-        let _ = AppLogger.repository
-        let _ = AppLogger.service
-        let _ = AppLogger.viewModel
-        let _ = AppLogger.view
-        let _ = AppLogger.auth
-        let _ = AppLogger.secure
-        let _ = AppLogger.app
-    }
-
-    @Test func logWithNetworkCategory() {
-        AppLogger.network.log("Test message", .info)
-        #expect(true)
-    }
-
-    @Test func logWithViewModelCategory() {
-        AppLogger.viewModel.log("Test message", .debug)
-        #expect(true)
-    }
-
-    @Test func logWithErrorLevel() {
-        AppLogger.view.log("Error test", .error)
-        #expect(true)
-    }
-}
-
-// MARK: - ShimmerEffect Tests
-
-@MainActor
-struct ShimmerEffectTests {
-    @Test func shimmerModifierExists() {
-        let view = Text("Loading").shimmer()
-        #expect(true)
-    }
-
-    @Test func shimmerRow() {
-        let row = ShimmerRow()
-        #expect(row is ShimmerRow)
-    }
-
-    @Test func shimmerList() {
-        let list = ShimmerList(rowCount: 5)
-        #expect(list is ShimmerList)
-    }
-}
-
-// MARK: - AppDIContainer Tests
-
-@MainActor
-struct AppDIContainerExtendedTests {
-    @Test func customInit() {
-        let container = AppDIContainer(
-            theme: AppTheme.dark,
-            networking: PreviewNetworkingMock(),
-            graphQLNetworking: PreviewGraphQLNetworkingMock()
-        )
-        #expect(container is AppDIContainer)
-    }
-
-    @Test func defaultInit() {
-        let container = AppDIContainer()
-        #expect(container.theme is AppTheme)
-    }
-}

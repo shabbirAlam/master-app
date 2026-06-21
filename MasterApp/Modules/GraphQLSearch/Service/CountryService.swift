@@ -10,13 +10,16 @@ final class CountryServiceImpl: CountryService {
 
     init(repository: CountryRepository) {
         self.repository = repository
+        AppLogger.service.log("CountryServiceImpl initialized", .info)
     }
 
     func fetchCountries() async throws -> [Country] {
-        try await repository.fetchCountries()
+        AppLogger.service.log("Fetching all countries", .info)
+        return try await repository.fetchCountries()
     }
 
     func fetchCountry(for code: String) async throws -> Country {
-        try await repository.fetchCountry(for: code)
+        AppLogger.service.log("Fetching country for code: \(code)", .info)
+        return try await repository.fetchCountry(for: code)
     }
 }

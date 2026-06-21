@@ -16,13 +16,16 @@ struct ChessRatingServiceImpl: ChessRatingService {
     ) {
         self.store = store
         self.kFactor = kFactor
+        AppLogger.service.log("ChessRatingServiceImpl initialized", .info)
     }
 
     func loadProfile() -> ChessRatingProfile {
-        store.loadProfile()
+        AppLogger.service.log("Loading chess rating profile", .debug)
+        return store.loadProfile()
     }
 
     func updateComputerRating(_ rating: Int) -> ChessRatingProfile {
+        AppLogger.service.log("Updating computer rating to \(rating)", .info)
         var profile = store.loadProfile()
         profile.computerRating = ChessRatingProfile.clamp(rating)
         store.saveProfile(profile)
@@ -30,6 +33,7 @@ struct ChessRatingServiceImpl: ChessRatingService {
     }
 
     func applyMatchOutcome(_ outcome: ChessMatchOutcome) -> ChessRatingProfile {
+        AppLogger.service.log("Applying match outcome: \(outcome)", .info)
         var profile = store.loadProfile()
         let expectedScore = expectedScore(
             playerRating: profile.userRating,

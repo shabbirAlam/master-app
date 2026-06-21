@@ -9,9 +9,11 @@ final class TodoServiceImpl: TodoService {
 
     init(repository: TodoRepository) {
         self.repository = repository
+        AppLogger.service.log("TodoServiceImpl initialized", .info)
     }
 
     func fetchTodos() async throws -> [Todo] {
-        try await repository.fetchTodos()
+        AppLogger.service.log("Fetching todos", .info)
+        return try await repository.fetchTodos()
     }
 }

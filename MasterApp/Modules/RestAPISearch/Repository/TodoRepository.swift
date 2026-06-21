@@ -11,9 +11,11 @@ final class TodoRepositoryImpl: TodoRepository {
     init(networking: Networking, simulatedDelayNanos: UInt64 = 500_000_000) {
         self.networking = networking
         self.simulatedDelayNanos = simulatedDelayNanos
+        AppLogger.repository.log("TodoRepositoryImpl initialized", .info)
     }
 
     func fetchTodos() async throws -> [Todo] {
+        AppLogger.repository.log("Fetching todos", .info)
         try await Task.sleep(nanoseconds: simulatedDelayNanos)
         try Task.checkCancellation()
         return try await networking.request(APIEndpoint.todos)

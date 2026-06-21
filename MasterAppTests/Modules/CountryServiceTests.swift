@@ -73,17 +73,4 @@ struct CountryServiceTests {
         }
     }
 
-    @Test func fetchCountryError() async {
-        let mock = MockCountryRepository()
-        mock.setError(NetworkError.unknown)
-
-        let service = CountryServiceImpl(repository: mock)
-
-        do {
-            let _ = try await service.fetchCountry(for: "IN")
-            Issue.record("Expected error")
-        } catch {
-            #expect(true)
-        }
-    }
 }

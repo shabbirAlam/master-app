@@ -70,7 +70,7 @@ struct Position: Hashable, Sendable {
     }
 
     var algebraic: String {
-        let file = String(UnicodeScalar(97 + col)!)
+        let file = String(Character(UnicodeScalar(97 + col) ?? "a"))
         let rank = String(8 - row)
         return file + rank
     }

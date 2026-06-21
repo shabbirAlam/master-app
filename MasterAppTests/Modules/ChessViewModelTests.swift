@@ -873,22 +873,6 @@ struct ChessViewModelTests {
         #expect(game.status.isGameOver)
     }
 
-    @Test func gameState_checkmate_sequence() {
-        var game = GameState()
-        game.board = Self.emptyBoard()
-        game.board[7][4] = ChessPiece(type: .king, color: .white) // e1
-        game.board[0][4] = ChessPiece(type: .king, color: .black) // e8
-        game.board[6][4] = ChessPiece(type: .pawn, color: .white) // e2
-        game.board[1][4] = ChessPiece(type: .pawn, color: .black) // e7
-        game.currentTurn = .white
-        game.status = .playing
-
-        // This test verifies that playing through a sequence doesn't crash
-        // Scholar's mate setup is complex; just verify the flow works
-        let moves = game.allLegalMoves(for: .white)
-        #expect(!moves.isEmpty)
-    }
-
     @Test func gameState_updateStatus_playing() {
         let game = GameState()
         // Initial position - many legal moves

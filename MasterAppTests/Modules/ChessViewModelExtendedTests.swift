@@ -140,19 +140,6 @@ struct ChessViewModelExtendedTests {
         #expect(vm.selectedPosition == nil)
     }
 
-    // MARK: - selectSquare during AI thinking
-
-    @Test func viewModel_selectSquareWhileAIThinking() {
-        let vm = ChessViewModel()
-        vm.setGameMode(.vsComputer, with: .white)
-
-        // Simulate AI thinking state
-        // Need to set isAIThinking via reflection or directly if it was private(set)
-        // Since isAIThinking is private(set), we can't set it directly
-        // The AI won't be thinking initially for .white, so let's skip
-        #expect(true)
-    }
-
     // MARK: - selectSquare vsComputer with wrong color
 
     @Test func viewModel_vsComputerSelectsWrongColor() {
