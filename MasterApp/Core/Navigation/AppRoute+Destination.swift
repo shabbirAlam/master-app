@@ -17,7 +17,7 @@ extension HomeRoute {
     func destination(container: AppDIContainer) -> some View {
         switch self {
         case .secureView:
-            SecureView()
+            SecureBuilder.build(container: container)
         case .graphQLSearch:
             CountryBuilder.build(container: container)
         case .restAPISearch:

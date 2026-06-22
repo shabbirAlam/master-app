@@ -16,7 +16,7 @@ final class CountryViewSnapshotTests: XCTestCase {
         let viewModel = CountryViewModel(service: SnapshotMockCountryService(data: countries))
         viewModel.setCountriesForSnapshot(countries)
 
-        let view = CountryView(viewModel: viewModel)
+        let view = CountryView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -34,7 +34,7 @@ final class CountryViewSnapshotTests: XCTestCase {
         viewModel.searchedText = "in"
         viewModel.filterCountries()
 
-        let view = CountryView(viewModel: viewModel)
+        let view = CountryView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -45,7 +45,7 @@ final class CountryViewSnapshotTests: XCTestCase {
         let viewModel = CountryViewModel(service: SnapshotMockCountryService(data: []))
         viewModel.setCountriesForSnapshot([])
 
-        let view = CountryView(viewModel: viewModel)
+        let view = CountryView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -56,7 +56,7 @@ final class CountryViewSnapshotTests: XCTestCase {
         let viewModel = CountryViewModel(service: SnapshotMockCountryService(data: []))
         viewModel.setErrorForSnapshot("Network error occurred")
 
-        let view = CountryView(viewModel: viewModel)
+        let view = CountryView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 

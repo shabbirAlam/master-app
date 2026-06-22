@@ -4,7 +4,7 @@ struct CountryView: View {
     @State private var viewModel: CountryViewModel
     private let theme: Theme
 
-    init(viewModel: CountryViewModel, theme: Theme = AppTheme.light) {
+    init(viewModel: CountryViewModel, theme: Theme) {
         self.viewModel = viewModel
         self.theme = theme
     }
@@ -41,11 +41,13 @@ struct CountryView: View {
 
     private var searchField: some View {
         TextField("Country...", text: $viewModel.searchedText)
+            .foregroundStyle(theme.textPrimary)
+            .tint(theme.accent)
             .padding(.horizontal, 16)
             .frame(height: 40)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.gray, lineWidth: 1)
+                    .stroke(theme.accent.opacity(0.3), lineWidth: 1)
             )
             .padding(.horizontal)
             .accessibilityIdentifier("country_search")
@@ -74,19 +76,26 @@ struct CountryView: View {
     }
 
     private var emptyState: some View {
-        VStack {
+        VStack(spacing: 12) {
             Spacer()
+            Image(systemName: "globe")
+                .font(.title2)
+                .foregroundStyle(theme.textPrimary.opacity(0.4))
             Text("No data found")
+                .foregroundStyle(theme.textPrimary.opacity(0.6))
                 .accessibilityIdentifier("country_empty")
             Spacer()
         }
     }
 
     private func errorState(_ message: String) -> some View {
-        VStack {
+        VStack(spacing: 12) {
             Spacer()
+            Image(systemName: "exclamationmark.triangle")
+                .font(.title2)
+                .foregroundStyle(theme.accent)
             Text(message)
-                .foregroundColor(.red)
+                .foregroundStyle(theme.accent)
                 .padding()
                 .accessibilityIdentifier("country_error")
             Spacer()
@@ -125,6 +134,7 @@ private struct CountryRow: View {
     return CountryView(
         viewModel: CountryViewModel(
             service: CountryServiceImpl(repository: CountryRepositoryImpl(networking: mock))
-        )
+        ),
+        theme: AppTheme.light
     )
 }

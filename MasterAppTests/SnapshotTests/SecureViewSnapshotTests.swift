@@ -8,7 +8,7 @@ final class SecureViewSnapshotTests: XCTestCase {
     let record: SnapshotTestingConfiguration.Record = .never
 
     func test_secureView() {
-        let view = SecureView()
+        let view = SecureView(viewModel: SecureViewModel(), theme: AppTheme.light)
 
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds

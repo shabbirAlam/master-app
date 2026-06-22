@@ -15,7 +15,7 @@ final class TodoViewSnapshotTests: XCTestCase {
         let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: items))
         viewModel.setItemsForSnapshot(items)
 
-        let view = TodoView(viewModel: viewModel)
+        let view = TodoView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -26,7 +26,7 @@ final class TodoViewSnapshotTests: XCTestCase {
         let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: []))
         viewModel.setItemsForSnapshot([])
 
-        let view = TodoView(viewModel: viewModel)
+        let view = TodoView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -41,7 +41,7 @@ final class TodoViewSnapshotTests: XCTestCase {
         viewModel.setItemsForSnapshot(items)
         viewModel.searchedText = "groceries"
 
-        let view = TodoView(viewModel: viewModel)
+        let view = TodoView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -52,7 +52,7 @@ final class TodoViewSnapshotTests: XCTestCase {
         let viewModel = TodoViewModel(service: SnapshotMockTodoService(data: []))
         viewModel.setLoadingForSnapshot(true)
 
-        let view = TodoView(viewModel: viewModel)
+        let view = TodoView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 
@@ -64,7 +64,7 @@ final class TodoViewSnapshotTests: XCTestCase {
         viewModel.setErrorForSnapshot("Something went wrong")
         viewModel.setItemsForSnapshot([])
 
-        let view = TodoView(viewModel: viewModel)
+        let view = TodoView(viewModel: viewModel, theme: AppTheme.light)
         let vc = UIHostingController(rootView: view)
         vc.view.frame = UIScreen.main.bounds
 

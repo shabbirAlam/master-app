@@ -4,7 +4,7 @@ struct TodoView: View {
     @State private var viewModel: TodoViewModel
     private let theme: Theme
     
-    init(viewModel: TodoViewModel, theme: Theme = AppTheme.light) {
+    init(viewModel: TodoViewModel, theme: Theme) {
         self.viewModel = viewModel
         self.theme = theme
     }
@@ -36,11 +36,13 @@ struct TodoView: View {
 
     private var searchField: some View {
         TextField("Search...", text: $viewModel.searchedText)
+            .foregroundStyle(theme.textPrimary)
+            .tint(theme.accent)
             .padding(.horizontal, 16)
             .frame(height: 40)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.gray, lineWidth: 1)
+                    .stroke(theme.accent.opacity(0.3), lineWidth: 1)
             )
             .padding(.horizontal)
             .accessibilityIdentifier("todo_search")
@@ -53,6 +55,7 @@ struct TodoView: View {
         List {
             ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { index, item in
                 Text(item.title)
+                    .foregroundStyle(theme.textPrimary)
                     .accessibilityIdentifier("todo_label_\(index)")
                     .accessibilityLabel(item.title)
             }
@@ -68,19 +71,26 @@ struct TodoView: View {
     }
 
     private var emptyState: some View {
-        VStack {
+        VStack(spacing: 12) {
             Spacer()
+            Image(systemName: "tray")
+                .font(.title2)
+                .foregroundStyle(theme.textPrimary.opacity(0.4))
             Text("No data found")
+                .foregroundStyle(theme.textPrimary.opacity(0.6))
                 .accessibilityIdentifier("todo_empty")
             Spacer()
         }
     }
 
     private func errorState(_ message: String) -> some View {
-        VStack {
+        VStack(spacing: 12) {
             Spacer()
+            Image(systemName: "exclamationmark.triangle")
+                .font(.title2)
+                .foregroundStyle(theme.accent)
             Text(message)
-                .foregroundColor(.red)
+                .foregroundStyle(theme.accent)
                 .padding()
                 .accessibilityIdentifier("todo_error")
             Spacer()
@@ -92,6 +102,7 @@ struct TodoView: View {
     let mock = PreviewNetworkingMock()
     mock.setData([Todo(userId: 1, id: 1, title: "todo 1", body: "this is todo 1 body")])
     return TodoView(
-        viewModel: TodoViewModel(service: TodoServiceImpl(repository: TodoRepositoryImpl(networking: mock)))
+        viewModel: TodoViewModel(service: TodoServiceImpl(repository: TodoRepositoryImpl(networking: mock))),
+        theme: AppTheme.light
     )
 }
