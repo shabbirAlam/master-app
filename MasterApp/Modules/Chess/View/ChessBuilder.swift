@@ -6,6 +6,10 @@ enum ChessBuilder {
             ratingService: container.chessRatingService,
             chessKitService: container.chessKitService
         )
-        return ChessView(viewModel: viewModel, theme: container.theme)
+        return ChessView(
+            viewModel: viewModel,
+            puzzleRepository: container.puzzleRepository,
+            theme: container.theme
+        )
     }
 }

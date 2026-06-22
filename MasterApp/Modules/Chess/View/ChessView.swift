@@ -6,7 +6,9 @@ struct ChessView: View {
     @State private var selectedColor: PieceColor = .white
     @State private var isAutoAnimating = false
     @State private var autoDisplayColor: PieceColor = .white
+    @State private var showPuzzles = false
     private let theme: Theme
+    private let puzzleRepository: PuzzleRepository
 
     private enum ChessMenuAction: Identifiable {
         case restart, close
@@ -30,8 +32,9 @@ struct ChessView: View {
     private let boardSize: CGFloat
     private let squareSize: CGFloat
 
-    init(viewModel: ChessViewModel, theme: Theme = AppTheme.light) {
+    init(viewModel: ChessViewModel, puzzleRepository: PuzzleRepository = SQLitePuzzleRepository(), theme: Theme = AppTheme.light) {
         self.viewModel = viewModel
+        self.puzzleRepository = puzzleRepository
         self.theme = theme
         let screenWidth = UIScreen.main.bounds.width
         self.boardSize = screenWidth - 32
@@ -195,8 +198,29 @@ struct ChessView: View {
                     .cornerRadius(12)
                 }
                 .accessibilityIdentifier("chess_two_player")
+
+                Button {
+                    showPuzzles = true
+                } label: {
+                    HStack {
+                        Image(systemName: "puzzlepiece.extension.fill")
+                            .font(.title2)
+                        Text("Puzzles")
+                            .font(.title3)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.orange.opacity(0.15))
+                    .cornerRadius(12)
+                }
+                .accessibilityIdentifier("chess_puzzles")
             }
             .padding(.horizontal, 40)
+        }
+        .sheet(isPresented: $showPuzzles) {
+            NavigationStack {
+                PuzzleView(viewModel: PuzzleViewModel(repository: puzzleRepository, userRating: viewModel.userRating))
+            }
         }
     }
 

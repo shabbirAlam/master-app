@@ -12,6 +12,7 @@ final class AppDIContainer {
     let graphQLNetworking: GraphQLNetworking
     let chessRatingService: ChessRatingService
     let chessKitService: ChessKitAIService
+    let puzzleRepository: PuzzleRepository
 
     init(
         theme: Theme = AppTheme.light,
@@ -20,12 +21,14 @@ final class AppDIContainer {
         chessRatingService: ChessRatingService = ChessRatingServiceImpl(
             store: UserDefaultsChessRatingStore()
         ),
-        chessKitService: ChessKitAIService = ChessKitAIServiceImpl()
+        chessKitService: ChessKitAIService = ChessKitAIServiceImpl(),
+        puzzleRepository: PuzzleRepository = SQLitePuzzleRepository()
     ) {
         self.theme = theme
         self.networking = networking
         self.graphQLNetworking = graphQLNetworking
         self.chessRatingService = chessRatingService
         self.chessKitService = chessKitService
+        self.puzzleRepository = puzzleRepository
     }
 }
