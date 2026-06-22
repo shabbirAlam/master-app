@@ -38,22 +38,16 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		58C179212F97A3CA005B726B /* MasterAppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = MasterAppTests;
 			sourceTree = "<group>";
 		};
 		58C1792B2F97A3CA005B726B /* MasterAppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = MasterAppUITests;
 			sourceTree = "<group>";
 		};
 		58C179512F97A4AB005B726B /* MasterApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = MasterApp;
 			sourceTree = "<group>";
 		};

@@ -30,6 +30,7 @@ final class PuzzleViewModel {
             title: "Loading...",
             rating: 0,
             fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -",
+            premove: nil,
             expectedMoves: [],
             responseMoves: []
         )
@@ -45,8 +46,13 @@ final class PuzzleViewModel {
         self.currentPuzzle = puzzle
         self.puzzleRating = puzzle.rating
         self.userRating = userRating
-        guard let state = GameState(fen: puzzle.fen) else {
+        guard var state = GameState(fen: puzzle.fen) else {
             fatalError("Invalid FEN in puzzle \(puzzle.id)")
+        }
+        if let premove = puzzle.premove {
+            guard state.applyUCIMove(premove) else {
+                fatalError("Invalid pre-move \(premove) for puzzle \(puzzle.id)")
+            }
         }
         self.gameState = state
     }
@@ -164,8 +170,19 @@ final class PuzzleViewModel {
         positionToUCI(pos)
     }
 
+    func loadPuzzleById(_ id: String) {
+        guard let puzzle = try? repository?.puzzleById(id) else {
+            errorMessage = "Puzzle \(id) not found"
+            return
+        }
+        applyPuzzle(puzzle)
+    }
+
     func retry() {
-        guard let state = GameState(fen: currentPuzzle.fen) else { return }
+        guard var state = GameState(fen: currentPuzzle.fen) else { return }
+        if let premove = currentPuzzle.premove {
+            guard state.applyUCIMove(premove) else { return }
+        }
         gameState = state
         currentStep = 0
         selectedPosition = nil
@@ -186,9 +203,15 @@ final class PuzzleViewModel {
     }
 
     private func applyPuzzle(_ puzzle: ChessPuzzle) {
-        guard let state = GameState(fen: puzzle.fen) else {
+        guard var state = GameState(fen: puzzle.fen) else {
             AppLogger.chessAI.log("Invalid FEN for puzzle \(puzzle.id): \(puzzle.fen)", .error)
             return
+        }
+        if let premove = puzzle.premove {
+            guard state.applyUCIMove(premove) else {
+                AppLogger.chessAI.log("Invalid pre-move \(premove) for puzzle \(puzzle.id)", .error)
+                return
+            }
         }
         currentPuzzle = puzzle
         puzzleRating = puzzle.rating

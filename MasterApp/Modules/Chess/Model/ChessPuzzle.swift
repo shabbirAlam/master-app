@@ -5,6 +5,7 @@ struct ChessPuzzle: Identifiable, Sendable {
     let title: String
     let rating: Int
     let fen: String
+    let premove: String?
     let expectedMoves: [String]
     let responseMoves: [String]
 

@@ -161,16 +161,16 @@ struct ChessView: View {
                     .accessibilityIdentifier("chess_color_auto")
                 }
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 16)
 
-            VStack(spacing: 0) {
+            VStack(spacing: 8) {
                 Toggle(isOn: $viewModel.undoEnabled) {
                     Label("Undo", systemImage: "arrow.uturn.backward")
                         .font(.caption)
                 }
                 .tint(theme.accent)
                 Divider()
-                    .padding(.leading, 52)
+                    .padding(.leading)
                 Toggle(isOn: $viewModel.showHints) {
                     Label("Hints", systemImage: "lightbulb")
                         .font(.caption)
@@ -178,9 +178,10 @@ struct ChessView: View {
                 .tint(theme.accent)
             }
             .toggleStyle(.switch)
+            .padding(8)
             .background(theme.accent.opacity(0.05))
             .cornerRadius(12)
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 16)
 
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
@@ -242,7 +243,7 @@ struct ChessView: View {
                 }
                 .accessibilityIdentifier("chess_puzzles")
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 16)
         }
         }
         .padding(.bottom, 24)
@@ -283,7 +284,7 @@ struct ChessView: View {
             .background(theme.accent.opacity(0.05))
             .cornerRadius(12)
         }
-        .padding(.horizontal, 40)
+        .padding(.horizontal, 16)
     }
 
     private var gameView: some View {

@@ -55,6 +55,14 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
         }
     }
 
+    func puzzleById(_ id: String) throws -> ChessPuzzle? {
+        guard let db else { return nil }
+        let sql = "SELECT PuzzleId, FEN, Moves, Rating FROM puzzles WHERE PuzzleId = ? LIMIT 1"
+        return queryOne(sql: sql) { stmt in
+            sqlite3_bind_text(stmt, 1, (id as NSString).utf8String, -1, nil)
+        }
+    }
+
     func puzzleCount(near rating: Int, range: Int) throws -> Int {
         guard let db else { return 0 }
         let minRating = max(100, rating - range)
@@ -96,14 +104,17 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
             let rating = Int(sqlite3_column_int(stmt, 3))
 
             let moves = movesStr.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
-            let expectedMoves = stride(from: 0, to: moves.count, by: 2).map { moves[$0] }
-            let responseMoves = stride(from: 1, to: moves.count, by: 2).map { moves[$0] }
+            let premove = moves.count > 0 ? moves[0] : nil
+            let remaining = moves.count > 1 ? Array(moves[1...]) : []
+            let expectedMoves = stride(from: 0, to: remaining.count, by: 2).map { remaining[$0] }
+            let responseMoves = stride(from: 1, to: remaining.count, by: 2).map { remaining[$0] }
 
             results.append(ChessPuzzle(
                 id: puzzleId,
                 title: puzzleId,
                 rating: rating,
                 fen: fen,
+                premove: premove,
                 expectedMoves: expectedMoves,
                 responseMoves: responseMoves
             ))
