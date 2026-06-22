@@ -5,6 +5,7 @@ import Observation
 @Observable
 final class PuzzleViewModel {
     private let repository: PuzzleRepository?
+    private let ratingService: ChessRatingService
     private(set) var gameState: GameState
     private(set) var currentPuzzle: ChessPuzzle
     private(set) var currentStep: Int = 0
@@ -22,8 +23,9 @@ final class PuzzleViewModel {
     var totalSteps: Int { currentPuzzle.totalSteps }
     var isLastStep: Bool { currentStep >= currentPuzzle.expectedMoves.count - 1 }
 
-    init(repository: PuzzleRepository, userRating: Int = 800) {
+    init(repository: PuzzleRepository, ratingService: ChessRatingService, userRating: Int = 800) {
         self.repository = repository
+        self.ratingService = ratingService
         self.userRating = userRating
         let placeholder = ChessPuzzle(
             id: "",
@@ -39,8 +41,9 @@ final class PuzzleViewModel {
         Task { await loadInitial() }
     }
 
-    init(puzzle: ChessPuzzle, userRating: Int = 800) {
+    init(puzzle: ChessPuzzle, ratingService: ChessRatingService = ChessRatingServiceImpl(store: InMemoryChessRatingStore()), userRating: Int = 800) {
         self.repository = nil
+        self.ratingService = ratingService
         self.currentPuzzle = puzzle
         self.puzzleRating = puzzle.rating
         self.userRating = userRating
@@ -100,6 +103,16 @@ final class PuzzleViewModel {
         }
     }
 
+    private var hasAppliedRatingUpdate = false
+
+    private func applyRatingUpdate(_ outcome: ChessMatchOutcome) {
+        guard !hasAppliedRatingUpdate else { return }
+        hasAppliedRatingUpdate = true
+        let profile = ratingService.applyMatchOutcome(outcome, opponentRating: puzzleRating)
+        userRating = profile.userRating
+        AppLogger.viewModel.log("Puzzle rating update: \(outcome) vs \(puzzleRating), new rating: \(userRating)", .info)
+    }
+
     private func applyUserMove(_ uci: String, from: Position, to: Position) {
         let expected = currentPuzzle.expectedMoves[currentStep]
         guard uci == expected else {
@@ -107,6 +120,7 @@ final class PuzzleViewModel {
             let toNotation = positionToChessNotation(to)
             errorMessage = "Expected \(expected.prefix(2))-\(expected.suffix(2)), not \(fromNotation)-\(toNotation)"
             puzzleFailed = true
+            applyRatingUpdate(.loss)
             AppLogger.chessAI.log("Puzzle \(self.currentPuzzle.id) step \(self.currentStep): expected \(expected), got \(uci)", .error)
             return
         }
@@ -114,6 +128,7 @@ final class PuzzleViewModel {
         guard gameState.applyUCIMove(uci) else {
             errorMessage = "Illegal move"
             puzzleFailed = true
+            applyRatingUpdate(.loss)
             return
         }
 
@@ -127,6 +142,7 @@ final class PuzzleViewModel {
 
         if currentStep >= currentPuzzle.expectedMoves.count {
             puzzleCompleted = true
+            applyRatingUpdate(.win)
             AppLogger.chessAI.log("Puzzle \(self.currentPuzzle.id) completed", .info)
         }
     }
@@ -139,6 +155,7 @@ final class PuzzleViewModel {
         guard gameState.applyUCIMove(response) else {
             AppLogger.chessAI.log("Failed to apply response \(response) in puzzle \(self.currentPuzzle.id)", .error)
             puzzleFailed = true
+            applyRatingUpdate(.loss)
             return
         }
     }
@@ -163,6 +180,7 @@ final class PuzzleViewModel {
         puzzleCompleted = false
         puzzleFailed = false
         errorMessage = nil
+        hasAppliedRatingUpdate = false
     }
 
     func nextPuzzle() {
@@ -196,6 +214,7 @@ final class PuzzleViewModel {
         puzzleCompleted = false
         puzzleFailed = false
         errorMessage = nil
+        hasAppliedRatingUpdate = false
     }
 
     private func loadAndSelectNext() async {

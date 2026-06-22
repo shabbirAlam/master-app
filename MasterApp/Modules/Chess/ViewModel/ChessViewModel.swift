@@ -21,7 +21,7 @@ final class ChessViewModel {
     var undoEnabled = true
     var showHints = true
 
-    private let ratingService: ChessRatingService
+    let ratingService: ChessRatingService
     private var aiTask: Task<Void, Never>?
     private var hasAppliedRatingUpdate = false
     private var turnStartTime: Date
@@ -270,6 +270,13 @@ final class ChessViewModel {
 
     func backToMenu() {
         resetGame()
+        reloadRatingFromStore()
+    }
+
+    private func reloadRatingFromStore() {
+        let profile = ratingService.loadProfile()
+        userRating = profile.userRating
+        computerRating = profile.computerRating
     }
 
     private func finalizeCompletedGameIfNeeded() {

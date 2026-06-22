@@ -7,6 +7,7 @@ struct ChessView: View {
     @State private var isAutoAnimating = false
     @State private var autoDisplayColor: PieceColor = .white
     @State private var showPuzzles = false
+    @State private var puzzleViewModel: PuzzleViewModel?
     private let theme: Theme
     private let puzzleRepository: PuzzleRepository
 
@@ -98,6 +99,11 @@ struct ChessView: View {
             }
         } message: { action in
             Text(action.message)
+        }
+        .navigationDestination(isPresented: $showPuzzles) {
+            if let vm = puzzleViewModel {
+                PuzzleView(viewModel: vm)
+            }
         }
     }
 
@@ -211,6 +217,9 @@ struct ChessView: View {
                 .accessibilityIdentifier("chess_two_player")
 
                 Button {
+                    let vm = PuzzleViewModel(repository: puzzleRepository, ratingService: viewModel.ratingService, userRating: viewModel.userRating)
+                    vm.showHints = viewModel.showHints
+                    puzzleViewModel = vm
                     showPuzzles = true
                 } label: {
                     HStack {
@@ -227,13 +236,6 @@ struct ChessView: View {
                 .accessibilityIdentifier("chess_puzzles")
             }
             .padding(.horizontal, 40)
-        }
-        .sheet(isPresented: $showPuzzles) {
-            let vm = PuzzleViewModel(repository: puzzleRepository, userRating: viewModel.userRating)
-            vm.showHints = viewModel.showHints
-            return NavigationStack {
-                PuzzleView(viewModel: vm)
-            }
         }
     }
 

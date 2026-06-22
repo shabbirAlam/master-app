@@ -4,6 +4,7 @@ protocol ChessRatingService: Sendable {
     func loadProfile() -> ChessRatingProfile
     func updateComputerRating(_ rating: Int) -> ChessRatingProfile
     func applyMatchOutcome(_ outcome: ChessMatchOutcome) -> ChessRatingProfile
+    func applyMatchOutcome(_ outcome: ChessMatchOutcome, opponentRating: Int) -> ChessRatingProfile
 }
 
 struct ChessRatingServiceImpl: ChessRatingService {
@@ -38,6 +39,20 @@ struct ChessRatingServiceImpl: ChessRatingService {
         let expectedScore = expectedScore(
             playerRating: profile.userRating,
             opponentRating: profile.computerRating
+        )
+        let actualScore = score(for: outcome)
+        let delta = Int((kFactor * (actualScore - expectedScore)).rounded())
+        profile.userRating = ChessRatingProfile.clamp(profile.userRating + delta)
+        store.saveProfile(profile)
+        return profile
+    }
+
+    func applyMatchOutcome(_ outcome: ChessMatchOutcome, opponentRating: Int) -> ChessRatingProfile {
+        AppLogger.service.log("Applying match outcome: \(outcome) vs \(opponentRating)", .info)
+        var profile = store.loadProfile()
+        let expectedScore = expectedScore(
+            playerRating: profile.userRating,
+            opponentRating: opponentRating
         )
         let actualScore = score(for: outcome)
         let delta = Int((kFactor * (actualScore - expectedScore)).rounded())

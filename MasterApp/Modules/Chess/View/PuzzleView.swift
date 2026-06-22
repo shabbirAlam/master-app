@@ -3,7 +3,6 @@ import SwiftUI
 struct PuzzleView: View {
     @State private var viewModel: PuzzleViewModel
     @State private var showPuzzleList = false
-    @Environment(\.dismiss) private var dismiss
     private let theme: Theme
 
     private let boardSize: CGFloat
@@ -25,14 +24,6 @@ struct PuzzleView: View {
         .navigationTitle("Chess Puzzles")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                }
-                .accessibilityIdentifier("puzzle_close")
-            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showPuzzleList = true
