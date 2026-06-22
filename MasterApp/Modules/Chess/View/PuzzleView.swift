@@ -63,19 +63,13 @@ struct PuzzleView: View {
 
     private var ratingBar: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("You: \(viewModel.userRating)")
-                    .font(.caption)
-                    .foregroundColor(theme.textPrimary.opacity(0.7))
-                Text("Puzzle: \(viewModel.puzzleRating)")
-                    .font(.caption)
-                    .foregroundColor(theme.textPrimary.opacity(0.7))
-            }
+            Text("You: \(viewModel.userRating)")
+                .font(.caption)
+                .foregroundColor(theme.textPrimary.opacity(0.7))
             Spacer()
-            Text(viewModel.currentPuzzle.title)
-                .font(.caption.bold())
-                .foregroundColor(theme.textPrimary)
-            Spacer()
+            Text("Puzzle: \(viewModel.puzzleRating)")
+                .font(.caption)
+                .foregroundColor(theme.textPrimary.opacity(0.7))
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
@@ -162,9 +156,9 @@ struct PuzzleView: View {
             return Color.yellow.opacity(0.3)
         }
         if isValidMove {
-            return isLight ? Color.green.opacity(0.3) : Color.green.opacity(0.4)
+            return isLight ? theme.accent.opacity(0.25) : theme.accent.opacity(0.35)
         }
-        return isLight ? Color(white: 0.9) : Color(white: 0.6)
+        return isLight ? theme.boardLight : theme.boardDark
     }
 
     private var successOverlay: some View {

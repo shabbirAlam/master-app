@@ -4,4 +4,6 @@ protocol Theme: Sendable {
     var background: Color { get }
     var textPrimary: Color { get }
     var accent: Color { get }
+    var boardLight: Color { get }
+    var boardDark: Color { get }
 }

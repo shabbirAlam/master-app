@@ -117,14 +117,20 @@ struct ChessView: View {
     }
 
     private var modeSelectionView: some View {
-        VStack(spacing: 24) {
-            Text("♚ Chess ♔")
-                .font(.system(size: 48, weight: .bold))
-                .foregroundColor(theme.textPrimary)
+        ScrollView {
+            VStack(spacing: 24) {
+                VStack(spacing: 4) {
+                    Text("♚")
+                        .font(.system(size: 56))
+                    Text("Chess")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(theme.textPrimary)
+                }
+                .padding(.top, 16)
 
-            ratingSetupView
+                ratingSetupView
 
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 Text("Your Color")
                     .font(.headline)
                     .foregroundColor(theme.textPrimary)
@@ -144,11 +150,11 @@ struct ChessView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 9)
-                        .background(isAutoAnimating ? Color.orange.opacity(0.25) : Color.purple.opacity(0.15))
+                        .background(isAutoAnimating ? theme.accent.opacity(0.2) : Color.purple.opacity(0.15))
                         .cornerRadius(10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(isAutoAnimating ? Color.orange : Color.purple, lineWidth: 2)
+                                .stroke(isAutoAnimating ? theme.accent : Color.purple, lineWidth: 2)
                         )
                     }
                     .disabled(isAutoAnimating)
@@ -157,26 +163,23 @@ struct ChessView: View {
             }
             .padding(.horizontal, 40)
 
-            Toggle(isOn: $viewModel.undoEnabled) {
-                HStack(spacing: 8) {
-                    Image(systemName: "arrow.uturn.backward")
-                        .font(.caption)
-                    Text("Undo")
+            VStack(spacing: 0) {
+                Toggle(isOn: $viewModel.undoEnabled) {
+                    Label("Undo", systemImage: "arrow.uturn.backward")
                         .font(.caption)
                 }
-            }
-            .toggleStyle(.switch)
-            .padding(.horizontal, 40)
-
-            Toggle(isOn: $viewModel.showHints) {
-                HStack(spacing: 8) {
-                    Image(systemName: "lightbulb")
-                        .font(.caption)
-                    Text("Hints")
+                .tint(theme.accent)
+                Divider()
+                    .padding(.leading, 52)
+                Toggle(isOn: $viewModel.showHints) {
+                    Label("Hints", systemImage: "lightbulb")
                         .font(.caption)
                 }
+                .tint(theme.accent)
             }
             .toggleStyle(.switch)
+            .background(theme.accent.opacity(0.05))
+            .cornerRadius(12)
             .padding(.horizontal, 40)
 
             VStack(spacing: 16) {
@@ -228,17 +231,21 @@ struct ChessView: View {
                         Image(systemName: "puzzlepiece.extension")
                             .font(.title2)
                         Text("Puzzles")
-                            .font(.title3)
+                            .font(.callout.weight(.medium))
                     }
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.orange.opacity(0.15))
-                    .cornerRadius(12)
+                    .padding(.vertical, 16)
+                    .background(Color.orange.gradient)
+                    .foregroundColor(.white)
+                    .cornerRadius(14)
+                    .shadow(color: .orange.opacity(0.3), radius: 6, y: 3)
                 }
                 .accessibilityIdentifier("chess_puzzles")
             }
             .padding(.horizontal, 40)
         }
+        }
+        .padding(.bottom, 24)
     }
 
     private var ratingSetupView: some View {
@@ -249,9 +256,14 @@ struct ChessView: View {
                 .accessibilityIdentifier("chess_user_rating")
 
             VStack(spacing: 8) {
-                Text("Computer Elo: \(viewModel.computerRating)")
-                    .font(.subheadline)
-                    .foregroundColor(theme.textPrimary.opacity(0.8))
+                HStack {
+                    Text("Computer Elo:")
+                        .font(.subheadline)
+                        .foregroundColor(theme.textPrimary.opacity(0.8))
+                    Text("\(viewModel.computerRating)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(theme.accent)
+                }
 
                 Stepper(
                     value: Binding(
@@ -264,8 +276,12 @@ struct ChessView: View {
                     EmptyView()
                 }
                 .labelsHidden()
+                .tint(theme.accent)
                 .accessibilityIdentifier("chess_computer_rating_stepper")
             }
+            .padding(12)
+            .background(theme.accent.opacity(0.05))
+            .cornerRadius(12)
         }
         .padding(.horizontal, 40)
     }
@@ -449,9 +465,9 @@ struct ChessView: View {
             return Color.yellow.opacity(0.3)
         }
         if isValidMove {
-            return isLight ? Color.green.opacity(0.3) : Color.green.opacity(0.4)
+            return isLight ? theme.accent.opacity(0.25) : theme.accent.opacity(0.35)
         }
-        return isLight ? Color(white: 0.9) : Color(white: 0.6)
+        return isLight ? theme.boardLight : theme.boardDark
     }
 
     private func accessibilityLabel(for piece: ChessPiece?, at position: Position, isSelected: Bool, isValidMove: Bool) -> String {
@@ -483,11 +499,11 @@ struct ChessView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 9)
-            .background(Color.purple.opacity(0.15))
+            .background(theme.accent.opacity(0.1))
             .cornerRadius(10)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.accentColor, lineWidth: isSelected ? 2 : 0)
+                    .stroke(isSelected ? theme.accent : Color.clear, lineWidth: 2)
             )
         }
         .disabled(isAutoAnimating)
