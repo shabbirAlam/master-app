@@ -122,10 +122,6 @@ struct ChessView: View {
                 .font(.system(size: 48, weight: .bold))
                 .foregroundColor(theme.textPrimary)
 
-            Text("Choose a game mode")
-                .font(.title3)
-                .foregroundColor(theme.textPrimary.opacity(0.7))
-
             ratingSetupView
 
             VStack(spacing: 12) {
@@ -184,37 +180,43 @@ struct ChessView: View {
             .padding(.horizontal, 40)
 
             VStack(spacing: 16) {
-                Button {
-                    viewModel.setGameMode(.vsComputer, with: selectedColor)
-                } label: {
-                    HStack {
-                        Image(systemName: "cpu")
-                            .font(.title2)
-                        Text("vs Computer")
-                            .font(.title3)
+                HStack(spacing: 16) {
+                    Button {
+                        viewModel.setGameMode(.vsComputer, with: selectedColor)
+                    } label: {
+                        VStack(spacing: 6) {
+                            Image(systemName: "cpu")
+                                .font(.title)
+                            Text("vs AI")
+                                .font(.callout.weight(.medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(.blue.gradient)
+                        .foregroundColor(.white)
+                        .cornerRadius(14)
+                        .shadow(color: .blue.opacity(0.3), radius: 6, y: 3)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue.opacity(0.15))
-                    .cornerRadius(12)
-                }
-                .accessibilityIdentifier("chess_vs_computer")
+                    .accessibilityIdentifier("chess_vs_computer")
 
-                Button {
-                    viewModel.setGameMode(.twoPlayer, with: selectedColor)
-                } label: {
-                    HStack {
-                        Image(systemName: "person.2")
-                            .font(.title2)
-                        Text("2 Players")
-                            .font(.title3)
+                    Button {
+                        viewModel.setGameMode(.twoPlayer, with: selectedColor)
+                    } label: {
+                        VStack(spacing: 6) {
+                            Image(systemName: "person.2")
+                                .font(.title)
+                            Text("2 Players")
+                                .font(.callout.weight(.medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(.green.gradient)
+                        .foregroundColor(.white)
+                        .cornerRadius(14)
+                        .shadow(color: .green.opacity(0.3), radius: 6, y: 3)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green.opacity(0.15))
-                    .cornerRadius(12)
+                    .accessibilityIdentifier("chess_two_player")
                 }
-                .accessibilityIdentifier("chess_two_player")
 
                 Button {
                     let vm = PuzzleViewModel(repository: puzzleRepository, ratingService: viewModel.ratingService, userRating: viewModel.userRating)
@@ -223,7 +225,7 @@ struct ChessView: View {
                     showPuzzles = true
                 } label: {
                     HStack {
-                        Image(systemName: "puzzlepiece.extension.fill")
+                        Image(systemName: "puzzlepiece.extension")
                             .font(.title2)
                         Text("Puzzles")
                             .font(.title3)
