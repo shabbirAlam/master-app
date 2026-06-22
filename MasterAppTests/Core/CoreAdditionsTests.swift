@@ -15,16 +15,16 @@ struct AppDIContainerTests {
 struct AppThemeTests {
     @Test func lightTheme() {
         let theme = AppTheme.light
-        #expect(theme.background == .white)
-        #expect(theme.textPrimary == .black)
-        #expect(theme.accent == .blue)
+        #expect(theme.background == Color(hex: "#FAF7F2"))
+        #expect(theme.textPrimary == Color(hex: "#262626"))
+        #expect(theme.accent == Color(hex: "#4073D9"))
     }
 
     @Test func darkTheme() {
         let theme = AppTheme.dark
-        #expect(theme.background == .black)
-        #expect(theme.textPrimary == .white)
-        #expect(theme.accent == .blue)
+        #expect(theme.background == Color(hex: "#1F1F24"))
+        #expect(theme.textPrimary == Color(hex: "#EBEBF0"))
+        #expect(theme.accent == Color(hex: "#6699FF"))
     }
 }
 
