@@ -47,6 +47,20 @@ struct ChessPiece: Hashable, Sendable {
         }
     }
 
+    nonisolated var assetName: String {
+        let prefix = color == .white ? "w" : "b"
+        let suffix: String
+        switch type {
+        case .king: suffix = "K"
+        case .queen: suffix = "Q"
+        case .rook: suffix = "R"
+        case .bishop: suffix = "B"
+        case .knight: suffix = "N"
+        case .pawn: suffix = "P"
+        }
+        return prefix + suffix
+    }
+
     nonisolated var value: Int {
         switch type {
         case .pawn:   1

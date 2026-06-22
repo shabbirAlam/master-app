@@ -133,8 +133,10 @@ struct PuzzleView: View {
             }
 
             if let piece {
-                Text(piece.symbol)
-                    .font(.system(size: squareSize * 0.7))
+                Image(piece.assetName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: squareSize * 0.75, height: squareSize * 0.75)
             }
         }
         .frame(width: squareSize, height: squareSize)

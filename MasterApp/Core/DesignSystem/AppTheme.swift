@@ -1,5 +1,17 @@
 import SwiftUI
 
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        let value = UInt(hex, radix: 16) ?? 0
+        self.init(
+            red: Double((value >> 16) & 0xFF) / 255,
+            green: Double((value >> 8) & 0xFF) / 255,
+            blue: Double(value & 0xFF) / 255
+        )
+    }
+}
+
 struct AppTheme: Theme {
     let background: Color
     let textPrimary: Color
@@ -8,18 +20,18 @@ struct AppTheme: Theme {
     let boardDark: Color
 
     static let light = AppTheme(
-        background: Color(red: 0.98, green: 0.97, blue: 0.95),
-        textPrimary: Color(red: 0.15, green: 0.15, blue: 0.15),
-        accent: Color(red: 0.25, green: 0.45, blue: 0.85),
-        boardLight: Color(red: 0.94, green: 0.91, blue: 0.84),
-        boardDark: Color(red: 0.56, green: 0.40, blue: 0.24)
+        background: Color(hex: "#FAF7F2"),
+        textPrimary: Color(hex: "#262626"),
+        accent: Color(hex: "#4073D9"),
+        boardLight: Color(hex: "#F0E8D6"),
+        boardDark: Color(hex: "#AD8A61")
     )
 
     static let dark = AppTheme(
-        background: Color(red: 0.12, green: 0.12, blue: 0.14),
-        textPrimary: Color(red: 0.92, green: 0.92, blue: 0.94),
-        accent: Color(red: 0.40, green: 0.60, blue: 1.00),
-        boardLight: Color(red: 0.76, green: 0.70, blue: 0.50),
-        boardDark: Color(red: 0.30, green: 0.20, blue: 0.10)
+        background: Color(hex: "#1F1F24"),
+        textPrimary: Color(hex: "#EBEBF0"),
+        accent: Color(hex: "#6699FF"),
+        boardLight: Color(hex: "#C2B380"),
+        boardDark: Color(hex: "#4D331A")
     )
 }

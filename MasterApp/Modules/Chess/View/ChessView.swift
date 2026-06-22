@@ -360,8 +360,10 @@ struct ChessView: View {
                 .font(.caption)
                 .foregroundColor(theme.textPrimary.opacity(0.6))
             ForEach(Array(pieces.enumerated()), id: \.offset) { _, piece in
-                Text(piece.symbol)
-                    .font(.caption)
+                Image(piece.assetName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 16, height: 16)
             }
             Spacer()
         }
@@ -422,8 +424,10 @@ struct ChessView: View {
             }
 
             if let piece {
-                Text(piece.symbol)
-                    .font(.system(size: squareSize * 0.7))
+                Image(piece.assetName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: squareSize * 0.75, height: squareSize * 0.75)
             }
 
             if isRankLabel {
@@ -591,8 +595,11 @@ struct ChessView: View {
                         viewModel.selectPromotion(type)
                     } label: {
                         VStack {
-                            Text(ChessPiece(type: type, color: viewModel.game.currentTurn == .white ? .white : .black).symbol)
-                                .font(.system(size: 44))
+                            let promoPiece = ChessPiece(type: type, color: viewModel.game.currentTurn == .white ? .white : .black)
+                            Image(promoPiece.assetName)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 44, height: 44)
                             Text(type.rawValue.capitalized)
                                 .font(.caption)
                         }
