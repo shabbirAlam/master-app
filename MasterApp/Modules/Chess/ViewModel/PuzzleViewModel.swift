@@ -18,8 +18,6 @@ final class PuzzleViewModel {
     var showHints = true
     private(set) var userRating: Int = 800
     private(set) var puzzleRating: Int
-    private(set) var availablePuzzles: [ChessPuzzle] = []
-
     var totalSteps: Int { currentPuzzle.totalSteps }
     var isLastStep: Bool { currentStep >= currentPuzzle.expectedMoves.count - 1 }
 
@@ -55,13 +53,8 @@ final class PuzzleViewModel {
 
     private func loadInitial() async {
         isLoading = true
-        let puzzles = (try? repository?.puzzles(near: userRating, range: 200)) ?? []
-        availablePuzzles = puzzles
-        if let first = puzzles.first {
-            applyPuzzle(first)
-        } else {
-            let fallback = try? repository?.randomPuzzle(excluding: nil, near: 1200, range: 800) ?? nil
-            if let fallback { applyPuzzle(fallback) }
+        if let puzzle = try? repository?.randomPuzzle(excluding: nil, near: userRating, range: 100) {
+            applyPuzzle(puzzle)
         }
         isLoading = false
     }
@@ -184,15 +177,7 @@ final class PuzzleViewModel {
     }
 
     func nextPuzzle() {
-        let remaining = availablePuzzles.filter { $0.id != currentPuzzle.id }
-        if let next = remaining.randomElement() {
-            applyPuzzle(next)
-        } else {
-            Task { await loadAndSelectNext() }
-        }
-    }
-
-    func selectPuzzle(_ puzzle: ChessPuzzle) {
+        guard let puzzle = try? repository?.randomPuzzle(excluding: currentPuzzle.id, near: userRating, range: 100) else { return }
         applyPuzzle(puzzle)
     }
 
@@ -215,11 +200,5 @@ final class PuzzleViewModel {
         puzzleFailed = false
         errorMessage = nil
         hasAppliedRatingUpdate = false
-    }
-
-    private func loadAndSelectNext() async {
-        let next = try? repository?.randomPuzzle(excluding: currentPuzzle.id, near: userRating, range: 300) ?? nil
-        guard let next else { return }
-        applyPuzzle(next)
     }
 }

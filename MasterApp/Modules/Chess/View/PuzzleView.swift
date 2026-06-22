@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PuzzleView: View {
     @State private var viewModel: PuzzleViewModel
-    @State private var showPuzzleList = false
+    @State private var showOverlay = true
     private let theme: Theme
 
     private let boardSize: CGFloat
@@ -23,37 +23,39 @@ struct PuzzleView: View {
         }
         .navigationTitle("Chess Puzzles")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showPuzzleList = true
-                } label: {
-                    Image(systemName: "list.bullet")
-                }
-                .accessibilityIdentifier("puzzle_list_button")
-            }
-        }
-        .sheet(isPresented: $showPuzzleList) {
-            puzzleListView
-        }
         .overlay {
-            if viewModel.puzzleCompleted {
+            if viewModel.puzzleCompleted, showOverlay {
                 successOverlay
+                    .onTapGesture { showOverlay = false }
+                    .onAppear { startDismissTimer() }
             }
-            if viewModel.puzzleFailed, let error = viewModel.errorMessage {
+            if viewModel.puzzleFailed, let error = viewModel.errorMessage, showOverlay {
                 errorOverlay(message: error)
+                    .onTapGesture { showOverlay = false }
+                    .onAppear { startDismissTimer() }
             }
         }
         .animation(.easeInOut, value: viewModel.puzzleCompleted)
         .animation(.easeInOut, value: viewModel.puzzleFailed)
+        .onChange(of: viewModel.puzzleCompleted) { showOverlay = true }
+        .onChange(of: viewModel.puzzleFailed) { showOverlay = true }
+    }
+
+    private func startDismissTimer() {
+        Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            showOverlay = false
+        }
     }
 
     @ViewBuilder
     private var content: some View {
         VStack(spacing: 8) {
             ratingBar
-            progressBar
             boardView
+            if viewModel.puzzleCompleted || viewModel.puzzleFailed {
+                actionButtons
+            }
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -74,27 +76,9 @@ struct PuzzleView: View {
                 .font(.caption.bold())
                 .foregroundColor(theme.textPrimary)
             Spacer()
-            Text("\(viewModel.currentStep + 1)/\(viewModel.totalSteps)")
-                .font(.caption.monospacedDigit())
-                .foregroundColor(theme.textPrimary.opacity(0.7))
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
-    }
-
-    private var progressBar: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 8)
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.blue)
-                    .frame(width: geo.size.width * CGFloat(viewModel.currentStep) / CGFloat(max(viewModel.totalSteps, 1)), height: 8)
-            }
-        }
-        .frame(height: 8)
-        .padding(.horizontal, 4)
     }
 
     private var boardRows: [Int] { [0, 1, 2, 3, 4, 5, 6, 7] }
@@ -120,10 +104,11 @@ struct PuzzleView: View {
         let piece = viewModel.gameState.piece(at: position)
         let isFileLabel = row == 7
         let isRankLabel = col == 0
+        let isKingInCheck = viewModel.gameState.status == .check && viewModel.gameState.findKing(viewModel.gameState.currentTurn) == position
 
         return ZStack {
             Rectangle()
-                .fill(squareColor(isLight: isLight, isSelected: isSelected, isLastMove: isLastMove))
+                .fill(squareColor(isLight: isLight, isSelected: isSelected, isValidMove: isValidMove, isLastMove: isLastMove, isKingInCheck: isKingInCheck))
 
             if isValidMove {
                 if piece != nil {
@@ -166,12 +151,18 @@ struct PuzzleView: View {
         .accessibilityIdentifier("puzzle_square_\(position.algebraic)")
     }
 
-    private func squareColor(isLight: Bool, isSelected: Bool, isLastMove: Bool) -> Color {
+    private func squareColor(isLight: Bool, isSelected: Bool, isValidMove: Bool, isLastMove: Bool, isKingInCheck: Bool) -> Color {
         if isSelected {
             return Color.yellow.opacity(0.6)
         }
+        if isKingInCheck {
+            return Color.red.opacity(0.45)
+        }
         if isLastMove {
             return Color.yellow.opacity(0.3)
+        }
+        if isValidMove {
+            return isLight ? Color.green.opacity(0.3) : Color.green.opacity(0.4)
         }
         return isLight ? Color(white: 0.9) : Color(white: 0.6)
     }
@@ -190,29 +181,6 @@ struct PuzzleView: View {
                 Text("Rating: \(viewModel.puzzleRating)")
                     .font(.headline)
                     .foregroundColor(.white.opacity(0.8))
-                HStack(spacing: 16) {
-                    Button {
-                        viewModel.retry()
-                    } label: {
-                        Label("Retry", systemImage: "arrow.counterclockwise")
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(10)
-                    }
-                    .accessibilityIdentifier("puzzle_retry")
-                    Button {
-                        viewModel.nextPuzzle()
-                    } label: {
-                        Label("Next", systemImage: "forward.end")
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                    }
-                    .accessibilityIdentifier("puzzle_next")
-                }
-                .foregroundColor(.white)
             }
             .padding(24)
             .background(.ultraThinMaterial)
@@ -232,29 +200,6 @@ struct PuzzleView: View {
                     .font(.headline)
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
-                HStack(spacing: 16) {
-                    Button {
-                        viewModel.retry()
-                    } label: {
-                        Label("Retry", systemImage: "arrow.counterclockwise")
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(10)
-                    }
-                    .accessibilityIdentifier("puzzle_retry_error")
-                    Button {
-                        viewModel.nextPuzzle()
-                    } label: {
-                        Label("Next Puzzle", systemImage: "forward.end")
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                    }
-                    .accessibilityIdentifier("puzzle_next_error")
-                }
-                .foregroundColor(.white)
             }
             .padding(24)
             .background(.ultraThinMaterial)
@@ -262,42 +207,35 @@ struct PuzzleView: View {
         }
     }
 
-    private var puzzleListView: some View {
-        NavigationStack {
-            List(viewModel.availablePuzzles) { puzzle in
-                Button {
-                    viewModel.selectPuzzle(puzzle)
-                    showPuzzleList = false
-                } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(puzzle.title)
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                            Text("Rating: \(puzzle.rating) | Moves: \(puzzle.totalSteps)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        if puzzle.id == viewModel.currentPuzzle.id {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-                .accessibilityIdentifier("puzzle_list_item_\(puzzle.id)")
+    private var actionButtons: some View {
+        HStack(spacing: 16) {
+            Button {
+                viewModel.retry()
+            } label: {
+                Label("Retry", systemImage: "arrow.counterclockwise")
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .foregroundColor(.blue)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.blue, lineWidth: 1.5)
+                    )
             }
-            .navigationTitle("Select Puzzle")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        showPuzzleList = false
-                    }
-                }
+            .accessibilityIdentifier("puzzle_retry")
+            Button {
+                viewModel.nextPuzzle()
+            } label: {
+                Label("Next", systemImage: "forward.end")
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color.blue)
+                    .cornerRadius(10)
             }
+            .accessibilityIdentifier("puzzle_next")
         }
+        .foregroundColor(.white)
     }
 }
 

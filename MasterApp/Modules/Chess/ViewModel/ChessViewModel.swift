@@ -12,7 +12,6 @@ final class ChessViewModel {
     private(set) var statusMessage: String = "Welcome"
     private(set) var userRating: Int
     private(set) var computerRating: Int
-    private(set) var ratingChangeMessage: String?
     var showPromotionDialog = false
     private(set) var promotionMoves: [Move] = []
     private(set) var isAIThinking = false
@@ -58,7 +57,6 @@ final class ChessViewModel {
         game = GameState()
         selectedPosition = nil
         validMoves = []
-        ratingChangeMessage = nil
         hasAppliedRatingUpdate = false
         userLastMoveTime = nil
         computerLastMoveTime = nil
@@ -171,7 +169,6 @@ final class ChessViewModel {
         game = GameState()
         selectedPosition = nil
         validMoves = []
-        ratingChangeMessage = nil
         hasAppliedRatingUpdate = false
         userLastMoveTime = nil
         computerLastMoveTime = nil
@@ -197,7 +194,6 @@ final class ChessViewModel {
         }
         guard game.undoLastMove() else { return }
 
-        ratingChangeMessage = nil
         hasAppliedRatingUpdate = false
         userLastMoveTime = nil
         computerLastMoveTime = nil
@@ -300,13 +296,11 @@ final class ChessViewModel {
         let previousRating = userRating
         let updatedProfile = ratingService.applyMatchOutcome(outcome)
         userRating = updatedProfile.userRating
-        computerRating = updatedProfile.computerRating
         hasAppliedRatingUpdate = true
 
         let delta = userRating - previousRating
         let deltaPrefix = delta > 0 ? "+" : ""
         let ratingMessage = delta == 0 ? "Rating unchanged" : "Rating \(deltaPrefix)\(delta)"
-        ratingChangeMessage = ratingMessage
         statusMessage = "\(baseMessage) \(ratingMessage)"
     }
 

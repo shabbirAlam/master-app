@@ -385,10 +385,11 @@ struct ChessView: View {
         let bottomRow = boardRows.last
         let isFileLabel = row == bottomRow
         let isRankLabel = columnsReversed ? col == 7 : col == 0
+        let isKingInCheck = viewModel.game.status == .check && viewModel.game.findKing(viewModel.game.currentTurn) == position
 
         return ZStack {
             Rectangle()
-                .fill(squareColor(isLight: isLight, isSelected: isSelected, isValidMove: isValidMove, isLastMove: isLastMove))
+                .fill(squareColor(isLight: isLight, isSelected: isSelected, isValidMove: isValidMove, isLastMove: isLastMove, isKingInCheck: isKingInCheck))
 
             if isValidMove {
                 if piece != nil {
@@ -435,9 +436,12 @@ struct ChessView: View {
         .accessibilityLabel(accessibilityLabel(for: piece, at: position, isSelected: isSelected, isValidMove: isValidMove))
     }
 
-    private func squareColor(isLight: Bool, isSelected: Bool, isValidMove: Bool, isLastMove: Bool) -> Color {
+    private func squareColor(isLight: Bool, isSelected: Bool, isValidMove: Bool, isLastMove: Bool, isKingInCheck: Bool) -> Color {
         if isSelected {
             return Color.yellow.opacity(0.6)
+        }
+        if isKingInCheck {
+            return Color.red.opacity(0.45)
         }
         if isLastMove {
             return Color.yellow.opacity(0.3)
