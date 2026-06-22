@@ -306,9 +306,11 @@ final class ChessViewModel {
         switch rating {
         case ..<700: 300
         case ..<1000: 500
-        case ..<1400: 1000
-        case ..<1800: 1500
-        default: 2000
+        case ..<1300: 600
+        case ..<1600: 700
+        case ..<1900: 800
+        case ..<2100: 900
+        default: 1000
         }
     }
 
