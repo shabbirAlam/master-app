@@ -7,7 +7,7 @@ final class HomeViewModel {
     private(set) var items: [HomeFeatures]
     let theme: Theme
 
-    init(features: [HomeFeatures] = HomeFeatures.allCases, theme: Theme = AppTheme.light) {
+    init(features: [HomeFeatures], theme: Theme) {
         self.items = features
         self.theme = theme
     }
