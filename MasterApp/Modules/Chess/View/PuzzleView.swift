@@ -174,9 +174,6 @@ struct PuzzleView: View {
                 Text("Puzzle Solved!")
                     .font(.title.bold())
                     .foregroundColor(.white)
-                Text("Rating: \(viewModel.puzzleRating)")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
             }
             .padding(24)
             .background(.ultraThinMaterial)

@@ -30,9 +30,10 @@ enum AppLogger {
             self.logger = Logger(subsystem: AppLogger.subsystem, category: category)
         }
 
-        func log(_ message: String, _ level: Level = .debug) {
+        func log(_ message: String, _ level: Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
 #if DEBUG
-            logger.log(level: level.osLogType, "\(message, privacy: .public)")
+            let filename = (file as NSString).lastPathComponent
+            logger.log(level: level.osLogType, "[\(filename):\(line) \(function)] \(message, privacy: .public)")
 #endif
         }
     }
