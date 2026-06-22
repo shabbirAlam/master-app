@@ -9,10 +9,12 @@ final class PuzzleViewModel {
     private(set) var currentPuzzle: ChessPuzzle
     private(set) var currentStep: Int = 0
     private(set) var selectedPosition: Position?
+    private(set) var validMoves: [Position] = []
     private(set) var puzzleCompleted: Bool = false
     private(set) var puzzleFailed: Bool = false
     private(set) var errorMessage: String?
     private(set) var isLoading = false
+    var showHints = true
     private(set) var userRating: Int = 800
     private(set) var puzzleRating: Int
     private(set) var availablePuzzles: [ChessPuzzle] = []
@@ -62,12 +64,17 @@ final class PuzzleViewModel {
     }
 
     func selectSquare(at position: Position) {
-        guard !puzzleCompleted, !puzzleFailed else { return }
+        guard !puzzleCompleted, !puzzleFailed else {
+            selectedPosition = nil
+            validMoves = []
+            return
+        }
 
         if let selected = selectedPosition {
             let piece = gameState.board[selected.row][selected.col]
             if piece?.color == gameState.currentTurn && position == selected {
                 selectedPosition = nil
+                validMoves = []
                 return
             }
             let legal = gameState.legalMoves(at: selected)
@@ -80,12 +87,15 @@ final class PuzzleViewModel {
             }
             if gameState.board[position.row][position.col]?.color == gameState.currentTurn {
                 selectedPosition = position
+                validMoves = gameState.legalMoves(at: position).map(\.to)
                 return
             }
             selectedPosition = nil
+            validMoves = []
         } else {
             if gameState.board[position.row][position.col]?.color == gameState.currentTurn {
                 selectedPosition = position
+                validMoves = gameState.legalMoves(at: position).map(\.to)
             }
         }
     }
@@ -108,37 +118,28 @@ final class PuzzleViewModel {
         }
 
         selectedPosition = nil
+        validMoves = []
         errorMessage = nil
         currentStep += 1
+
+        applyResponseMoves()
+        guard !puzzleFailed else { return }
 
         if currentStep >= currentPuzzle.expectedMoves.count {
             puzzleCompleted = true
             AppLogger.chessAI.log("Puzzle \(self.currentPuzzle.id) completed", .info)
-            return
         }
-
-        applyResponseMoves()
     }
 
     private func applyResponseMoves() {
-        guard currentStep < currentPuzzle.responseMoves.count else {
-            if currentStep >= currentPuzzle.expectedMoves.count {
-                puzzleCompleted = true
-            }
-            return
-        }
+        let responseIndex = currentStep - 1
+        guard responseIndex < currentPuzzle.responseMoves.count else { return }
 
-        let response = currentPuzzle.responseMoves[currentStep]
+        let response = currentPuzzle.responseMoves[responseIndex]
         guard gameState.applyUCIMove(response) else {
             AppLogger.chessAI.log("Failed to apply response \(response) in puzzle \(self.currentPuzzle.id)", .error)
             puzzleFailed = true
             return
-        }
-
-        if gameState.status.isTerminal {
-            if currentStep >= currentPuzzle.expectedMoves.count - 1 {
-                puzzleCompleted = true
-            }
         }
     }
 
@@ -158,6 +159,7 @@ final class PuzzleViewModel {
         gameState = state
         currentStep = 0
         selectedPosition = nil
+        validMoves = []
         puzzleCompleted = false
         puzzleFailed = false
         errorMessage = nil
@@ -190,6 +192,7 @@ final class PuzzleViewModel {
         gameState = state
         currentStep = 0
         selectedPosition = nil
+        validMoves = []
         puzzleCompleted = false
         puzzleFailed = false
         errorMessage = nil
@@ -199,13 +202,5 @@ final class PuzzleViewModel {
         let next = try? repository?.randomPuzzle(excluding: currentPuzzle.id, near: userRating, range: 300) ?? nil
         guard let next else { return }
         applyPuzzle(next)
-    }
-}
-
-private extension GameStatus {
-    var isTerminal: Bool {
-        if case .checkmate = self { return true }
-        if case .stalemate = self { return true }
-        return false
     }
 }

@@ -18,7 +18,8 @@ final class ChessViewModel {
     private(set) var isAIThinking = false
     private(set) var userLastMoveTime: Double?
     private(set) var computerLastMoveTime: Double?
-    var undoEnabled = false
+    var undoEnabled = true
+    var showHints = true
 
     private let ratingService: ChessRatingService
     private var aiTask: Task<Void, Never>?

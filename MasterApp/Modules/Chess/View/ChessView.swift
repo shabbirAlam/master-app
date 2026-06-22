@@ -166,6 +166,17 @@ struct ChessView: View {
             .toggleStyle(.switch)
             .padding(.horizontal, 40)
 
+            Toggle(isOn: $viewModel.showHints) {
+                HStack(spacing: 8) {
+                    Image(systemName: "lightbulb")
+                        .font(.caption)
+                    Text("Hints")
+                        .font(.caption)
+                }
+            }
+            .toggleStyle(.switch)
+            .padding(.horizontal, 40)
+
             VStack(spacing: 16) {
                 Button {
                     viewModel.setGameMode(.vsComputer, with: selectedColor)
@@ -218,8 +229,10 @@ struct ChessView: View {
             .padding(.horizontal, 40)
         }
         .sheet(isPresented: $showPuzzles) {
-            NavigationStack {
-                PuzzleView(viewModel: PuzzleViewModel(repository: puzzleRepository, userRating: viewModel.userRating))
+            let vm = PuzzleViewModel(repository: puzzleRepository, userRating: viewModel.userRating)
+            vm.showHints = viewModel.showHints
+            return NavigationStack {
+                PuzzleView(viewModel: vm)
             }
         }
     }
@@ -364,7 +377,7 @@ struct ChessView: View {
         let position = Position(row: row, col: col)
         let isLight = (row + col) % 2 == 0
         let isSelected = viewModel.selectedPosition == position
-        let isValidMove = viewModel.validMoves.contains(position)
+        let isValidMove = viewModel.showHints && viewModel.validMoves.contains(position)
         let isLastMove = viewModel.game.moveHistory.last.map { $0.to == position || $0.from == position } ?? false
         let piece = viewModel.game.piece(at: position)
         let bottomRow = boardRows.last

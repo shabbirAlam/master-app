@@ -124,13 +124,24 @@ struct PuzzleView: View {
         let position = Position(row: row, col: col)
         let isLight = (row + col) % 2 == 0
         let isSelected = viewModel.selectedPosition == position
+        let isLastMove = viewModel.gameState.moveHistory.last.map { $0.from == position || $0.to == position } ?? false
+        let isValidMove = viewModel.showHints && viewModel.validMoves.contains(position)
         let piece = viewModel.gameState.piece(at: position)
         let isFileLabel = row == 7
         let isRankLabel = col == 0
 
         return ZStack {
             Rectangle()
-                .fill(squareColor(isLight: isLight, isSelected: isSelected))
+                .fill(squareColor(isLight: isLight, isSelected: isSelected, isLastMove: isLastMove))
+
+            if isValidMove {
+                if piece != nil {
+                    Circle().stroke(Color.orange, lineWidth: 3).padding(3)
+                } else {
+                    Circle().fill(Color.gray.opacity(0.5))
+                        .frame(width: squareSize * 0.25, height: squareSize * 0.25)
+                }
+            }
 
             if isRankLabel {
                 Text("\(8 - row)")
@@ -164,9 +175,12 @@ struct PuzzleView: View {
         .accessibilityIdentifier("puzzle_square_\(position.algebraic)")
     }
 
-    private func squareColor(isLight: Bool, isSelected: Bool) -> Color {
+    private func squareColor(isLight: Bool, isSelected: Bool, isLastMove: Bool) -> Color {
         if isSelected {
             return Color.yellow.opacity(0.6)
+        }
+        if isLastMove {
+            return Color.yellow.opacity(0.3)
         }
         return isLight ? Color(white: 0.9) : Color(white: 0.6)
     }
