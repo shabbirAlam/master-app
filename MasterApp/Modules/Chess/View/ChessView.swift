@@ -74,6 +74,7 @@ struct ChessView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                            .accessibilityIdentifier("chess_menu_button")
                     }
                     .accessibilityIdentifier("chess_menu_button")
                 }

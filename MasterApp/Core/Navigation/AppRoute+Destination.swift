@@ -33,7 +33,7 @@ extension ProfileRoute {
     func destination(container: AppDIContainer) -> some View {
         switch self {
         case .editProfile:
-            ProfileView()
+            ProfileDetailsView()
         }
     }
 }
