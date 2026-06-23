@@ -12,6 +12,7 @@ enum HomeFeatures: CaseIterable {
     case restAPISearch
     case graphQLSearch
     case chess
+//    case aiChat
 
     var name: String {
         switch self {
@@ -19,6 +20,7 @@ enum HomeFeatures: CaseIterable {
         case .restAPISearch: "Rest API Search"
         case .graphQLSearch: "GraphQL Search"
         case .chess: "Chess"
+//        case .aiChat: "AI Chat"
         }
     }
 
@@ -28,6 +30,7 @@ enum HomeFeatures: CaseIterable {
         case .restAPISearch: "magnifyingglass.circle"
         case .graphQLSearch: "network"
         case .chess: "gamecontroller"
+//        case .aiChat: "bubble.left.and.bubble.right.fill"
         }
     }
 
@@ -37,6 +40,7 @@ enum HomeFeatures: CaseIterable {
         case .restAPISearch: "Search todos via REST API"
         case .graphQLSearch: "Explore countries with GraphQL"
         case .chess: "Play chess with AI opponent"
+//        case .aiChat: "Chat with an AI assistant"
         }
     }
 }

@@ -18,7 +18,7 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
     }
 
     func randomPuzzle(excluding id: String?, near rating: Int, range: Int) throws -> ChessPuzzle? {
-        guard let db else { return nil }
+        guard db != nil else { return nil }
         let minRating = max(100, rating - range)
         let maxRating = rating + range
 
@@ -44,7 +44,7 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
     }
 
     func puzzles(near rating: Int, range: Int) throws -> [ChessPuzzle] {
-        guard let db else { return [] }
+        guard db != nil else { return [] }
         let minRating = max(100, rating - range)
         let maxRating = rating + range
 
@@ -56,7 +56,7 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
     }
 
     func puzzleById(_ id: String) throws -> ChessPuzzle? {
-        guard let db else { return nil }
+        guard db != nil else { return nil }
         let sql = "SELECT PuzzleId, FEN, Moves, Rating FROM puzzles WHERE PuzzleId = ? LIMIT 1"
         return queryOne(sql: sql) { stmt in
             sqlite3_bind_text(stmt, 1, (id as NSString).utf8String, -1, nil)
