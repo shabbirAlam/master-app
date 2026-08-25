@@ -1,13 +1,20 @@
 import SwiftUI
 
+/// Home screen listing available features as tappable cards that push
+/// routes onto the shared `Router`.
 struct HomeView: View {
+    /// The app-wide navigation stack.
     @Environment(Router.self) private var router
+    /// Presentation state for the screen.
     @State private var viewModel: HomeViewModel
 
+    /// Creates the view.
+    /// - Parameter viewModel: The injected view model.
     init(viewModel: HomeViewModel) {
         self.viewModel = viewModel
     }
 
+    /// Renders the header and feature grid.
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -21,6 +28,7 @@ struct HomeView: View {
         .accessibilityIdentifier("home_view")
     }
 
+    /// The app title and tagline section.
     private var headerSection: some View {
         VStack(spacing: 8) {
             Image(systemName: "square.grid.2x2")
@@ -41,6 +49,7 @@ struct HomeView: View {
         .padding(.bottom, 8)
     }
 
+    /// Vertical stack of feature cards.
     private var featuresGrid: some View {
         VStack(spacing: 16) {
             ForEach(viewModel.items, id: \.self) { item in
@@ -49,6 +58,9 @@ struct HomeView: View {
         }
     }
 
+    /// Builds a tappable card for a feature that navigates on tap.
+    /// - Parameter item: The feature to render.
+    /// - Returns: The feature card view.
     private func featureCard(for item: HomeFeatures) -> some View {
         Button {
             if let route = viewModel.route(for: item) {
@@ -91,6 +103,9 @@ struct HomeView: View {
         .accessibilityLabel("\(item.name): \(item.description)")
     }
 
+    /// Builds the circular icon badge for a feature.
+    /// - Parameter item: The feature to render.
+    /// - Returns: The icon circle view.
     private func iconCircle(for item: HomeFeatures) -> some View {
         ZStack {
             Circle()

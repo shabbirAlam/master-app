@@ -1,6 +1,10 @@
 import SwiftUI
 
 extension AppRoute {
+    /// Builds the destination view for this route.
+    ///
+    /// - Parameter container: The dependency container used to construct the destination.
+    /// - Returns: The view representing the route's destination.
     @ViewBuilder
     func destination(container: AppDIContainer) -> some View {
         switch self {
@@ -13,6 +17,10 @@ extension AppRoute {
 }
 
 extension HomeRoute {
+    /// Builds the destination view for this home-tab route.
+    ///
+    /// - Parameter container: The dependency container used to construct the destination.
+    /// - Returns: The feature view associated with the route.
     @ViewBuilder
     func destination(container: AppDIContainer) -> some View {
         switch self {
@@ -29,6 +37,10 @@ extension HomeRoute {
 }
 
 extension ProfileRoute {
+    /// Builds the destination view for this profile-tab route.
+    ///
+    /// - Parameter container: The dependency container used to construct the destination.
+    /// - Returns: The feature view associated with the route.
     @ViewBuilder
     func destination(container: AppDIContainer) -> some View {
         switch self {

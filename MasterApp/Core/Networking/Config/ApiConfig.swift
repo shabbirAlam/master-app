@@ -7,7 +7,9 @@
 
 import Foundation
 
+/// Central configuration of API base URLs, switched by build configuration.
 struct ApiConfig {
+    /// Base URL for the app's primary REST API (debug vs. release).
     static var baseURL: String {
         #if DEBUG
         return "https://dev-api.master.com"
@@ -15,7 +17,8 @@ struct ApiConfig {
         return "https://api.master.com"
         #endif
     }
-    
+
+    /// Base URL for the GraphQL countries API.
     static var graphQLBaseURL: String {
         #if DEBUG
         return "https://countries.trevorblades.com/"
@@ -23,7 +26,8 @@ struct ApiConfig {
         return "https://countries.trevorblades.com/"
         #endif
     }
-    
+
+    /// Base URL for the JSONPlaceholder todos API.
     static var todoBaseURL: String {
         #if DEBUG
         return "https://jsonplaceholder.typicode.com/"

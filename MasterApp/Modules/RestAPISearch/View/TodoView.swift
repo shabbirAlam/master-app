@@ -1,14 +1,23 @@
 import SwiftUI
 
+/// Screen listing todos fetched via REST with search filtering, shimmer
+/// loading, empty, and error states.
 struct TodoView: View {
+    /// Presentation state for the screen.
     @State private var viewModel: TodoViewModel
+    /// The active design-system theme.
     private let theme: Theme
-    
+
+    /// Creates the view.
+    /// - Parameters:
+    ///   - viewModel: The injected view model.
+    ///   - theme: The theme used for styling.
     init(viewModel: TodoViewModel, theme: Theme) {
         self.viewModel = viewModel
         self.theme = theme
     }
 
+    /// Renders the screen and kicks off the initial todo fetch.
     var body: some View {
         ZStack {
             theme.background.ignoresSafeArea()
@@ -34,6 +43,7 @@ struct TodoView: View {
         }
     }
 
+    /// The search text field bound to the view model's query.
     private var searchField: some View {
         TextField("Search...", text: $viewModel.searchedText)
             .foregroundStyle(theme.textPrimary)
@@ -51,6 +61,7 @@ struct TodoView: View {
             }
     }
 
+    /// The scrollable list of filtered todos.
     private var listView: some View {
         List {
             ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { index, item in
@@ -65,11 +76,13 @@ struct TodoView: View {
         .accessibilityIdentifier("todo_list")
     }
 
+    /// Skeleton placeholder rows shown while loading.
     private var shimmerList: some View {
         ShimmerList()
             .accessibilityIdentifier("todo_loading")
     }
 
+    /// Placeholder shown when no todos match the search.
     private var emptyState: some View {
         VStack(spacing: 12) {
             Spacer()
@@ -83,6 +96,7 @@ struct TodoView: View {
         }
     }
 
+    /// Full-screen error state with the given message.
     private func errorState(_ message: String) -> some View {
         VStack(spacing: 12) {
             Spacer()

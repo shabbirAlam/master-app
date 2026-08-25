@@ -7,6 +7,10 @@
 
 import Foundation
 
+/// Describes the features available from the app's home screen.
+///
+/// Each case represents a distinct feature the user can launch, with the
+/// `name`, `iconName`, and `description` metadata used to display it in the UI.
 enum HomeFeatures: CaseIterable {
     case secureView
     case restAPISearch
@@ -14,6 +18,7 @@ enum HomeFeatures: CaseIterable {
     case chess
 //    case aiChat
 
+    /// The display name shown in the feature list.
     var name: String {
         switch self {
         case .secureView: "Secure View"
@@ -24,6 +29,7 @@ enum HomeFeatures: CaseIterable {
         }
     }
 
+    /// The SF Symbol name for the feature's icon.
     var iconName: String {
         switch self {
         case .secureView: "lock.shield"
@@ -34,6 +40,7 @@ enum HomeFeatures: CaseIterable {
         }
     }
 
+    /// A short description of the feature shown beneath its name.
     var description: String {
         switch self {
         case .secureView: "Protected content with screenshot and video prevention"

@@ -7,17 +7,24 @@
 
 import Foundation
 
+/// Typed errors surfaced by the networking layer.
 enum NetworkError: LocalizedError, Equatable {
+    /// An unrecognized failure.
     case unknown
+    /// A request URL could not be constructed.
     case invalidURL
+    /// Response decoding failed.
     case decodingError
+    /// Request body encoding failed.
     case encodingError
+    /// The response was not a valid HTTP response.
     case invalidResponse
+    /// The server returned an unexpected status code.
     case badStatusCode(Int)
 }
 
 extension NetworkError {
-    // this will set the localizedDescription variable
+    /// User-facing, localized description for each error case.
     var errorDescription: String? {
         return switch self {
         case .invalidResponse: "Server is not responding properly"

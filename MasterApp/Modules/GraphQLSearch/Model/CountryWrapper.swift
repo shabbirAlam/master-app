@@ -7,6 +7,8 @@
 
 import Foundation
 
+/// Decodable payload for the single-country GraphQL query.
 struct CountryWrapper: Decodable {
+    /// The country matching the queried code.
     let country: Country
 }

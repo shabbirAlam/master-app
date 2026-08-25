@@ -1,13 +1,20 @@
 import Foundation
 import ChessKitEngine
 
+/// Errors produced by the Stockfish-backed chess AI service.
 enum ChessKitAIError: Error, LocalizedError {
+    /// The engine is not initialized yet.
     case engineNotReady
+    /// The engine failed to return a legal best move.
     case bestMoveNotFound
+    /// A move returned by the engine could not be interpreted.
     case invalidMove(String)
+    /// The engine was stopped while a request was in progress.
     case engineStopped
+    /// The NNUE data download for the engine failed.
     case nnueDownloadFailed(String)
 
+    /// Human-readable error message for app-level logging and UI feedback.
     var errorDescription: String? {
         switch self {
         case .engineNotReady: "Chess engine is not ready yet"
@@ -19,12 +26,22 @@ enum ChessKitAIError: Error, LocalizedError {
     }
 }
 
+/// Contract for requesting chess engine moves during gameplay.
 protocol ChessKitAIService: Sendable {
+    /// Requests the best move for the given player color in the provided position.
+    /// - Parameters:
+    ///   - game: The current game state.
+    ///   - color: The side for which to compute a move.
+    ///   - moveTime: The maximum move-search time in milliseconds.
+    /// - Returns: The chosen move, if a valid move is available.
     func selectMove(from game: GameState, for color: PieceColor, moveTime milliseconds: Int) async throws -> Move?
+    /// Starts the underlying engine and prepares it for move generation.
     func start() async
+    /// Stops the engine and releases any pending move continuation.
     func stop() async
 }
 
+/// Stockfish-backed AI engine wrapper used to generate moves for the chess game.
 actor ChessKitAIServiceImpl: ChessKitAIService {
     private let engine: Engine
     private var streamTask: Task<Void, Never>?
@@ -34,10 +51,12 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
     nonisolated private static let nnueMain = "nn-1111cefa1111"
     nonisolated private static let nnueSmall = "nn-37f18f62d772"
 
+    /// Creates a new engine-backed AI service.
     init() {
         self.engine = Engine(type: .stockfish, loggingEnabled: false)
     }
 
+    /// Starts the engine and ensures required NNUE files are available.
     func start() async {
         await ensureNNUEFiles()
 
@@ -60,6 +79,7 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
         isReady = true
     }
 
+    /// Stops the engine and cancels any pending move request.
     func stop() async {
         streamTask?.cancel()
         streamTask = nil
@@ -69,6 +89,12 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
         isReady = false
     }
 
+    /// Requests the engine to choose the best legal move for the current board.
+    /// - Parameters:
+    ///   - game: The board state to evaluate.
+    ///   - color: The side to move.
+    ///   - moveTime: Search time in milliseconds.
+    /// - Returns: The parsed move when the engine provides one.
     func selectMove(from game: GameState, for color: PieceColor, moveTime milliseconds: Int = 2000) async throws -> Move? {
         guard isReady else { throw ChessKitAIError.engineNotReady }
 
@@ -92,11 +118,14 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
         return parseUCIMove(moveString, in: game, for: color)
     }
 
+    /// Cancels an in-flight engine request.
     private func cancelMove() async {
         moveContinuation?.resume(throwing: CancellationError())
         moveContinuation = nil
     }
 
+    /// Handles a best-move response returned by the engine stream.
+    /// - Parameter response: The engine response object.
     private func handleResponse(_ response: EngineResponse) {
         if case .bestmove(let move, _) = response {
             moveContinuation?.resume(returning: move)
@@ -104,6 +133,7 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
         }
     }
 
+    /// Ensures the local NNUE files used for evaluation are available.
     private func ensureNNUEFiles() async {
         let fileManager = FileManager.default
         guard let cachesDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else {
@@ -129,6 +159,10 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
         }
     }
 
+    /// Downloads a required NNUE evaluation file from the Stockfish asset source.
+    /// - Parameters:
+    ///   - name: The NNUE file name.
+    ///   - destination: Local file URL used for storage.
     private func downloadNNUE(name: String, to destination: URL) async {
         let urlString = "https://tests.stockfishchess.org/api/nn/\(name).nnue"
         guard let url = URL(string: urlString) else {
@@ -150,6 +184,7 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
         }
     }
 
+    /// Updates the engine with the local evaluation file paths.
     private func setNNUEOptions() async {
         let fileManager = FileManager.default
         guard let cachesDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
@@ -167,6 +202,12 @@ actor ChessKitAIServiceImpl: ChessKitAIService {
         }
     }
 
+    /// Interprets a UCI move string into the app's `Move` representation.
+    /// - Parameters:
+    ///   - uci: The engine-provided move as UCI notation.
+    ///   - game: The active board state for context.
+    ///   - color: The side to move.
+    /// - Returns: The mapped move model, or `nil` when the move is invalid.
     private func parseUCIMove(_ uci: String, in game: GameState, for color: PieceColor) -> Move? {
         guard uci.count >= 4 else { return nil }
         let chars = Array(uci)

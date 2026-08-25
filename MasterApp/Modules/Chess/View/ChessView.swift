@@ -1,20 +1,37 @@
 import SwiftUI
 
+/// Main chess screen that handles mode selection, in-game controls, and access to
+/// puzzle mode for the app's chess feature.
 struct ChessView: View {
+    /// Observable chess view model that owns gameplay and state.
     @State private var viewModel: ChessViewModel
+    /// Confirmation action for restart/close menu items.
     @State private var pendingAction: ChessMenuAction?
+    /// Player-selected piece color for a new game.
     @State private var selectedColor: PieceColor = .white
+    /// Whether the auto-animation preview is currently running.
     @State private var isAutoAnimating = false
+    /// The color currently used for the auto-animate board preview.
     @State private var autoDisplayColor: PieceColor = .white
+    /// Whether the puzzle destination is shown.
     @State private var showPuzzles = false
+    /// View model for the opened puzzle flow.
     @State private var puzzleViewModel: PuzzleViewModel?
+    /// Active application theme for chess UI styling.
     private let theme: Theme
+    /// Repository source for puzzle selection.
     private let puzzleRepository: PuzzleRepository
 
+    /// Menu actions available from the chess toolbar when a game is active.
     private enum ChessMenuAction: Identifiable {
-        case restart, close
+        /// Restart the current match.
+        case restart
+        /// Return to the game-mode selection screen.
+        case close
+
         var id: Self { self }
 
+        /// Display title for the confirmation alert.
         var title: String {
             switch self {
             case .restart: "Restart Game"
@@ -22,6 +39,7 @@ struct ChessView: View {
             }
         }
 
+        /// User-facing explanatory message for the action.
         var message: String {
             switch self {
             case .restart: "Are you sure you want to restart? Current progress will be lost."
@@ -30,9 +48,16 @@ struct ChessView: View {
         }
     }
 
+    /// The overall board size used by the chess layout.
     private let boardSize: CGFloat
+    /// Size of each chess square.
     private let squareSize: CGFloat
 
+    /// Creates the chess screen using the injected view model and dependencies.
+    /// - Parameters:
+    ///   - viewModel: Gameplay state and logic object.
+    ///   - puzzleRepository: Repository used to load puzzle challenges.
+    ///   - theme: Theme used for the board and controls.
     init(viewModel: ChessViewModel, puzzleRepository: PuzzleRepository = SQLitePuzzleRepository(), theme: Theme = AppTheme.light) {
         self.viewModel = viewModel
         self.puzzleRepository = puzzleRepository
@@ -42,10 +67,12 @@ struct ChessView: View {
         self.squareSize = (screenWidth - 32) / 8
     }
 
+    /// Whether the active game is mid-progress and should prompt before reset/close.
     private var needsConfirmation: Bool {
         !viewModel.game.moveHistory.isEmpty && !viewModel.game.status.isGameOver
     }
 
+    /// Renders the mode selection UI or the active game board depending on state.
     var body: some View {
         ZStack {
             theme.background.ignoresSafeArea()
@@ -108,6 +135,7 @@ struct ChessView: View {
         }
     }
 
+    /// Switches between the mode-selection screen and active gameplay screen.
     @ViewBuilder
     private var content: some View {
         if viewModel.gameMode == nil {
@@ -117,6 +145,7 @@ struct ChessView: View {
         }
     }
 
+    /// The welcome screen that lets the user choose the game mode, color, and puzzle flow.
     private var modeSelectionView: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -250,6 +279,7 @@ struct ChessView: View {
         .padding(.bottom, 24)
     }
 
+    /// Renders the rating information and current state while setting up a game.
     private var ratingSetupView: some View {
         VStack(spacing: 12) {
             Text("Your Elo: \(viewModel.userRating)")

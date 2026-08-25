@@ -1,5 +1,6 @@
 import Foundation
 
+/// Supported HTTP methods for REST requests.
 enum HTTPMethod: String, Sendable {
     case GET
     case POST

@@ -1,20 +1,35 @@
 import Foundation
 
+/// A complete, value-semantic chess game state: board, turn, status,
+/// history, captured pieces, en-passant target, castling rights, and an
+/// undo stack.
 struct GameState: Equatable, Sendable {
+    /// The 8x8 board; index `[row][col]` with row 0 = rank 8.
     var board: [[ChessPiece?]]
+    /// The side to move next.
     var currentTurn: PieceColor
+    /// The current game status (playing/check/checkmate/stalemate).
     var status: GameStatus
+    /// All moves played so far.
     var moveHistory: [Move]
+    /// Pieces captured by each color, keyed by capturing color.
     var capturedPieces: [PieceColor: [ChessPiece]]
+    /// The square vulnerable to en passant, if a pawn just advanced two ranks.
     var enPassantTarget: Position?
+    /// Castling availability per color.
     var castlingRights: [PieceColor: CastlingRights]
+    /// Snapshots of prior states enabling undo.
     private(set) var undoStack: [GameState] = []
 
+    /// Per-color castling availability flags.
     struct CastlingRights: Equatable, Sendable {
+        /// Whether kingside castling is still allowed.
         var kingside: Bool
+        /// Whether queenside castling is still allowed.
         var queenside: Bool
     }
 
+    /// Creates a state with the standard starting position and white to move.
     init() {
         self.board = Self.initialBoard()
         self.currentTurn = .white
@@ -28,6 +43,8 @@ struct GameState: Equatable, Sendable {
         ]
     }
 
+    /// Builds the standard chess starting position.
+    /// - Returns: An 8x8 board with pieces in initial placement.
     static func initialBoard() -> [[ChessPiece?]] {
         var board = [[ChessPiece?]](
             repeating: [ChessPiece?](repeating: nil, count: 8),

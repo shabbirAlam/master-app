@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// View modifier that overlays an animated-looking shimmer gradient and masks
+/// it to the content's shape, producing a loading placeholder effect.
 struct ShimmerModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -24,11 +26,14 @@ struct ShimmerModifier: ViewModifier {
 }
 
 extension View {
+    /// Applies a shimmer loading effect to the view.
+    /// - Returns: The view with the shimmer overlay applied.
     func shimmer() -> some View {
         modifier(ShimmerModifier())
     }
 }
 
+/// A single skeleton list row used as a loading placeholder.
 struct ShimmerRow: View {
     var body: some View {
         VStack(spacing: 0) {
@@ -45,9 +50,13 @@ struct ShimmerRow: View {
     }
 }
 
+/// A scroll-disabled skeleton list of shimmer rows used while content loads.
 struct ShimmerList: View {
+    /// The number of placeholder rows to display.
     let rowCount: Int
 
+    /// Creates a shimmer list.
+    /// - Parameter rowCount: Number of rows (defaults to 8).
     init(rowCount: Int = 8) {
         self.rowCount = rowCount
     }

@@ -1,6 +1,8 @@
 import SwiftUI
 
 extension Color {
+    /// Creates a color from a hex string such as `"#4073D9"` or `"4073D9"`.
+    /// - Parameter hex: The hexadecimal RGB string; invalid input yields black.
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         let value = UInt(hex, radix: 16) ?? 0
@@ -12,6 +14,7 @@ extension Color {
     }
 }
 
+/// The app's concrete theme with light and dark variants built from hex colors.
 struct AppTheme: Theme {
     let background: Color
     let textPrimary: Color
@@ -19,6 +22,7 @@ struct AppTheme: Theme {
     let boardLight: Color
     let boardDark: Color
 
+    /// The light appearance theme.
     static let light = AppTheme(
         background: Color(hex: "#FAF7F2"),
         textPrimary: Color(hex: "#262626"),
@@ -27,6 +31,7 @@ struct AppTheme: Theme {
         boardDark: Color(hex: "#AD8A61")
     )
 
+    /// The dark appearance theme.
     static let dark = AppTheme(
         background: Color(hex: "#1F1F24"),
         textPrimary: Color(hex: "#EBEBF0"),

@@ -1,8 +1,11 @@
 import SwiftUI
 
+/// Profile editing screen demonstrating navigation pop actions.
 struct ProfileDetailsView: View {
+    /// The app-wide navigation stack.
     @Environment(Router.self) private var router
 
+    /// Renders back-navigation controls.
     var body: some View {
         VStack(spacing: 16) {
             Button {

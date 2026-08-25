@@ -1,6 +1,9 @@
 import Foundation
 
+/// Parses a chess position from a FEN string and initializes the in-memory game state.
 extension GameState {
+    /// Builds a board state from the standard FEN representation used by chess engines and puzzles.
+    /// - Parameter fen: The FEN string describing the board layout, active side, castling rights, and en passant target.
     init?(fen: String) {
         let parts = fen.split(separator: " ")
         guard parts.count >= 4 else { return nil }
@@ -64,7 +67,10 @@ extension GameState {
     }
 }
 
+/// Maps a FEN board character such as "Q" or "p" into a chess piece definition.
 extension ChessPiece {
+    /// Creates a piece from a single FEN character.
+    /// - Parameter fen: The one-character FEN notation for a piece.
     init?(fen: Character) {
         let isWhite = fen.isUppercase
         let lower = fen.lowercased()
@@ -83,7 +89,10 @@ extension ChessPiece {
     }
 }
 
+/// Parses a two-character chess square such as "e4" into a board coordinate.
 extension Position {
+    /// Creates a board coordinate from algebraic notation.
+    /// - Parameter chessNotation: A square like "e4" or "a8".
     init?(chessNotation: String) {
         guard chessNotation.count == 2 else { return nil }
         let colChar = chessNotation[chessNotation.startIndex]
@@ -94,7 +103,11 @@ extension Position {
     }
 }
 
+/// Applies a UCI move string directly to the current game state.
 extension GameState {
+    /// Attempts to apply a legal move represented in UCI format.
+    /// - Parameter uci: A move like "e2e4" or "g7g8q".
+    /// - Returns: `true` when the move is valid and applied successfully.
     mutating func applyUCIMove(_ uci: String) -> Bool {
         guard uci.count >= 4 else { return false }
         let from = String(uci[uci.startIndex..<uci.index(uci.startIndex, offsetBy: 2)])
@@ -118,7 +131,10 @@ extension GameState {
     }
 }
 
+/// Converts a promotion character into a chess piece type.
 extension PieceType {
+    /// Builds a promotion type from the single-character PGN value.
+    /// - Parameter pgn: The piece letter used in promotion notation.
     init?(pgn: Character) {
         switch pgn {
         case "N": self = .knight

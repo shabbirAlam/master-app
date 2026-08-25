@@ -1,9 +1,12 @@
 import Foundation
 import SQLite3
 
+/// SQLite-backed repository that exposes chess puzzles from the bundled local database.
 final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
+    /// Open database handle for puzzle queries.
     private nonisolated(unsafe) let db: OpaquePointer?
 
+    /// Creates the repository by opening the bundled chess puzzles database.
     init() {
         let url = Bundle(for: SQLitePuzzleRepository.self).url(forResource: "puzzles_l10moves", withExtension: "db")
         db = url.flatMap { url in
@@ -17,6 +20,12 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
         if let db { sqlite3_close(db) }
     }
 
+    /// Returns a random puzzle near the provided rating while optionally excluding one ID.
+    /// - Parameters:
+    ///   - id: The puzzle to exclude, if any.
+    ///   - rating: The target rating.
+    ///   - range: The maximum distance to search from the target rating.
+    /// - Returns: A puzzle matching the request, or `nil` if none are available.
     func randomPuzzle(excluding id: String?, near rating: Int, range: Int) throws -> ChessPuzzle? {
         guard db != nil else { return nil }
         let minRating = max(100, rating - range)
@@ -43,6 +52,11 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
         return queryOne(sql: sql, bind: bind)
     }
 
+    /// Fetches a batch of puzzles close to the requested rating.
+    /// - Parameters:
+    ///   - rating: The target rating.
+    ///   - range: Maximum spread around the rating value.
+    /// - Returns: A list of matching puzzles.
     func puzzles(near rating: Int, range: Int) throws -> [ChessPuzzle] {
         guard db != nil else { return [] }
         let minRating = max(100, rating - range)
@@ -55,6 +69,9 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
         }
     }
 
+    /// Fetches a single puzzle by its ID.
+    /// - Parameter id: The puzzle database ID.
+    /// - Returns: The matching puzzle, if one exists.
     func puzzleById(_ id: String) throws -> ChessPuzzle? {
         guard db != nil else { return nil }
         let sql = "SELECT PuzzleId, FEN, Moves, Rating FROM puzzles WHERE PuzzleId = ? LIMIT 1"
@@ -63,6 +80,11 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
         }
     }
 
+    /// Counts the number of puzzles near a rating.
+    /// - Parameters:
+    ///   - rating: The target rating.
+    ///   - range: The maximum distance from the target rating.
+    /// - Returns: Number of puzzles in the requested band.
     func puzzleCount(near rating: Int, range: Int) throws -> Int {
         guard let db else { return 0 }
         let minRating = max(100, rating - range)
@@ -83,10 +105,20 @@ final class SQLitePuzzleRepository: PuzzleRepository, @unchecked Sendable {
         return count
     }
 
+    /// Executes a single-row query and returns the first mapped puzzle result.
+    /// - Parameters:
+    ///   - sql: SQL text for the lookup.
+    ///   - bind: Closure that binds any query parameters to the prepared statement.
+    /// - Returns: The first puzzle row mapped to `ChessPuzzle`, if found.
     private func queryOne(sql: String, bind: (OpaquePointer) -> Void) -> ChessPuzzle? {
         queryMany(sql: sql, bind: bind).first
     }
 
+    /// Executes a SQL query and maps all returned rows into `ChessPuzzle` objects.
+    /// - Parameters:
+    ///   - sql: SQL text for the lookup.
+    ///   - bind: Closure that binds any query parameters to the prepared statement.
+    /// - Returns: A list of puzzle results parsed from the database.
     private func queryMany(sql: String, bind: (OpaquePointer) -> Void) -> [ChessPuzzle] {
         guard let db else { return [] }
         var stmt: OpaquePointer?

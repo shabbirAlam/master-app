@@ -1,11 +1,17 @@
 import SwiftUI
 
+/// Root screen hosting the tab bar (Home/Profile) inside a shared
+/// `NavigationStack`, with theme-driven tab bar styling.
 struct DashboardView: View {
+    /// The app-wide dependency container.
     @Environment(AppDIContainer.self) private var container
+    /// The navigation stack state shared by all tabs.
     @State private var router = Router()
 
+    /// The currently selected tab index.
     @State private var selectedTab = 0
 
+    /// Renders the navigation stack, tabs, and route destinations.
     var body: some View {
         NavigationStack(path: $router.path) {
             TabView(selection: $selectedTab) {
@@ -35,6 +41,8 @@ struct DashboardView: View {
         }
     }
 
+    /// Applies theme colors to the tab bar via the UIKit appearance proxy.
+    /// - Parameter theme: The theme providing colors.
     private func styleTabBar(with theme: Theme) {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()

@@ -1,14 +1,23 @@
 import SwiftUI
 
+/// Demo screen whose content is wrapped in a snapshot-preventing container,
+/// hiding it from screenshots and the app switcher.
 struct SecureView: View {
+    /// Presentation state for the screen.
     @State private var viewModel: SecureViewModel
+    /// The active design-system theme.
     private let theme: Theme
 
+    /// Creates the view.
+    /// - Parameters:
+    ///   - viewModel: The injected view model.
+    ///   - theme: The theme used for styling.
     init(viewModel: SecureViewModel, theme: Theme) {
         self.viewModel = viewModel
         self.theme = theme
     }
 
+    /// Renders the protected content card inside a secure container.
     var body: some View {
         ZStack {
             theme.background.ignoresSafeArea()

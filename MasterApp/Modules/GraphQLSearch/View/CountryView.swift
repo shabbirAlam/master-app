@@ -1,14 +1,23 @@
 import SwiftUI
 
+/// Screen listing countries fetched via GraphQL with search filtering,
+/// shimmer loading, empty, and error states.
 struct CountryView: View {
+    /// Presentation state for the screen.
     @State private var viewModel: CountryViewModel
+    /// The active design-system theme.
     private let theme: Theme
 
+    /// Creates the view.
+    /// - Parameters:
+    ///   - viewModel: The injected view model.
+    ///   - theme: The theme used for styling.
     init(viewModel: CountryViewModel, theme: Theme) {
         self.viewModel = viewModel
         self.theme = theme
     }
 
+    /// Renders the screen and kicks off the initial country fetch.
     var body: some View {
         ZStack {
             theme.background.ignoresSafeArea()
@@ -26,6 +35,7 @@ struct CountryView: View {
         .navigationTitle("Countries")
     }
 
+    /// Switches between error, loading, empty, and list states.
     @ViewBuilder
     private var content: some View {
         if let error = viewModel.errorMessage {
@@ -39,6 +49,7 @@ struct CountryView: View {
         }
     }
 
+    /// The search text field bound to the view model's query.
     private var searchField: some View {
         TextField("Country...", text: $viewModel.searchedText)
             .foregroundStyle(theme.textPrimary)
@@ -56,6 +67,7 @@ struct CountryView: View {
             }
     }
 
+    /// The scrollable list of filtered countries.
     private var listView: some View {
         List(viewModel.filteredCountries) { country in
             CountryRow(country: country, theme: theme) {
@@ -70,11 +82,13 @@ struct CountryView: View {
         .accessibilityIdentifier("country_list")
     }
 
+    /// Skeleton placeholder rows shown while loading.
     private var shimmerList: some View {
         ShimmerList()
             .accessibilityIdentifier("country_loading")
     }
 
+    /// Placeholder shown when no countries match the search.
     private var emptyState: some View {
         VStack(spacing: 12) {
             Spacer()
@@ -88,6 +102,7 @@ struct CountryView: View {
         }
     }
 
+    /// Full-screen error state with the given message.
     private func errorState(_ message: String) -> some View {
         VStack(spacing: 12) {
             Spacer()
@@ -103,9 +118,13 @@ struct CountryView: View {
     }
 }
 
+/// A single tappable row displaying a country's name, capital, and code.
 private struct CountryRow: View {
+    /// The country to display.
     let country: Country
+    /// The active theme.
     let theme: Theme
+    /// Action invoked when the row is tapped.
     let onTap: () -> Void
 
     var body: some View {
